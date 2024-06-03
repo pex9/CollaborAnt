@@ -66,8 +66,9 @@ fun TaskItem(
             .width(300.dp)
             .padding(bottom = 18.dp),  // Set card width and padding
         colors = CardDefaults.cardColors(
-            containerColor = colors.onSecondary,  // Set card background color
+            containerColor = colors.surface,  // Set card background color
         ),
+        elevation = CardDefaults.cardElevation(4.dp),
         border = BorderStroke(1.dp, colors.outline),  // Set card border
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {

@@ -10,6 +10,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import it.polito.lab5.navigation.AppNavigation
 import it.polito.lab5.ui.theme.Lab4Theme
 import it.polito.lab5.viewModels.AppViewModel
@@ -21,17 +23,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Lab4Theme(darkTheme= true) {
-                if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
+            CompositionLocalProvider(LocalTheme provides DarkTheme(appViewModel.themeUserSetting)) {
+                Lab4Theme(darkTheme = LocalTheme.current.isDark) {
+                    if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
+                    }
+                    AppNavigation(vm = appViewModel)
                 }
-
-                AppNavigation(vm = appViewModel)
             }
         }
 
     }
 }
+
+data class DarkTheme(val isDark: Boolean = false)
+val LocalTheme = compositionLocalOf { DarkTheme() }
 
 fun isFirstLaunch(context: Context): Boolean {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)

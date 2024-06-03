@@ -9,10 +9,10 @@ val PrimaryDark = Color(0XFFFCCD85)
 val Secondary = Color(0XFF8CC5FF)
 val SecondaryVariant = Color(0XFF2937B3)
 
-val BackGround = Color(0XFFFFFFFF)
+val BackGround = Color(0XFFF8F8F8)
 val BackGroundDark = Color(0xFF121212)
 
-val Surface = Color(0XFFFFFFFF)
+val Surface = Color(0XFFF8F8F8)
 val SurfaceDark = Color(0xFF121212)
 
 val Error = Color(0xFFB00020)

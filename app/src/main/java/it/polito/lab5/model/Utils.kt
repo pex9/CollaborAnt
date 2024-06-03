@@ -120,4 +120,3 @@ fun calculateScore(assignedTasks: Int, completedTasks: Int): Int {
     return Math.round(n * completedTasks.toFloat() * (completedTasks.toFloat() / assignedTasks.toFloat()))
 }
 
-

@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,24 +27,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
+import it.polito.lab5.R
 import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MyTeamsTopBar() {
+fun MyTeamsTopBar(toggleTheme: () -> Unit) {
     // Get color scheme from MaterialTheme
     val colors = MaterialTheme.colorScheme
+    val topBarBackground = if(LocalTheme.current.isDark) colors.secondary else colors.secondary
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colors.onSecondary,
+            containerColor = topBarBackground,
             titleContentColor = colors.onPrimary,
         ),
         title = {
@@ -60,6 +67,11 @@ fun MyTeamsTopBar() {
                     )
                 )
             )
+        },
+        actions = {
+            IconButton(onClick = { toggleTheme() }) {
+                Icon(painter = painterResource(R.drawable.baseline_camera_24), contentDescription = "switch theme")
+            }
         }
     )
 }

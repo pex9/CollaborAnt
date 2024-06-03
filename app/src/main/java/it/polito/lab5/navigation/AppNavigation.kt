@@ -65,6 +65,8 @@ fun AppNavigation(vm: AppViewModel) {
     val myChatViewModel: MyChatsViewModel = viewModel(
         factory = AppFactory(context = context)
     )
+
+    val t = LocalContext.current
     // Set up navigation graph
     NavHost(
         navController = navController,
@@ -98,6 +100,7 @@ fun AppNavigation(vm: AppViewModel) {
                 setShowDialogValue = vm::setShowDialogValue,
                 navController = navController,
                 isReadState = myChatViewModel.chatsReadState,
+                toggleTheme = vm::toggleThemeUserSettingValue
             )
         }
 
@@ -221,7 +224,7 @@ fun AppNavigation(vm: AppViewModel) {
 
             TeamViewScreen(
                 vm = teamViewModel,
-                navController = navController
+                navController = navController,
             )
         }
 

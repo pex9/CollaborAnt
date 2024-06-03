@@ -29,6 +29,7 @@ fun MyTeamsScreen (
     setShowDialogValue: (Boolean) -> Unit,
     navController: NavController,
     isReadState: MutableList<Pair<Int, Boolean>>,
+    toggleTheme: () -> Unit
 ) {
     val teams = vm.teams.collectAsState().value.filter { team ->
         team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)
@@ -36,7 +37,7 @@ fun MyTeamsScreen (
 
     Scaffold(
         bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
-        topBar = { MyTeamsTopBar() },
+        topBar = { MyTeamsTopBar(toggleTheme) },
         floatingActionButton = {
             // Floating action button for adding a new team
             SmallFloatingActionButton(
