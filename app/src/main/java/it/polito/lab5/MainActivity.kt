@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Lab4Theme(darkTheme= false) {
+            Lab4Theme(darkTheme= true) {
                 if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
                 }
