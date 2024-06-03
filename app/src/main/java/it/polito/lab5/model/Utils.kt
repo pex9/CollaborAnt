@@ -115,6 +115,22 @@ data class KPI (
     val score: Int
 )
 
+//used for login and registration
+data class SignInState(
+    val isSignInSuccessful: Boolean = false,
+    val signInError: String? = null
+)
+data class SignInResult(
+    val data: UserData?,
+    val errorMessage: String?
+)
+
+data class UserData(
+    val userId: String,
+    val username: String?,
+    val profilePictureUrl: String?
+)
+
 fun calculateScore(assignedTasks: Int, completedTasks: Int): Int {
     val n = 5
     return Math.round(n * completedTasks.toFloat() * (completedTasks.toFloat() / assignedTasks.toFloat()))

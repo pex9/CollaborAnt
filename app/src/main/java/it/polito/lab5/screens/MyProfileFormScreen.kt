@@ -16,7 +16,7 @@ fun MyProfileFormScreen(
     vm: MyProfileFormViewModel,
     navController: NavController,
     cameraContract: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    galleryContract: ManagedActivityResultLauncher<String, Uri?>
+    galleryContract: ManagedActivityResultLauncher<String, Uri?>,
 ) {
     Scaffold(
         topBar = { MyProfileFormTopBar(vm::validate, navController) },

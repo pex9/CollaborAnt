@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.myProfile.MyProfileTopBar
 import it.polito.lab5.model.DataBase
+import it.polito.lab5.model.UserData
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyProfileViewModel
 
@@ -17,6 +18,8 @@ import it.polito.lab5.viewModels.MyProfileViewModel
 fun MyProfileScreen (
     vm: MyProfileViewModel,
     navController: NavController,
+    userData: UserData?,
+    onSignOut : () -> Unit,
     isReadState: MutableList<Pair<Int, Boolean>>,
 ) {
     val user = vm.users.collectAsState().value.find{
@@ -25,7 +28,7 @@ fun MyProfileScreen (
 
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
-        topBar = { MyProfileTopBar(navController) },
+        topBar = { MyProfileTopBar(onSignOut , navController) },
    
     ) { paddingValues ->
         user?.let { user ->

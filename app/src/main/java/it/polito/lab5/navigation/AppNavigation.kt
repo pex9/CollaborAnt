@@ -1,15 +1,20 @@
 package it.polito.lab5.navigation
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -18,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import androidx.lifecycle.lifecycleScope
+import it.polito.lab5.googlesignIn.GoogleAuthUiClient
 import it.polito.lab5.model.Taken
 import it.polito.lab5.model.Uploaded
 import it.polito.lab5.screens.IndividualStatsScreen
@@ -45,6 +52,7 @@ import it.polito.lab5.viewModels.MyProfileFormViewModel
 import it.polito.lab5.viewModels.MyProfileViewModel
 import it.polito.lab5.viewModels.MyTasksViewModel
 import it.polito.lab5.viewModels.MyTeamsViewModel
+import it.polito.lab5.viewModels.SignInViewModel
 import it.polito.lab5.viewModels.TaskFormViewModel
 import it.polito.lab5.viewModels.TaskHistoryViewModel
 import it.polito.lab5.viewModels.TaskViewViewModel
@@ -54,22 +62,85 @@ import it.polito.lab5.viewModels.TeamInvitationViewModel
 import it.polito.lab5.viewModels.TeamStatsViewModel
 import it.polito.lab5.viewModels.TeamViewModel
 import it.polito.lab5.viewModels.UserProfileViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleOwner
+import it.polito.lab5.screens.SignInScreen
 import java.io.File
 import java.io.IOException
 
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
-fun AppNavigation(vm: AppViewModel) {
+fun AppNavigation(vm: AppViewModel,
+                  googleAuthUiClient: GoogleAuthUiClient,
+                  applicationContext : Context,
+                  lifecycleOwner: LifecycleOwner
+) {
     val context = LocalContext.current
     val navController = rememberNavController() // Remember the navigation controller
     val myChatViewModel: MyChatsViewModel = viewModel(
         factory = AppFactory(context = context)
     )
+
     // Set up navigation graph
     NavHost(
         navController = navController,
-        startDestination = "myTeams?teamId={teamId}"   // Starting destination
+        startDestination = "login"   // Starting destination
     ) {
+
+            composable("login") {
+                val SignInViewModel = viewModel<SignInViewModel>()
+                val state by SignInViewModel.state.collectAsState()
+                LaunchedEffect(key1 = Unit) {
+                    //if already logged
+                    if (googleAuthUiClient.getSignedInUser() != null) {
+                        navController.navigate("myTeams?teamId={teamId}")
+                    }
+                }
+
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartIntentSenderForResult(),
+                    onResult = { result ->
+                        if (result.resultCode == ComponentActivity.RESULT_OK) {
+                            lifecycleOwner.lifecycleScope.launch {
+                                val signInResult = googleAuthUiClient.signInWithIntent(
+                                    intent = result.data ?: return@launch
+                                )
+                                SignInViewModel.onSignInResult(signInResult)
+                            }
+                        }
+                    }
+                )
+                LaunchedEffect(key1 = state.isSignInSuccessful) {
+                    if (state.isSignInSuccessful) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Sign in successful",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        navController.navigate("myTeams?teamId={teamId}")
+                        SignInViewModel.resetState()
+                    }
+                }
+
+                SignInScreen(
+                    vm = SignInViewModel,
+                    state = state,
+                    onSignInClick = {
+                        lifecycleOwner.lifecycleScope.launch {
+                            val signInIntentSender = googleAuthUiClient.signIn()
+                            launcher.launch(
+                                IntentSenderRequest.Builder(
+                                    signInIntentSender ?: return@launch
+                                ).build()
+                            )
+                        }
+                    }
+                )
+            }
+
+
 
         // MyTeams screen
         composable(
@@ -415,7 +486,22 @@ fun AppNavigation(vm: AppViewModel) {
             val myProfileViewModel: MyProfileViewModel = viewModel(
                 factory = AppFactory(context = context)
             )
-            MyProfileScreen(vm = myProfileViewModel, navController = navController, isReadState = myChatViewModel.chatsReadState)
+
+            MyProfileScreen(vm = myProfileViewModel,
+                navController = navController,
+                onSignOut = {
+                    lifecycleOwner.lifecycleScope.launch {
+                        googleAuthUiClient.signOut()
+                        Toast.makeText(
+                            applicationContext,
+                            "Signed out",
+                            Toast.LENGTH_LONG
+                        ).show()
+
+                        navController.navigate("login")
+                    }},
+                userData = googleAuthUiClient.getSignedInUser(),
+                isReadState = myChatViewModel.chatsReadState)
         }
 
         composable(route = "myProfile/edit"){
@@ -454,16 +540,20 @@ fun AppNavigation(vm: AppViewModel) {
                     }
                 }
             }
+
             MyProfileFormScreen(vm=myProfileFormViewModel,
                 navController = navController,
                 cameraContract = cameraContract,
-                galleryContract = galleryContract)
+                galleryContract = galleryContract,
+            )
         }
 
         composable(
             route = "users/{userId}/profile",
             arguments = listOf(navArgument("userId") { type = NavType.IntType })
         ) {entry ->
+
+
             val userId = entry.arguments?.getInt("userId")
             val userProfileViewModel: UserProfileViewModel = viewModel(
                 factory = AppFactory(userId = userId, context = context)

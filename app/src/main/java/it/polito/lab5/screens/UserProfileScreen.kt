@@ -7,13 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.userProfile.UserProfileTopBar
+import it.polito.lab5.model.UserData
 import it.polito.lab5.viewModels.UserProfileViewModel
 
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
 fun UserProfileScreen (
     vm: UserProfileViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
     Scaffold(
         topBar = { UserProfileTopBar(navController) },

@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.KPI
@@ -91,6 +93,8 @@ fun OverlappingComponents(
     joinedTeams: Int,
     kpi: List<Pair<Int, KPI>>
 ) {
+
+    //val user = Firebase.auth.currentUser
     Box(modifier = Modifier
         .fillMaxWidth()
         .height(292.dp)

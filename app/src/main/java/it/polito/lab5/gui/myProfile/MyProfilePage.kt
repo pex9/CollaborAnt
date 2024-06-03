@@ -37,7 +37,7 @@ import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileTopBar(navController: NavController) {
+fun MyProfileTopBar(onSignOut : () -> Unit,navController: NavController) {
     val colors = MaterialTheme.colorScheme
 
     TopAppBar(
@@ -73,6 +73,19 @@ fun MyProfileTopBar(navController: NavController) {
                 Icon(
                     painter = painterResource(id = R.drawable.edit_square),
                     contentDescription = "Back Icon",
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+            IconButton(
+                onClick = onSignOut ,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = CollaborantColors.DarkBlue
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.logout),
+                    contentDescription = "log out icon",
                     modifier = Modifier.size(26.dp)
                 )
             }
