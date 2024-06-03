@@ -1,24 +1,31 @@
-package it.polito.lab5.gui.signin
+package it.polito.lab5.gui.Login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.polito.lab5.R
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
@@ -31,7 +38,7 @@ fun SignInPage(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(top= 60.dp,start=32.dp,end=32.dp,bottom=16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
 
@@ -40,6 +47,12 @@ fun SignInPage(
 
         //image
 
+        Image(
+            painter = painterResource(id = R.mipmap.ic_launcher_foreground), // Replace with your image name
+            contentDescription = "Description of your image",
+            modifier = Modifier.clip(RoundedCornerShape(16.dp)), // Adjust the size as needed, // Adjust the modifier as needed
+            contentScale = ContentScale.Crop // Adjust content scaling as needed
+        )
 
 
 
@@ -59,7 +72,7 @@ fun SignInPage(
             )
         )
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(100.dp))
 
         Text(
             text = "Welcome!",
@@ -71,12 +84,13 @@ fun SignInPage(
                 "Boost productivity and stay organized effortlessly!",
             fontFamily = interFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp)
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center)
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(80.dp))
 
         Button(
-            shape= ButtonDefaults.textShape,
+            shape = RoundedCornerShape(16.dp),
             onClick = {
                 if (isSignedIn) onSignInClick()
                 setIsSignedInValue(true)
@@ -88,10 +102,10 @@ fun SignInPage(
             modifier = Modifier
                 .padding(8.dp)
                 .height(50.dp)
-                .width(300.dp)
+                .fillMaxWidth()
         ) {
             Text(
-                text = if (isSignedIn) "Sign in" else "Get Started",
+                text = if (isSignedIn) "SIGN IN WITH GOOGLE" else "GET STARTED",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 20.sp // Adjusted text size to fit inside the button

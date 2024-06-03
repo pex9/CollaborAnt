@@ -4,13 +4,13 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import it.polito.lab5.gui.signin.SignInPage
+import it.polito.lab5.gui.Login.SignInPage
 import it.polito.lab5.model.SignInState
-import it.polito.lab5.viewModels.SignInViewModel
+import it.polito.lab5.viewModels.LogInViewModel
 
 @Composable
 fun SignInScreen(
-    vm : SignInViewModel,
+    vm : LogInViewModel,
     state: SignInState,
     onSignInClick: () -> Unit
 ) {

@@ -52,7 +52,7 @@ import it.polito.lab5.viewModels.MyProfileFormViewModel
 import it.polito.lab5.viewModels.MyProfileViewModel
 import it.polito.lab5.viewModels.MyTasksViewModel
 import it.polito.lab5.viewModels.MyTeamsViewModel
-import it.polito.lab5.viewModels.SignInViewModel
+import it.polito.lab5.viewModels.LogInViewModel
 import it.polito.lab5.viewModels.TaskFormViewModel
 import it.polito.lab5.viewModels.TaskHistoryViewModel
 import it.polito.lab5.viewModels.TaskViewViewModel
@@ -64,7 +64,6 @@ import it.polito.lab5.viewModels.TeamViewModel
 import it.polito.lab5.viewModels.UserProfileViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.LifecycleOwner
 import it.polito.lab5.screens.SignInScreen
 import java.io.File
@@ -90,8 +89,8 @@ fun AppNavigation(vm: AppViewModel,
     ) {
 
             composable("login") {
-                val SignInViewModel = viewModel<SignInViewModel>()
-                val state by SignInViewModel.state.collectAsState()
+                val LogInViewModel = viewModel<LogInViewModel>()
+                val state by LogInViewModel.state.collectAsState()
                 LaunchedEffect(key1 = Unit) {
                     //if already logged
                     if (googleAuthUiClient.getSignedInUser() != null) {
@@ -107,7 +106,7 @@ fun AppNavigation(vm: AppViewModel,
                                 val signInResult = googleAuthUiClient.signInWithIntent(
                                     intent = result.data ?: return@launch
                                 )
-                                SignInViewModel.onSignInResult(signInResult)
+                                LogInViewModel.onSignInResult(signInResult)
                             }
                         }
                     }
@@ -120,12 +119,12 @@ fun AppNavigation(vm: AppViewModel,
                             Toast.LENGTH_LONG
                         ).show()
                         navController.navigate("myTeams?teamId={teamId}")
-                        SignInViewModel.resetState()
+                        LogInViewModel.resetState()
                     }
                 }
 
                 SignInScreen(
-                    vm = SignInViewModel,
+                    vm = LogInViewModel,
                     state = state,
                     onSignInClick = {
                         lifecycleOwner.lifecycleScope.launch {

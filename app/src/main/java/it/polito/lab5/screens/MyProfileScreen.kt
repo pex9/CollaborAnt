@@ -28,7 +28,11 @@ fun MyProfileScreen (
 
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
-        topBar = { MyProfileTopBar(onSignOut , navController) },
+        topBar = { MyProfileTopBar(
+            onSignOut = onSignOut,
+            optionsOpened= vm.optionsOpened,
+            setOptionsOpenedValue = vm::setOptionsOpenedValue,
+            navController) },
    
     ) { paddingValues ->
         user?.let { user ->
