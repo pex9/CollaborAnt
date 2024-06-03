@@ -104,6 +104,16 @@ fun MyTasksTopBar() {
         ),
         title = {
             Text(
+                text = "My Tasks",
+                fontFamily = interFamily,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 22.sp,
+                letterSpacing = 0.sp,
+                modifier = Modifier.padding(start= 5.dp)
+            )
+        },
+        actions = {
+            Text(
                 text = "CollaborAnt", // App title
                 maxLines = 1,
                 fontFamily = interFamily,
@@ -113,7 +123,8 @@ fun MyTasksTopBar() {
                     brush = Brush.linearGradient(
                         colors = gradientColors
                     )
-                )
+                ),
+                modifier = Modifier.padding(end= 15.dp)
             )
         }
     )

@@ -190,17 +190,9 @@ fun PersonalTaskListPane(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
-        item {
-            Text(
-                text = "My Tasks",
-                modifier = Modifier.padding(start= 20.dp, top = 22.dp),
-                fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                letterSpacing = 0.sp
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-        }
+        /*item {
+
+        }*/
 
         // Display items for each category
         itemsIndexed(categories) { index, category ->

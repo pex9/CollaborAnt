@@ -70,7 +70,8 @@ fun AppNavigation(vm: AppViewModel) {
     // Set up navigation graph
     NavHost(
         navController = navController,
-        startDestination = "myTeams?teamId={teamId}"   // Starting destination
+        /*startDestination = "myTeams?teamId={teamId}"   // Starting destination*/
+        startDestination = "myTasks"   // Starting destination
     ) {
 
         // MyTeams screen
