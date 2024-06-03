@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.gui.myTeams.MyTeamsPage
 import it.polito.lab5.gui.myTeams.MyTeamsTopBar
 import it.polito.lab5.model.DataBase
@@ -35,20 +36,24 @@ fun MyTeamsScreen (
         team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)
     }
 
+    val colors = MaterialTheme.colorScheme
+
     Scaffold(
-        bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
         topBar = { MyTeamsTopBar(toggleTheme) },
+        bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
             // Floating action button for adding a new team
             SmallFloatingActionButton(
                 onClick = { navController.navigate("myTeams/add") }, // Navigate to add team screen on click
                 shape = CircleShape,
-                modifier = Modifier
-                    .size(60.dp),
-                containerColor = MaterialTheme.colorScheme.primary, // Button color
+                modifier = Modifier.size(60.dp),
+                containerColor = colors.secondary, // Button color
             ) {
                 // Icon for the floating action button
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Icon")
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = "Add Icon",
+                )
             }
         }
     ) { paddingValues ->

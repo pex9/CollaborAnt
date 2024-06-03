@@ -132,13 +132,14 @@ fun TaskStateComp(
     onClick: (() -> Unit)? = null, // Click listener for the task state card
     trailingIcon: @Composable (() -> Unit?)? = null // Trailing icon for the task state card
 ) {
+    val colors = MaterialTheme.colorScheme
     val (literalState, color) = when (state) {
-        TaskState.NOT_ASSIGNED -> "Not assigned" to CollaborantColors.DarkBlue
-        TaskState.PENDING -> "Pending" to CollaborantColors.DarkBlue
-        TaskState.IN_PROGRESS -> "In progress" to CollaborantColors.PriorityOrange
-        TaskState.ON_HOLD -> "On-hold" to CollaborantColors.PriorityOrange
-        TaskState.COMPLETED -> "Completed" to CollaborantColors.PriorityGreen
-        TaskState.OVERDUE -> "Overdue" to CollaborantColors.PriorityOrange2
+        TaskState.NOT_ASSIGNED -> "Not assigned" to colors.secondary
+        TaskState.PENDING -> "Pending" to colors.secondary
+        TaskState.IN_PROGRESS -> "In progress" to colors.primary
+        TaskState.ON_HOLD -> "On-hold" to colors.primary
+        TaskState.COMPLETED -> "Completed" to colors.onBackground
+        TaskState.OVERDUE -> "Overdue" to colors.primary
     }
     val modifier = if (onClick != null) Modifier.clickable { onClick() }
     else Modifier
@@ -150,7 +151,8 @@ fun TaskStateComp(
             containerColor = color.copy(alpha = 0.2f),
             contentColor = color,
         ),
-        border = BorderStroke(width = 2.dp, color = color)
+        border = BorderStroke(width = 1.dp, color = color),
+        modifier = Modifier.padding(vertical = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -160,7 +162,7 @@ fun TaskStateComp(
             // Display the task state text
             Text(
                 text = literalState,
-                color = color,
+                color = colors.onBackground,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = fontSize,
@@ -278,6 +280,7 @@ fun TextFieldComp(
 
 @Composable
 fun TagCircleComp(color: Color, modifier: Modifier) {
+    val colors = MaterialTheme.colorScheme
     Canvas(
         modifier = modifier
     ) {
@@ -285,10 +288,10 @@ fun TagCircleComp(color: Color, modifier: Modifier) {
         val r = 1f * min(w, h) // Calculate the radius as half of the smaller dimension
         drawCircle(color = color, radius = r, center = center) // Draw the circle with the specified color
         drawCircle(
-            color = CollaborantColors.BorderGray, // Black color for the outline
+            color = colors.outline, // Black color for the outline
             radius = r, // Same radius as the main circle
             center = center, // Center of the canvas
-            style = Stroke(width = 1f) // Stroke style for the outline
+            style = Stroke(width = 2f) // Stroke style for the outline
         )
     }
 }

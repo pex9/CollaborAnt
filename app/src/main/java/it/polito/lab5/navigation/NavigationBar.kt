@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,8 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-//import it.polito.lab4.R
-import it.polito.lab5.ui.theme.CollaborantColors
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.ui.theme.interFamily
 
 
@@ -35,9 +35,13 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
     val currentRoute = navBackStackEntry?.destination?.route
     val myChatsNotificationsCount = isReadState.count{ !it.second }
 
+    val colors = MaterialTheme.colorScheme
+    val containerColor = colors.surfaceColorAtElevation(10.dp)
+    val badgeColor = if(LocalTheme.current.isDark) colors.primary else colors.secondaryContainer
+
     // Bottom navigation bar
     NavigationBar(
-        containerColor = MaterialTheme.colorScheme.onSecondary // Set container color
+        containerColor = containerColor // Set container color
     ) {
         // Iterate over bottom navigation items
         bottomNavItems.forEach { navItem ->
@@ -65,7 +69,7 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                                 if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                             ),
                             contentDescription = "icon",
-                            tint = if (currentRoute == navItem.route) CollaborantColors.DarkBlue else CollaborantColors.BorderGray, // Set icon tint based on selection
+                            tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.onBackground, // Set icon tint based on selection
                             modifier = Modifier.size(28.dp) // Set icon size
                         )
                     } else {
@@ -73,8 +77,8 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                             badge = {
                                 if (myChatsNotificationsCount > 0) {
                                     Badge(
-                                        containerColor = Color.Red,
-                                        contentColor = Color.White
+                                        containerColor = colors.error,
+                                        contentColor = colors.onError
                                     ) {
                                         Text(myChatsNotificationsCount.toString())
                                     }
@@ -87,7 +91,7 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                                     if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                                 ),
                                 contentDescription = "icon",
-                                tint = if (currentRoute == navItem.route) CollaborantColors.DarkBlue else CollaborantColors.BorderGray, // Set icon tint based on selection
+                                tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.onBackground, // Set icon tint based on selection
                                 modifier = Modifier.size(28.dp) // Set icon size
                             )
                         }
@@ -104,14 +108,15 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                         fontWeight = weight,
                         fontSize = 10.sp,
                         letterSpacing = 0.sp,
-                        modifier = Modifier.padding(top = 2.dp) // Add padding
+                        modifier = Modifier.padding(top = 2.dp), // Add padding
+
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    indicatorColor = Color.White,
-                    unselectedTextColor = MaterialTheme.colorScheme.outline, // Set text color for unselected state
-                    selectedTextColor = CollaborantColors.DarkBlue // Set text color for selected state
+                    selectedIconColor = containerColor,
+                    indicatorColor = containerColor,
+                    unselectedTextColor = colors.onBackground, // Set text color for unselected state
+                    selectedTextColor = colors.secondaryContainer // Set text color for selected state
                 )
             )
         }

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,12 +46,25 @@ import it.polito.lab5.ui.theme.interFamily
 fun MyTeamsTopBar(toggleTheme: () -> Unit) {
     // Get color scheme from MaterialTheme
     val colors = MaterialTheme.colorScheme
-    val topBarBackground = if(LocalTheme.current.isDark) colors.secondary else colors.secondary
+
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
+
+    val gradientColors =
+        if(LocalTheme.current.isDark)
+            listOf(
+                colors.secondary,
+                colors.primary,
+            )
+        else
+            listOf(
+                colors.onSurface,
+                colors.secondaryContainer,
+            )
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = topBarBackground,
-            titleContentColor = colors.onPrimary,
+            containerColor = containerColor,
         ),
         title = {
             Text(
@@ -60,10 +75,7 @@ fun MyTeamsTopBar(toggleTheme: () -> Unit) {
                 fontSize = 22.sp,
                 style = TextStyle(
                     brush = Brush.linearGradient(
-                        colors = listOf(
-                            CollaborantColors.DarkBlue,
-                            CollaborantColors.Yellow
-                        ) // Gradient colors
+                        colors = gradientColors // Gradient colors
                     )
                 )
             )
@@ -99,7 +111,8 @@ fun MyTeamsPage(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues), // Apply padding
+            .padding(paddingValues)
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
@@ -118,13 +131,13 @@ fun MyTeamsPage(
         itemsIndexed(teams) { index, team ->
             TeamItem(team,navController)
 
-            // Add divider except for the last category
+            /*// Add divider except for the last category
             if(index != teams.size - 1) {
                 Divider(
                     thickness = 1.dp,
                     color = CollaborantColors.BorderGray.copy(0.4f)
                 )
-            }
+            }*/
         }
     }
 

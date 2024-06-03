@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
 data class DarkTheme(val isDark: Boolean = false)
 val LocalTheme = compositionLocalOf { DarkTheme() }
 
+
 fun isFirstLaunch(context: Context): Boolean {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
     val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)

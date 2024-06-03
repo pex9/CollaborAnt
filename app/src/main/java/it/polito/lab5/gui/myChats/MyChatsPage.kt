@@ -92,13 +92,6 @@ fun MyChatsPage(
                 setIsReadStateValue = setIsReadStateValue,
                 navController = navController
             )
-
-            if(idx < userTeams.size - 1) {
-                Divider(
-                    thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f)
-                )
-            }
         }
     }
 }

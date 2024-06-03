@@ -2,6 +2,7 @@ package it.polito.lab5.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
+// topbar in Light
 val Primary = Color(0XFFFA9B1E)
 val PrimaryVariant = Color(0XFFEF8019)
 val PrimaryDark = Color(0XFFFCCD85)
@@ -9,9 +10,11 @@ val PrimaryDark = Color(0XFFFCCD85)
 val Secondary = Color(0XFF8CC5FF)
 val SecondaryVariant = Color(0XFF2937B3)
 
+// Backgrounds
 val BackGround = Color(0XFFF8F8F8)
 val BackGroundDark = Color(0xFF121212)
 
+// Cards, topbar in Dark
 val Surface = Color(0XFFF8F8F8)
 val SurfaceDark = Color(0xFF121212)
 

@@ -223,9 +223,6 @@ fun PersonalTaskListPane(
                 setNumberOfTasksForCategory = setNumberOfTasksForCategory,
                 setChosenCategoryValue = setChosenCategoryValue
             )
-            // Add divider except for the last category
-            if(index != categories.size - 1)
-                Divider(color = CollaborantColors.BorderGray.copy(0.6f), thickness = 1.dp)
         }
     }
 

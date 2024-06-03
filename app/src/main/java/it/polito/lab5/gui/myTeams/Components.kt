@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.myTeams
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,15 +16,19 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -47,35 +52,46 @@ import kotlinx.coroutines.launch
 @Composable
 fun TeamItem(team: Team, navController: NavController) {
     val (first, last) = getMonogramText(team.name)
-
-    ListItem(
-        leadingContent = {
-            Box(
-                modifier = Modifier
-                .size(48.dp)
-                .padding(4.dp)
-            ) {
-                ImagePresentationComp(
-                    first = first,
-                    last = last,
-                    imageProfile = team.image,
-                    fontSize = 18.sp
+    val colors =  MaterialTheme.colorScheme
+    Card(
+        modifier = Modifier.padding(horizontal = 15.dp, vertical = 10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colors.surface,
+        ),
+        elevation = CardDefaults.cardElevation(4.dp),
+        border = BorderStroke(width = 1.dp, color = colors.outline),
+    ){
+        ListItem(
+            modifier = Modifier
+                .padding(vertical = 3.dp)
+                .clickable { navController.navigate("myTeams/${team.id}") },
+            leadingContent = {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(4.dp)
+                ) {
+                    ImagePresentationComp(
+                        first = first,
+                        last = last,
+                        imageProfile = team.image,
+                        fontSize = 18.sp
+                    )
+                }
+            },
+            headlineContent = {
+                Text(
+                    text = team.name,
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 17.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    color = colors.onSurface
                 )
-            }
-        },
-        headlineContent = {
-            Text(
-                text = team.name,
-                fontFamily = interFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 17.sp,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-        },
-        colors = ListItemDefaults.colors(containerColor = Color.White),
-        modifier = Modifier.clickable { navController.navigate("myTeams/${team.id}") }
-    )
+            },
+        )
+    }
 }
 
 @Composable

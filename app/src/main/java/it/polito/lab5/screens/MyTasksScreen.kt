@@ -1,5 +1,6 @@
 package it.polito.lab5.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -11,8 +12,10 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import it.polito.lab5.R
 import it.polito.lab5.gui.myTasks.MyTasksTopBar
 import it.polito.lab5.gui.myTasks.PersonalTaskListPane
 import it.polito.lab5.model.DataBase
@@ -22,22 +25,21 @@ import it.polito.lab5.viewModels.MyTasksViewModel
 
 @Composable
 fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadState: MutableList<Pair<Int, Boolean>>,) {
+    val colors = MaterialTheme.colorScheme
     Scaffold(
-        bottomBar = { BottomNavigationBarComp(navController, isReadState) },
         topBar = { MyTasksTopBar() },
+        bottomBar = { BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
             if(vm.isVisible) {
                 // Floating action button for adding a new team
                 SmallFloatingActionButton(
                     onClick = {
-                        vm.setCurrentCategoryValue(""); vm.setCategoryValue(""); vm.setDialogOpenValue(
-                        true
-                    )
+                        vm.setCurrentCategoryValue(""); vm.setCategoryValue(""); vm.setDialogOpenValue(true)
                     }, // Navigate to add team screen on click
                     shape = CircleShape,
                     modifier = Modifier
                         .size(60.dp),
-                    containerColor = MaterialTheme.colorScheme.primary, // Button color
+                    containerColor = colors.secondary, // Button color
                 ) {
                     // Icon for the floating action button
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Icon")

@@ -1,7 +1,9 @@
 package it.polito.lab5.gui.myTasks
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -9,16 +11,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -53,6 +62,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Tag
@@ -63,6 +73,8 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -71,11 +83,24 @@ import java.util.Locale
 fun MyTasksTopBar() {
     // Get color scheme from MaterialTheme
     val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
+
+    val gradientColors =
+        if(LocalTheme.current.isDark)
+            listOf(
+                colors.secondary,
+                colors.primary,
+            )
+        else
+            listOf(
+                colors.onSurface,
+                colors.secondaryContainer,
+            )
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colors.onSecondary,
-            titleContentColor = colors.onPrimary,
+            containerColor = containerColor,
         ),
         title = {
             Text(
@@ -86,10 +111,7 @@ fun MyTasksTopBar() {
                 fontSize = 22.sp,
                 style = TextStyle(
                     brush = Brush.linearGradient(
-                        colors = listOf(
-                            CollaborantColors.DarkBlue,
-                            CollaborantColors.Yellow
-                        ) // Gradient colors
+                        colors = gradientColors
                     )
                 )
             )
@@ -120,106 +142,125 @@ fun CategoryItem(
     // Filter tasks for the current category
     val userTasks = tasks.filter { it.categories[DataBase.LOGGED_IN_USER_ID] == category }
     val flag = expandCategory.find { it.first == category }?.second ?: false
+    val colors = MaterialTheme.colorScheme
 
     // Row containing category name and task count
-    Row(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .clickable { setExpandCategory(category, !flag) }, // Toggle expansion on click
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+            .padding(horizontal = 15.dp, vertical = 13.dp)
+            .clickable { setExpandCategory(category, !flag) }, // Toggle expansion on click,
+        colors = CardDefaults.cardColors(
+            containerColor = colors.surface,
+        ),
+        elevation = CardDefaults.cardElevation(4.dp),
+        border = BorderStroke(width = 1.dp, color = colors.outline),
     ) {
-        // First column containing arrow and category name
-        Column(
-            modifier = Modifier
-                .weight(1.5f)
-                .padding(20.dp)
-        ) {
-            Row(
-                modifier = Modifier.padding(start = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start
-            ) {
-                val arrowIcon = if (flag) R.drawable.arrow_down else R.drawable.arrow_right
-                // Arrow icon for expanding/collapsing category
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = arrowIcon),
-                    contentDescription = "Localized description",
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Display category name
-                Text(
-                    text = category,
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 17.sp,
-                    letterSpacing = 0.sp
-                )
-            }
-        }
-        // Second column containing task count
         Row(
             modifier = Modifier
-                .weight(0.5f)
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            // Display number of tasks for the category
-            Text(
-                text = userTasks.size.toString(),
-                fontFamily = interFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
-                letterSpacing = 0.sp,
-                modifier = Modifier.padding(end = 10.dp)
-            )
-            if(category!= DataBase.default_categories[0]) {
-                CategoryOptionsComp(
-                    setCategorySelectionOpenedValue = setCategorySelectionOpenedValue,
-                    setIsDialogOpen = setIsDialogOpen,
-                    setCurrentCategory = setCurrentCategory,
-                    category = category,
-                    categorySelectionOpened = categorySelectionOpened,
-                    setCategory = setCategory,
-                    setIsDialogDeleteOpen = setIsDialogDeleteOpen,
-                    setNumberOfTasksForCategory = setNumberOfTasksForCategory,
-                    numberOfTasks= userTasks.size
+            // First column containing arrow and category name
+            Column(
+                modifier = Modifier
+                    .weight(1.5f)
+                    .padding(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(start = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    val arrowIcon = if (flag) R.drawable.arrow_down else R.drawable.arrow_right
+                    // Arrow icon for expanding/collapsing category
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = arrowIcon),
+                        contentDescription = "Localized description",
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Display category name
+                    Text(
+                        text = category,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 17.sp,
+                        letterSpacing = 0.sp,
+                        color = colors.onSurface
+                    )
+                }
+            }
+            // Second column containing task count
+            Row(
+                modifier = Modifier
+                    .weight(0.5f)
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Display number of tasks for the category
+                Text(
+                    text = userTasks.size.toString(),
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    letterSpacing = 0.sp,
+                    modifier = Modifier.padding(end = 10.dp),
+                    color = colors.onSurface
                 )
-            } else {
-                val context = LocalContext.current
-                Box(contentAlignment = Alignment.BottomEnd) {
-                    IconButton(onClick = { Toast.makeText(context, "This category can't be edited", Toast.LENGTH_SHORT).show() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.lock),
-                            contentDescription = "Blocked category",
-                            tint = CollaborantColors.DarkBlue,
-                            modifier = Modifier.size(26.dp)
-                        )
+                if (category != DataBase.default_categories[0]) {
+                    CategoryOptionsComp(
+                        setCategorySelectionOpenedValue = setCategorySelectionOpenedValue,
+                        setIsDialogOpen = setIsDialogOpen,
+                        setCurrentCategory = setCurrentCategory,
+                        category = category,
+                        categorySelectionOpened = categorySelectionOpened,
+                        setCategory = setCategory,
+                        setIsDialogDeleteOpen = setIsDialogDeleteOpen,
+                        setNumberOfTasksForCategory = setNumberOfTasksForCategory,
+                        numberOfTasks = userTasks.size
+                    )
+                } else {
+                    val context = LocalContext.current
+                    Box(contentAlignment = Alignment.BottomEnd) {
+                        IconButton(onClick = {
+                            Toast.makeText(
+                                context,
+                                "This category can't be edited",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.lock),
+                                contentDescription = "Blocked category",
+                                tint = colors.onSurface,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-    // If category is expanded, display tasks
-    if (flag) {
-        userTasks.forEach { task ->
-            val taskTeam = teams.find { it.id == task.teamId }
 
-            Divider(color = CollaborantColors.BorderGray.copy(0.4f), thickness = 1.dp)
+        // If category is expanded, display tasks
+        if (flag) {
+            userTasks.forEach { task ->
+                val taskTeam = teams.find { it.id == task.teamId }
 
-            if (taskTeam != null) {
-                TaskItem(
-                    team = taskTeam,
-                    task = task,
-                    navController = navController,
-                    setMyTasksHideSheet = setMyTasksHideSheet,
-                    setTargetTaskIdValue = setTargetTaskIdValue,
-                    setChosenCategory = { setChosenCategoryValue(category) }
-                )
+                Divider(color = CollaborantColors.BorderGray.copy(0.4f), thickness = 1.dp)
+
+                if (taskTeam != null) {
+                    TaskItem(
+                        team = taskTeam,
+                        task = task,
+                        navController = navController,
+                        setMyTasksHideSheet = setMyTasksHideSheet,
+                        setTargetTaskIdValue = setTargetTaskIdValue,
+                        setChosenCategory = { setChosenCategoryValue(category) }
+                    )
+                }
             }
         }
     }
@@ -235,12 +276,13 @@ fun TaskItem(
     setTargetTaskIdValue: (Int) -> Unit,
     setChosenCategory: () -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     // Column for displaying task details
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(CollaborantColors.PageBackGroundGray)
-            .padding(5.dp)
+            .background(colors.surfaceColorAtElevation(20.dp))
+            .padding(10.dp)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = { navController.navigate("viewTask/${task.id}") },
@@ -248,14 +290,33 @@ fun TaskItem(
                 )
             }
     ) {
-        // Row for task title
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
+                modifier = Modifier.weight(0.15f).fillMaxSize().padding(start = 6.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val tagContainerColor: Color = when (task.tag) {
+                    Tag.HIGH -> colors.error
+                    Tag.MEDIUM -> colors.primary
+                    Tag.LOW -> colors.secondary
+                    else -> colors.onBackground
+                }
+                TagCircleComp(color = tagContainerColor, modifier = Modifier
+                    .size(6.dp)
+                )
+            }
+
+            Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp)
+                    .fillMaxSize()
+                    .weight(0.85f).padding(start = 5.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
             ) {
                 // Display task title
                 val title = task.title.replaceFirstChar { it.uppercase() }
@@ -264,11 +325,15 @@ fun TaskItem(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     fontFamily = interFamily,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onSurface,
+                    modifier = Modifier.wrapContentWidth()
                 )
             }
+
+
             // Display task status and tag
             Column(
                 modifier = Modifier.weight(1f),
@@ -279,20 +344,7 @@ fun TaskItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.padding(end = 4.dp)
-                ) {
-                    // Determine tag color based on task priority
-                    val tagContainerColor: Color = when (task.tag) {
-                        Tag.HIGH -> CollaborantColors.PriorityOrange2
-                        Tag.MEDIUM -> CollaborantColors.PriorityOrange
-                        Tag.LOW -> CollaborantColors.PriorityGreen
-                        else -> CollaborantColors.NoPriorityGray
-                    }
-                    // Display task state and tag circle
-                    TaskStateComp(state = task.state, fontSize = 13.sp)
-                    TagCircleComp(color = tagContainerColor, modifier = Modifier
-                        .padding(start = 12.dp)
-                        .size(6.dp))
-                }
+                ) { TaskStateComp(state = task.state, fontSize = 13.sp) }
             }
         }
         // Spacer between rows
@@ -302,18 +354,36 @@ fun TaskItem(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 13.dp, top = 10.dp, bottom = 2.dp)
+                    .padding(start = 8.dp, top = 10.dp, bottom = 2.dp)
             ) {
-                // Display task category
-                Text(
-                    text = team.name,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp,
-                    letterSpacing = 0.sp
-                )
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Start
+                ){
+                    // Display task category
+                    Text(
+                        text = "(team)",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Light,
+                        fontSize = 12.sp,
+                        letterSpacing = 0.sp,
+                        color = colors.onSurface,
+                        modifier = Modifier.padding(bottom = 1.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = team.name,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        letterSpacing = 0.sp,
+                        color = colors.onSurface,
+                    )
+                }
             }
             // Display task due date
             Column(
@@ -324,13 +394,42 @@ fun TaskItem(
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH)
-                Text(
-                    task.dueDate?.format(formatter)?: "",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                    letterSpacing = 0.sp
-                )
+                var dueDateColor = colors.onBackground
+                var dueDateFont = FontWeight.Medium
+                if (task.dueDate != null) {
+                    val today = LocalDate.now()
+                    // difference in days between today and due date
+                    val difference = Period.between(today, task.dueDate)
+                    if (difference.days in 0..7) {
+                        // Task due date is within a week of today
+                        dueDateColor = colors.error
+                        dueDateFont = FontWeight.SemiBold
+                    }
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Text(
+                            text = "(deadline)",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Light,
+                            fontSize = 12.sp,
+                            letterSpacing = 0.sp,
+                            color = colors.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(7.dp))
+                        Text(
+                            task.dueDate.format(formatter),
+                            fontFamily = interFamily,
+                            fontWeight = dueDateFont,
+                            fontSize = 13.sp,
+                            letterSpacing = 0.sp,
+                            color = dueDateColor
+                        )
+                    }
+                }
             }
         }
     }
@@ -346,10 +445,10 @@ fun CategoryOptionsComp(
     setCategorySelectionOpenedValue: (String, Boolean) -> Unit,
     setCategory: (String) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
-
     setNumberOfTasksForCategory: (Int?) -> Unit,
     numberOfTasks: Int
 ) {
+    val colors = MaterialTheme.colorScheme
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
         val flag = categorySelectionOpened.find { it.first == category }?.second ?: false
@@ -358,7 +457,7 @@ fun CategoryOptionsComp(
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
-                tint = CollaborantColors.DarkBlue,
+                tint = colors.onSurface,
                 modifier = Modifier.size(32.dp)
             )
         }
