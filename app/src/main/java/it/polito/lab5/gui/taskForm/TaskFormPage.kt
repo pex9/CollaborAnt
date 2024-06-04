@@ -19,6 +19,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -161,6 +162,7 @@ fun TaskFormPage(
         capitalization = KeyboardCapitalization.Sentences,
         autoCorrect = true
     )
+    val colors = MaterialTheme.colorScheme
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -210,7 +212,7 @@ fun TaskFormPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
@@ -231,7 +233,7 @@ fun TaskFormPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
@@ -244,7 +246,7 @@ fun TaskFormPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 

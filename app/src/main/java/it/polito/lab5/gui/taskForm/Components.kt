@@ -28,6 +28,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,6 +71,7 @@ fun TagMenuComp(
     showTagMenu: Boolean, // Indicates whether the tag menu is shown or not
     setShowTagMenuValue: (Boolean) -> Unit // Callback to toggle the visibility of the tag menu
 ) {
+    val colors = MaterialTheme.colorScheme
     // Box to contain the tag component and the tag menu
     Box(contentAlignment = Alignment.BottomEnd) {
         // Tag component with an arrow icon to indicate the tag menu state
@@ -134,7 +136,7 @@ fun TagMenuComp(
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = CollaborantColors.BorderGray,
+                                    tint = colors.outline,
                                     modifier = Modifier.size(13.dp)
                                 )
                             }
@@ -146,7 +148,7 @@ fun TagMenuComp(
                     // Divider between menu items
                     if (idx != Tag.entries.size - 2)
                         Divider(
-                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            color = colors.outline,
                             thickness = 1.dp,
                             modifier = Modifier.padding(horizontal = 15.dp)
                         )
@@ -256,6 +258,7 @@ fun RepeatMenuComp(
     showRepeatMenu: Boolean, // Flag to indicate if the repeat menu is shown
     setShowRepeatMenuValue: (Boolean) -> Unit // Callback to toggle the visibility of the repeat menu
 ) {
+    val colors = MaterialTheme.colorScheme
     // Box to contain the repeat menu
     Box(contentAlignment = Alignment.BottomEnd) {
         // Repeat component with toggle icon
@@ -316,7 +319,7 @@ fun RepeatMenuComp(
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = CollaborantColors.BorderGray,
+                                    tint = colors.outline,
                                     modifier = Modifier.size(13.dp)
                                 )
                             }
@@ -328,7 +331,7 @@ fun RepeatMenuComp(
                     // Divider between menu items
                     if (idx != Tag.entries.size - 1)
                         Divider(
-                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            color = colors.outline,
                             thickness = 1.dp,
                             modifier = Modifier.padding(horizontal = 15.dp)
                         )
@@ -355,6 +358,7 @@ fun MembersPickerBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState()
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
 
     // Modal bottom sheet for selecting members
     ModalBottomSheet(
@@ -454,7 +458,7 @@ fun MembersPickerBottomSheet(
         modifier = Modifier.fillMaxWidth() // Fill maximum width
     ) {
         // Divider between header and member list
-        Divider(thickness = 1.dp, color = CollaborantColors.BorderGray)
+        Divider(thickness = 1.dp, color = colors.outline)
         // Lazy column to display the list of members
         LazyColumn(
             verticalArrangement = Arrangement.Top,

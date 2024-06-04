@@ -67,7 +67,7 @@ fun MonogramPresentationComp(
 ) {
     var monogramText = "  "
     val textMeasurer = rememberTextMeasurer()
-    val os = CollaborantColors.BorderGray
+    val colors = MaterialTheme.colorScheme
 
     // Construct monogram text if both first and last names are not blank
     if (first.isNotEmpty() && last.isNotEmpty())
@@ -86,7 +86,7 @@ fun MonogramPresentationComp(
 
         // Draw the monogram circle
         drawCircle(color = color, radius = r, center = center)
-        drawCircle(color = os, radius = r, center = center, style = Stroke(width = 3f))
+        drawCircle(color = colors.outline, radius = r, center = center, style = Stroke(width = 3f))
         // Draw the monogram text
         drawText(
             textLayoutResult = textLayoutResult,
@@ -100,7 +100,7 @@ fun MonogramPresentationComp(
 
 @Composable
 fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfile, fontSize: TextUnit){
-    val os = CollaborantColors.BorderGray
+    val colors = MaterialTheme.colorScheme
 
     when(imageProfile) {
         is Taken ->
@@ -110,7 +110,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
                 contentDescription = "Image Profile",
                 modifier = Modifier
                     .clip(CircleShape)
-                    .border(1.dp, os, CircleShape)
+                    .border(1.dp, colors.outline, CircleShape)
             )
         is Uploaded ->
             AsyncImage(
@@ -119,7 +119,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
                 contentDescription = "Image Profile",
                 modifier = Modifier
                     .clip(CircleShape)
-                    .border(1.dp, os, CircleShape)
+                    .border(1.dp, colors.outline, CircleShape)
             )
         is Empty -> MonogramPresentationComp(first, last, fontSize, imageProfile.color)
     }

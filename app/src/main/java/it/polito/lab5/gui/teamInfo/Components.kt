@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -69,6 +70,7 @@ fun OptionsComp(
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController
 ) {
+    val colors = MaterialTheme.colorScheme
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
         // IconButton to trigger the opening/closing of options
@@ -109,7 +111,7 @@ fun OptionsComp(
                 )
 
                 Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     thickness = 1.dp,
                     modifier = Modifier
                         .padding(horizontal = 15.dp)
@@ -140,7 +142,7 @@ fun OptionsComp(
                     },
                 )
                 Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     thickness = 1.dp,
                     modifier = Modifier
                         .padding(horizontal = 15.dp)
@@ -321,7 +323,7 @@ fun RoleOptionsComp(
         Role.SENIOR_MEMBER -> "Senior Member"
         Role.JUNIOR_MEMBER -> "Junior Member"
     }
-
+    val colors = MaterialTheme.colorScheme
     Box(
         contentAlignment = Alignment.BottomStart,
         modifier = Modifier
@@ -380,7 +382,7 @@ fun RoleOptionsComp(
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = CollaborantColors.BorderGray,
+                                    tint = colors.outline,
                                     modifier = Modifier.size(13.dp)
                                 )
                             }
@@ -398,7 +400,7 @@ fun RoleOptionsComp(
 
                     if(idx < Role.entries.size - 2) {
                         Divider(
-                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            color = colors.outline.copy(0.4f),
                             thickness = 1.dp,
                             modifier = Modifier.padding(horizontal = 15.dp)
                         )

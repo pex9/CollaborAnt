@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,26 +57,18 @@ fun MyProfileTopBar(navController: NavController) {
                 colors.secondaryContainer,
             )
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
-           /* titleContentColor = colors.onPrimary,*/
         ),
         title = {
             Text(
-                text = "CollaborAnt", // App title
-                maxLines = 1,
+                text = "My Profile",
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = gradientColors
-                        ) // Gradient colors
-                    )
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
             )
-
-        } ,
+        },
         actions = {
             IconButton(
                 onClick = { navController.navigate("myProfile/edit") },
@@ -90,6 +83,21 @@ fun MyProfileTopBar(navController: NavController) {
                     modifier = Modifier.size(26.dp)
                 )
             }
+        },
+        navigationIcon = {
+            Text(
+                text = "CollaborAnt", // App title
+                maxLines = 1,
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = gradientColors // Gradient colors
+                    )
+                ),
+                modifier = Modifier.padding(start = 5.dp)
+            )
         }
     )
 }
@@ -142,7 +150,7 @@ fun MyProfilePage(
             text = description,
             fontWeight = FontWeight.Medium,
             fontSize = 16.sp,
-            color = CollaborantColors.BorderGray
+            color = colors.outline
         )
 
         Spacer(modifier = Modifier.height(32.dp))

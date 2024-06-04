@@ -41,6 +41,7 @@ fun TextPresentationComp(
     color: Color = Color.Black,
     icon: @Composable (() -> Unit)? = null
 ) {
+    val colors = MaterialTheme.colorScheme
     Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
@@ -77,7 +78,7 @@ fun TextPresentationComp(
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 15.sp,
-                    color = CollaborantColors.BorderGray
+                    color = colors.outline
                 )
             }
         }
@@ -126,16 +127,15 @@ fun OverlappingComponents(
 
 @Composable
 fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
-    val c = CollaborantColors.BorderGray.copy(0.4f)
+    val colors = MaterialTheme.colorScheme
+    val c = colors.outline.copy(0.4f)
     val overallUserKPI = mapOf(
         "assigned" to kpi.sumOf{ it.second.assignedTasks },
         "completed" to kpi.sumOf{ it.second.completedTasks }
     )
 
-    val colors = MaterialTheme.colorScheme
-
     Card(
-        border = BorderStroke(1.dp, CollaborantColors.BorderGray),
+        border = BorderStroke(1.dp, colors.outline),
         shape = CardDefaults.outlinedShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -166,7 +166,7 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
-                    color = CollaborantColors.BorderGray,
+                    color = colors.outline,
                     textAlign = TextAlign.Center
                 )
             }
@@ -192,7 +192,7 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
-                    color = CollaborantColors.BorderGray,
+                    color = colors.outline,
                     textAlign = TextAlign.Center
                 )
             }
@@ -218,7 +218,7 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp,
-                    color = CollaborantColors.BorderGray,
+                    color = colors.outline,
                     textAlign = TextAlign.Center
                 )
             }

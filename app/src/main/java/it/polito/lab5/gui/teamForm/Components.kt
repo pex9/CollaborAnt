@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -57,6 +58,7 @@ fun OptionsBottomSheet(
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
@@ -136,7 +138,7 @@ fun OptionsBottomSheet(
 
             Divider(
                 thickness = 1.dp,
-                color = CollaborantColors.BorderGray.copy(0.4f),
+                color = colors.outline,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
 
@@ -169,7 +171,7 @@ fun OptionsBottomSheet(
             if(image !is Empty) {
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
 

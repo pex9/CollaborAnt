@@ -190,7 +190,7 @@ fun PersonalTaskListPane(
         state = scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(p).padding(top = 10.dp), // Apply padding
+            .padding(p).padding(top = 20.dp), // Apply padding
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {

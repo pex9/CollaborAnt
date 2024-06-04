@@ -42,17 +42,19 @@ fun MyTeamsScreen (
         topBar = { MyTeamsTopBar(toggleTheme) },
         bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
+            val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
             // Floating action button for adding a new team
             SmallFloatingActionButton(
                 onClick = { navController.navigate("myTeams/add") }, // Navigate to add team screen on click
                 shape = CircleShape,
                 modifier = Modifier.size(60.dp),
-                containerColor = colors.secondary, // Button color
+                containerColor = containerColor, // Button color
             ) {
                 // Icon for the floating action button
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = "Add Icon",
+                    tint = colors.onPrimary // Icon color
                 )
             }
         }

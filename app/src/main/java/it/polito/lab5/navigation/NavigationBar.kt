@@ -69,7 +69,7 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                                 if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                             ),
                             contentDescription = "icon",
-                            tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.onBackground, // Set icon tint based on selection
+                            tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.outline, // Set icon tint based on selection
                             modifier = Modifier.size(28.dp) // Set icon size
                         )
                     } else {
@@ -91,7 +91,7 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: MutableLi
                                     if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                                 ),
                                 contentDescription = "icon",
-                                tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.onBackground, // Set icon tint based on selection
+                                tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.outline, // Set icon tint based on selection
                                 modifier = Modifier.size(28.dp) // Set icon size
                             )
                         }

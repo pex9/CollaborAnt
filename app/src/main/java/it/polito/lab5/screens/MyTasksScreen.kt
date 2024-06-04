@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.myTasks.MyTasksTopBar
 import it.polito.lab5.gui.myTasks.PersonalTaskListPane
@@ -53,15 +54,15 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadSta
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
             if(vm.isVisible) {
+                val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
                 // Floating action button for adding a new team
                 SmallFloatingActionButton(
                     onClick = {
                         vm.setCurrentCategoryValue(""); vm.setCategoryValue(""); vm.setDialogOpenValue(true)
                     }, // Navigate to add team screen on click
                     shape = CircleShape,
-                    modifier = Modifier
-                        .size(60.dp),
-                    containerColor = colors.secondary, // Button color
+                    modifier = Modifier.size(60.dp),
+                    containerColor = containerColor, // Button color
                 ) {
                     // Icon for the floating action button
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add Icon")

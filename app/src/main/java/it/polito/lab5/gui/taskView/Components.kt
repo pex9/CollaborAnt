@@ -35,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -89,6 +90,7 @@ fun OptionsComp(
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController
 ) {
+    val colors = MaterialTheme.colorScheme
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
         // IconButton to trigger the opening/closing of options
@@ -131,7 +133,7 @@ fun OptionsComp(
                 )
 
                 Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     thickness = 1.dp,
                     modifier = Modifier
                         .padding(horizontal = 15.dp)
@@ -159,7 +161,7 @@ fun OptionsComp(
                 )
 
                 Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     thickness = 1.dp,
                     modifier = Modifier
                         .padding(horizontal = 15.dp)

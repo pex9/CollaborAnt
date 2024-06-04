@@ -317,7 +317,6 @@ fun AppNavigation(vm: AppViewModel) {
             val taskHistoryViewModel: TaskHistoryViewModel = viewModel(
                 factory = AppFactory(taskId = taskId, context = context)
             )
-
             TaskHistoryScreen(vm = taskHistoryViewModel, navController = navController)
         }
 
@@ -325,9 +324,6 @@ fun AppNavigation(vm: AppViewModel) {
         composable(
             route = "myChats",
         ) {
-
-
-
             MyChatsScreen(
                 vm = myChatViewModel,
                 isReadState = myChatViewModel.chatsReadState,
@@ -353,8 +349,6 @@ fun AppNavigation(vm: AppViewModel) {
                     context = context
                 )
             )
-
-
             TeamChatScreen (
                 vm = chatViewViewModel,
                 setIsReadState = myChatViewModel::setChatsReadStateValue,

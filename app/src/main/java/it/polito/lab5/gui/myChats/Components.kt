@@ -71,7 +71,8 @@ fun ChatItem(
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                        maxLines = 1,
+                        color = colors.onBackground
                     )
 
                     Text(
@@ -82,7 +83,7 @@ fun ChatItem(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         modifier = Modifier.padding(top= 4.dp),
-                        color = CollaborantColors.BorderGray
+                        color = colors.outline
                     )
                 }
             },
@@ -100,6 +101,7 @@ fun ChatItem(
                         fontSize = 10.sp,
                         letterSpacing = 0.sp,
                         maxLines = 1,
+                        color = colors.onBackground
                     )
 
                     Box(modifier = Modifier.padding(top = 14.dp)) {
@@ -111,7 +113,7 @@ fun ChatItem(
                 }
             },
             colors = ListItemDefaults.colors(
-                containerColor = Color.White
+                containerColor = colors.surface
             ),
             modifier = Modifier
                 .height(80.dp)

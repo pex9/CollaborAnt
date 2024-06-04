@@ -136,6 +136,7 @@ fun TaskPage(
     removeAttachment: (Int, Int) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -178,7 +179,7 @@ fun TaskPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
@@ -193,7 +194,7 @@ fun TaskPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
@@ -206,7 +207,7 @@ fun TaskPage(
 
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 

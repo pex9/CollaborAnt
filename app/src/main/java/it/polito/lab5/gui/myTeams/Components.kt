@@ -102,7 +102,7 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
             "- Make sure you checked all the links in the dialog after clicking on \"Add link\".\n\n" +
             "Note: You could simply ignore setting the app as the default links handler. " +
             "Though you won't be able to navigate to the app by clicking on external app-related links"
-
+    val colors =  MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -152,7 +152,7 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         },
         containerColor = Color.White,
         titleContentColor = CollaborantColors.DarkBlue,
-        textContentColor = CollaborantColors.BorderGray
+        textContentColor = colors.outline
     )
 }
 

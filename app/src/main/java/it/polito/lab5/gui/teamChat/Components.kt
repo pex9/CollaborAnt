@@ -27,6 +27,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -81,6 +82,7 @@ fun MessageTextField(
     setIsReadState: (Int, Boolean) -> Unit,
     teamId: Int
 ) {
+    val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -107,7 +109,7 @@ fun MessageTextField(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
-                        color = CollaborantColors.BorderGray
+                        color = colors.outline
                     )
                 },
                 // Trailing icon to clear the text field
@@ -117,7 +119,7 @@ fun MessageTextField(
                             Icon(
                                 painter = painterResource(id = R.drawable.cross),
                                 contentDescription = "Clear Icon",
-                                tint = CollaborantColors.BorderGray
+                                tint = colors.outline
                             )
                         }
                 },
@@ -141,10 +143,10 @@ fun MessageTextField(
                 ),
                 // Colors for the outlined text field
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = CollaborantColors.BorderGray,
-                    unfocusedBorderColor = CollaborantColors.BorderGray,
-                    focusedContainerColor = CollaborantColors.CardBackGroundGray.copy(0.2f),
-                    unfocusedContainerColor = CollaborantColors.CardBackGroundGray.copy(0.2f)
+                    focusedBorderColor = colors.outline,
+                    unfocusedBorderColor = colors.outline,
+                    focusedContainerColor = colors.outline.copy(0.2f),
+                    unfocusedContainerColor = colors.outline.copy(0.2f)
                 ),
                 maxLines = 6
             )

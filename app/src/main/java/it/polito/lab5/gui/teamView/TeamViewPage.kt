@@ -116,7 +116,7 @@ fun TeamViewTopBar(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 13.sp,
-                        color = CollaborantColors.BorderGray
+                        color = colors.outline
                     )
 
                 }

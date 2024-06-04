@@ -27,6 +27,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -98,45 +99,31 @@ fun MyTasksTopBar() {
                 colors.secondaryContainer,
             )
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
         ),
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.activity),
-                    contentDescription = "My Tasks",
-                    modifier = Modifier.size(26.dp),
-                )
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(
-                    text = "My Tasks",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 23.sp,
-                    letterSpacing = 0.sp,
-                    modifier = Modifier.padding(start= 5.dp)
-                )
-            }
+            Text(
+                text = "My Tasks",
+                fontFamily = interFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+            )
         },
-        actions = {
+        navigationIcon = {
             Text(
                 text = "CollaborAnt", // App title
                 maxLines = 1,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
+                fontSize = 19.sp,
                 style = TextStyle(
                     brush = Brush.linearGradient(
-                        colors = gradientColors
+                        colors = gradientColors // Gradient colors
                     )
                 ),
-                modifier = Modifier.padding(end= 15.dp)
+                modifier = Modifier.padding(start = 5.dp)
             )
         }
     )
@@ -272,7 +259,7 @@ fun CategoryItem(
             userTasks.forEach { task ->
                 val taskTeam = teams.find { it.id == task.teamId }
 
-                Divider(color = CollaborantColors.BorderGray.copy(0.4f), thickness = 1.dp)
+                Divider(color = colors.outline, thickness = 1.dp)
 
                 if (taskTeam != null) {
                     TaskItem(

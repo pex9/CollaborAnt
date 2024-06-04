@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,7 +51,6 @@ fun MyTeamsTopBar(toggleTheme: () -> Unit) {
 
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
 
-
     val gradientColors =
         if(LocalTheme.current.isDark)
             listOf(
@@ -62,28 +63,37 @@ fun MyTeamsTopBar(toggleTheme: () -> Unit) {
                 colors.secondaryContainer,
             )
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
         ),
         title = {
             Text(
-                text = "CollaborAnt", // App title
-                maxLines = 1,
+                text = "My Teams",
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = gradientColors // Gradient colors
-                    )
-                )
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
             )
         },
         actions = {
             IconButton(onClick = { toggleTheme() }) {
                 Icon(painter = painterResource(R.drawable.baseline_camera_24), contentDescription = "switch theme")
             }
+        },
+        navigationIcon = {
+            Text(
+                text = "CollaborAnt", // App title
+                maxLines = 1,
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = gradientColors // Gradient colors
+                    )
+                ),
+                modifier = Modifier.padding(start = 5.dp)
+            )
         }
     )
 }
@@ -112,32 +122,13 @@ fun MyTeamsPage(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .padding(top = 20.dp)
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
-        // Header for personal teams
-        item {
-            Text(
-                text = "My Teams",
-                modifier = Modifier.padding(start= 15.dp, top = 20.dp),
-                fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-        }
-
-        itemsIndexed(teams) { index, team ->
+        items(teams) { team ->
             TeamItem(team,navController)
-
-            /*// Add divider except for the last category
-            if(index != teams.size - 1) {
-                Divider(
-                    thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f)
-                )
-            }*/
         }
     }
 
