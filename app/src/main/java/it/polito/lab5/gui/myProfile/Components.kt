@@ -97,7 +97,7 @@ fun OverlappingComponents(
     first: String,
     last: String,
     imageProfile: ImageProfile,
-    joinedTeams: Int,
+    joinedTeams: Long,
     kpi: Map<String, KPI>
 ) {
 
@@ -135,7 +135,7 @@ fun OverlappingComponents(
 }
 
 @Composable
-fun KPIPresentationComp(kpi: Map<String, KPI>, joinedTeams: Int) {
+fun KPIPresentationComp(kpi: Map<String, KPI>, joinedTeams: Long) {
     val c = CollaborantColors.BorderGray.copy(0.4f)
     val overallUserKPI = mapOf(
         "assigned" to kpi.values.sumOf{ it.assignedTasks },

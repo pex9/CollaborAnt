@@ -9,6 +9,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import it.polito.lab5.R
+import it.polito.lab5.viewModels.pickRandomColor
 import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -32,22 +33,35 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
-        return try {
 
+        return try {
             val authResult = auth.signInWithCredential(googleCredentials).await()
             val user = authResult.user
             val isNewUser = authResult.additionalUserInfo?.isNewUser
 
             if (isNewUser == true) {
                 user?.let {
+                    val name = user.displayName?.split(" ")
 
-                    (context.applicationContext as MyApplication).model.createUser(
-                        userId = user.uid,
-                        name = user.displayName,
-                        email = user.email,
-                        telephone = user.phoneNumber,
-                        image = user.photoUrl
-                    )
+                    name?.let {
+                        (context.applicationContext as MyApplication).model.createUser(
+
+                            User(
+                                id = user.uid,
+                                first = name.first(),
+                                last = if(name.size > 1) name[1] else " ",
+                                nickname = "",
+                                email = user.email ?: "",
+                                telephone = user.phoneNumber ?: "",
+                                location = "",
+                                description = "",
+                                imageProfile = Empty(pickRandomColor()),
+                                joinedTeams = 0,
+                                kpiValues = emptyMap(),
+                                categories = listOf("Recently Assigned")
+                            )
+                        )
+                    }
                 }
             }
 

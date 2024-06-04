@@ -26,17 +26,14 @@ fun MyProfileScreen (
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val auth = (context.applicationContext as MyApplication).auth
-    val user = vm.users.collectAsState().value.find{
-        it.id == DataBase.LOGGED_IN_USER_ID
-    }
+    val user = vm.auth.getSignedInUserId()?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value
 
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
         topBar = { MyProfileTopBar(
             onSignOut = {
                 scope.launch {
-                    auth.signOut()
+                    vm.auth.signOut()
                     Toast.makeText(context, "Logout", Toast.LENGTH_LONG).show()
                     navController.navigate("login")
                 }},

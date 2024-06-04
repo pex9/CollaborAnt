@@ -95,7 +95,7 @@ fun MyProfilePage(
     location: String,
     description: String,
     imageProfile: ImageProfile,
-    joinedTeams: Int,
+    joinedTeams: Long,
     kpi: Map<String, KPI>,
     paddingValues: PaddingValues
 ) {

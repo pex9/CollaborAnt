@@ -1,35 +1,108 @@
 package it.polito.lab5.model
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.ui.graphics.Color
+import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 
-class MyModel(context: Context) {
+class MyModel(val context: Context) {
     init {
         FirebaseApp.initializeApp(context)
     }
 
     private val db = Firebase.firestore
 
-     fun createUser(userId: String, name: String?, email: String? , telephone: String?, image: Uri?) {
-        val documentReference = db.collection("Users").document(userId)
+    fun createUser(user: User) {
+        val documentReference = db.collection("Users").document(user.id)
 
         documentReference.set(
             hashMapOf(
-                "name" to name,
-                "email" to email,
-                "telephone" to telephone,
-                "image" to image
+                "first" to user.first,
+                "last" to user.last,
+                "nickname" to user.nickname,
+                "email" to user.email,
+                "telephone" to user.telephone,
+                "location" to user.location,
+                "description" to user.description,
+                "image" to mapOf(
+                    "color" to (user.imageProfile as Empty).color.value.toString(),
+                    "url" to null
+                ),
+                "joinedTeams" to user.joinedTeams,
+                "kpiValues" to user.kpiValues,
+                "categories" to user.categories
             )
         )
-            .addOnSuccessListener { Log.d("New User", userId) }
-            .addOnFailureListener { Log.e("Errore", it.toString()) }
+        .addOnSuccessListener {
+            Toast.makeText(context, "Signed In successfully", Toast.LENGTH_SHORT).show()
+        }
+        .addOnFailureListener {
+            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @Suppress("unchecked_cast")
+    fun getUser(userId: String) : Flow<User?> = callbackFlow{
+        val documentReference = db.collection("Users").document(userId)
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if(snapshot != null) {
+                val image = snapshot.get("image") as Map<String, String?>
+
+                trySend(User(
+                    id = userId,
+                    first = snapshot.get("first").toString(),
+                    last = snapshot.get("last").toString(),
+                    nickname = snapshot.get("nickname").toString(),
+                    email = snapshot.get("email").toString(),
+                    telephone = snapshot.get("telephone").toString(),
+                    location = snapshot.get("location").toString(),
+                    description = snapshot.get("description").toString(),
+                    imageProfile = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                    joinedTeams = snapshot.get("joinedTeams") as Long,
+                    kpiValues = snapshot.get("kpiValues") as Map<String, KPI>,
+                    categories = snapshot.get("categories") as List<String>
+                ))
+            } else {
+                Log.e("Error", e.toString())
+                trySend(null)
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+
+    suspend fun updateUser1(userId: String, user: User) {
+        val documentReference = db.collection("Users").document(userId)
+
+        documentReference.update(
+             hashMapOf(
+                "first" to user.first,
+                "last" to user.last,
+                "nickname" to user.nickname,
+                "email" to user.email,
+                "telephone" to user.telephone,
+                "location" to user.location,
+                "description" to user.description,
+                "image" to mapOf(
+                    "color" to if(user.imageProfile is Empty) user.imageProfile.color.value.toString() else null,
+                    "url" to if(user.imageProfile is Uploaded) user.imageProfile.image else null
+                ),
+                "joinedTeams" to user.joinedTeams,
+                "kpiValues" to user.kpiValues,
+                "categories" to user.categories
+            )
+        ).await()
     }
 
     //  Users

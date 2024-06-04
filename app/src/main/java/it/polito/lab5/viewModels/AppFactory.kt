@@ -3,12 +3,16 @@ package it.polito.lab5.viewModels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyApplication
 import it.polito.lab5.model.MyModel
 
 class AppFactory(context: Context, val teamId: String? = null, val userId: String? = null, val taskId: String? = null) : ViewModelProvider.Factory {
     val model: MyModel = (context.applicationContext as? MyApplication)?.model ?:
         throw java.lang.IllegalArgumentException("Bad application class")
+
+    val auth: GoogleAuthentication = (context.applicationContext as? MyApplication)?.auth ?:
+    throw java.lang.IllegalArgumentException("Bad application class")
 
     @Suppress("unchecked_cast")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -60,10 +64,10 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
             }
 
             modelClass.isAssignableFrom(MyProfileViewModel::class.java) -> {
-                 MyProfileViewModel(model)  as T
+                 MyProfileViewModel(model, auth)  as T
             }
             modelClass.isAssignableFrom(MyProfileFormViewModel::class.java) -> {
-                MyProfileFormViewModel(model)  as T
+                MyProfileFormViewModel(model, auth)  as T
             }
             modelClass.isAssignableFrom(UserProfileViewModel::class.java) -> {
                 userId?.let { UserProfileViewModel(it, model) } as T

@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,10 +47,13 @@ import it.polito.lab5.gui.teamForm.OptionsBottomSheet
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
+fun MyProfileFormTopBar(validate: suspend () -> Boolean, navController: NavController) {
+    val scope = rememberCoroutineScope()
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White,
@@ -81,7 +85,9 @@ fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
         },
         actions = {
             TextButton(
-                onClick = { if(validate()) { navController.popBackStack() } },
+                onClick = {
+                    scope.launch { if(validate()) navController.popBackStack() }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
                     contentColor = CollaborantColors.DarkBlue

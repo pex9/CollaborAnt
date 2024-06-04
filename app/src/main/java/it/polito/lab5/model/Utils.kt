@@ -81,6 +81,21 @@ data class User(
     val location: String,
     val description: String,
     val imageProfile: ImageProfile,
+    val joinedTeams: Long,
+    val kpiValues: Map<String, KPI>,//List<Pair<Int, KPI>>, // [(teamId, KPI)]
+    val categories: List<String>
+)
+
+data class U(
+    val id: String,
+    val first: String,
+    val last: String,
+    val nickname: String,
+    val email: String,
+    val telephone: String,
+    val location: String,
+    val description: String,
+    val imageProfile: String,
     val joinedTeams: Int,
     val kpiValues: Map<String, KPI>,//List<Pair<Int, KPI>>, // [(teamId, KPI)]
     val categories: List<String>
