@@ -36,17 +36,17 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
 
             val authResult = auth.signInWithCredential(googleCredentials).await()
             val user = authResult.user
-            val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+            val isNewUser = authResult.additionalUserInfo?.isNewUser
 
-
-            if (isNewUser) {
+            if (isNewUser == true) {
                 user?.let {
                     (context.applicationContext as MyApplication).model.createUser(
                         userId = user.uid,
-                        name = user.displayName
+                        name = user.displayName,
+                        email = user.email,
+                        telephone = user.phoneNumber
                     )
                 }
-
             }
 
             SignInResult(

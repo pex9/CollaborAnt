@@ -1,6 +1,7 @@
 package it.polito.lab5.model
 
 import android.content.Context
+import android.provider.ContactsContract.CommonDataKinds.Email
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -16,12 +17,14 @@ class MyModel(context: Context) {
 
     private val db = Firebase.firestore
 
-     fun createUser(userId: String, name: String?) {
+     fun createUser(userId: String, name: String?, email: String? , telephone: String?) {
         val documentReference = db.collection("Users").document(userId)
 
         documentReference.set(
             hashMapOf(
-                "name" to name
+                "name" to name,
+                "email" to email,
+                "telephone" to telephone
             )
         )
             .addOnSuccessListener { Log.d("New User", userId) }
