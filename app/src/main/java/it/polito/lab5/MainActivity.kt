@@ -10,9 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import com.google.android.gms.auth.api.identity.Identity
-import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.navigation.AppNavigation
 import it.polito.lab5.ui.theme.Lab4Theme
 import it.polito.lab5.viewModels.AppViewModel
@@ -20,12 +17,6 @@ import it.polito.lab5.viewModels.AppViewModel
 class MainActivity : ComponentActivity() {
     private val appViewModel: AppViewModel by viewModels()
 
-//    private val googleAuthUiClient by lazy {
-//        GoogleAuthentication(
-//            context = applicationContext,
-//            oneTapClient = Identity.getSignInClient(applicationContext)
-//        )
-//    }
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,12 +25,8 @@ class MainActivity : ComponentActivity() {
                 if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
                 }
-                AppNavigation(vm = appViewModel,
-                    //googleAuthUiClient=googleAuthUiClient,
-                    //applicationContext=applicationContext,
-                    //lifecycleOwner=LocalLifecycleOwner.current
-                )
 
+                AppNavigation(vm = appViewModel)
             }
         }
 

@@ -1,7 +1,6 @@
 package it.polito.lab5.navigation
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
@@ -23,8 +22,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import androidx.lifecycle.lifecycleScope
-import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.Taken
 import it.polito.lab5.model.Uploaded
 import it.polito.lab5.screens.IndividualStatsScreen
@@ -65,7 +62,6 @@ import it.polito.lab5.viewModels.UserProfileViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.LifecycleOwner
 import it.polito.lab5.model.MyApplication
 import it.polito.lab5.screens.SignInScreen
 import java.io.File
@@ -73,11 +69,7 @@ import java.io.IOException
 
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
-fun AppNavigation(vm: AppViewModel,
-//                  googleAuthUiClient: GoogleAuthentication,
-//                  applicationContext : Context,
-//                  lifecycleOwner: LifecycleOwner
-) {
+fun AppNavigation(vm: AppViewModel) {
     val context = LocalContext.current
     val googleAuthUiClient = (context.applicationContext as MyApplication).auth
     val scope = rememberCoroutineScope()
@@ -93,8 +85,8 @@ fun AppNavigation(vm: AppViewModel,
     ) {
 
             composable("login") {
-                val LogInViewModel = viewModel<LogInViewModel>()
-                val state by LogInViewModel.state.collectAsState()
+                val logInViewModel = viewModel<LogInViewModel>()
+                val state by logInViewModel.state.collectAsState()
                 LaunchedEffect(key1 = Unit) {
                     //if already logged
                     if (googleAuthUiClient.getSignedInUser() != null) {
@@ -110,7 +102,7 @@ fun AppNavigation(vm: AppViewModel,
                                 val signInResult = googleAuthUiClient.signInWithIntent(
                                     intent = result.data ?: return@launch
                                 )
-                                LogInViewModel.onSignInResult(signInResult)
+                                logInViewModel.onSignInResult(signInResult)
                             }
                         }
                     }
@@ -123,12 +115,12 @@ fun AppNavigation(vm: AppViewModel,
                             Toast.LENGTH_LONG
                         ).show()
                         navController.navigate("myTeams?teamId={teamId}")
-                        LogInViewModel.resetState()
+                        logInViewModel.resetState()
                     }
                 }
 
                 SignInScreen(
-                    vm = LogInViewModel,
+                    vm = logInViewModel,
                     state = state,
                     onSignInClick = {
                         scope.launch {
@@ -142,8 +134,6 @@ fun AppNavigation(vm: AppViewModel,
                     }
                 )
             }
-
-
 
         // MyTeams screen
         composable(
