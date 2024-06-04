@@ -36,20 +36,20 @@ enum class Repeat {
 
 data class Comment(
     val content: String,
-    val authorId: Int,
+    val authorId: String,
     val date: LocalDateTime
 )
 
 data class Action(
-    val id: Int,
-    val memberId: Int,
+    val id: String,
+    val memberId: String,
     val taskState: TaskState,
     val date: LocalDate,
     val description: String
 )
 
 data class Attachment(
-    val id: Int,
+    val id: String,
     val name: String,
     val type: String,
     val uri: Uri,
@@ -63,16 +63,16 @@ enum class Role{
 }
 
 data class Team(
-    val id: Int,
+    val id: String,
     val name: String,
     val description: String,
     val image: ImageProfile,
-    val members: List<Pair<Int, Role>>,
+    val members: List<Pair<String, Role>>,
     val chat: List<Message>
 )
 
 data class User(
-    val id: Int,
+    val id: String,
     val first: String,
     val last: String,
     val nickname: String,
@@ -82,29 +82,29 @@ data class User(
     val description: String,
     val imageProfile: ImageProfile,
     val joinedTeams: Int,
-    val kpiValues: List<Pair<Int, KPI>>, // [(teamId, KPI)]
+    val kpiValues: Map<String, KPI>,//List<Pair<Int, KPI>>, // [(teamId, KPI)]
     val categories: List<String>
 )
 
 data class Task(
-    val id: Int,
+    val id: String,
     val title: String,
     val description: String,
-    val teamId: Int,
+    val teamId: String,
     val dueDate: LocalDate?,
     val repeat: Repeat,
     val tag: Tag,
-    val teamMembers: List<Int>,
+    val teamMembers: List<String>,
     val state: TaskState,
     val comments: List<Comment>,
-    val categories: Map<Int, String>,    //  [userId -> category]
+    val categories: Map<String, String>,    //  [userId -> category]
     val attachments: List<Attachment>,
     val history: List<Action>
 )
 
 data class Message(
-    val senderId: Int,
-    val receiverId: Int?,  // if null means everybody
+    val senderId: String,
+    val receiverId: String?,  // if null means everybody
     val date: LocalDateTime,
     val content: String,
 )

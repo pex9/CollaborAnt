@@ -9,22 +9,22 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.User
 
-class TeamInfoViewModel(val teamId: Int, val model: MyModel): ViewModel() {
+class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
     val users = model.users
     val teams = model.teams
 
-    fun deleteTeam(teamId: Int) = model.deleteTeam(teamId)
+    fun deleteTeam(teamId: String) = model.deleteTeam(teamId)
 
-    fun updateRole(teamId: Int, memberId: Int, role: Role) = model.updateRole(teamId, memberId, role)
+    fun updateRole(teamId: String, memberId: String, role: Role) = model.updateRole(teamId, memberId, role)
 
-    fun removeMember(teamId: Int, memberId: Int) = model.removeMember(teamId, memberId)
+    fun removeMember(teamId: String, memberId: String) = model.removeMember(teamId, memberId)
 
     var optionsOpened by mutableStateOf(false)
     fun setOptionsOpenedValue(b: Boolean) {
         optionsOpened = b
     }
 
-    var roleSelectionOpened: MutableList<Pair<Int, Boolean>> = mutableStateListOf()
+    var roleSelectionOpened: MutableList<Pair<String, Boolean>> = mutableStateListOf()
     init {
         teams.value.find { it.id == teamId }?.let { team ->
             team.members.filter { it.second != Role.TEAM_MANAGER } }?.forEach {
@@ -32,7 +32,7 @@ class TeamInfoViewModel(val teamId: Int, val model: MyModel): ViewModel() {
         }
     }
 
-    fun setRoleSelectionOpenedValue(memberId: Int, b: Boolean) {
+    fun setRoleSelectionOpenedValue(memberId: String, b: Boolean) {
         val idx = roleSelectionOpened.indexOfFirst { it.first == memberId }
 
         roleSelectionOpened[idx] = memberId to b
@@ -63,8 +63,8 @@ class TeamInfoViewModel(val teamId: Int, val model: MyModel): ViewModel() {
         showMemberSelBottomSheet = b
     }
 
-    var chosenMember: Int? by mutableStateOf(null)
-    fun setChosenMemberValue(u: Int?) {
+    var chosenMember: String? by mutableStateOf(null)
+    fun setChosenMemberValue(u: String?) {
         chosenMember = u
     }
 

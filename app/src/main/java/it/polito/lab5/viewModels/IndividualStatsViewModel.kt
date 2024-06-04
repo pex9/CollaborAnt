@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.User
 
-class IndividualStatsViewModel(val teamId: Int, private val userId: Int, val model: MyModel): ViewModel() {
+class IndividualStatsViewModel(val teamId: String, private val userId: String, val model: MyModel): ViewModel() {
     val teams = model.teams
     private val users = model.users
     val targetMember: User? = model.users.value.find { it.id == userId }
@@ -14,9 +14,7 @@ class IndividualStatsViewModel(val teamId: Int, private val userId: Int, val mod
     private fun computeRankedMembersList(): List<User> {
         val teamMembersPairs = teams.value.find { it.id == teamId }?.members
         val teamMembers = users.value.filter { it.id in teamMembersPairs!!.map { pair -> pair.first } }
-        val orderedTeamMembers = teamMembers.sortedBy { user ->
-            user.kpiValues.find { pair -> pair.first == teamId }?.second?.score ?: 0
-        }.reversed()
+        val orderedTeamMembers = teamMembers.sortedBy { user -> user.kpiValues[teamId]?.score ?: 0 }.reversed()
 
         return orderedTeamMembers
     }

@@ -7,12 +7,12 @@ import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.MyModel
 
-class MyTeamsViewModel(val teamId: Int?, val model: MyModel): ViewModel() {
+class MyTeamsViewModel(val teamId: String?, val model: MyModel): ViewModel() {
     val teams = model.teams
 
     val invitationTeam = teams.value.find { it.id == teamId }
 
-    fun addMember(teamId: Int, memberId: Int) = model.addMember(teamId, memberId)
+    fun addMember(teamId: String, memberId: String) = model.addMember(teamId, memberId)
 
     var showBottomSheet by mutableStateOf(teamId != null)
     fun setShowBottomSheetValue(b: Boolean) {

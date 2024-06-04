@@ -144,7 +144,7 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun InvitationTeamBottomSheet(
     team: Team,
-    addMember: (Int, Int) -> Boolean,
+    addMember: (String, String) -> Boolean,
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
     joinSuccess: Boolean,
     setJoinSuccessValue: (Boolean) -> Unit,

@@ -392,7 +392,7 @@ fun DialogComp(
     )
 }
 
-fun bringPairToHead(list: List<Pair<Int, Any>>, targetId: Int): List<Pair<Int, Any>> {
+fun bringPairToHead(list: List<Pair<String, Any>>, targetId: String): List<Pair<String, Any>> {
     val indexOfTarget = list.indexOfFirst { it.first == targetId }
 
     return if (indexOfTarget != -1) {

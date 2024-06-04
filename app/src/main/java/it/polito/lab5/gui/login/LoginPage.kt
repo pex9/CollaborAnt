@@ -1,4 +1,4 @@
-package it.polito.lab5.gui.Login
+package it.polito.lab5.gui.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -15,10 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,31 +28,22 @@ import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
-fun SignInPage(
-    onSignInClick: () -> Unit,
-    isSignedIn: Boolean,
-    setIsSignedInValue: (Boolean) -> Unit){
-
+fun LoginPage(onSignInClick: () -> Unit) {
     Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top= 60.dp,start=32.dp,end=32.dp,bottom=16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
 
+            //.padding(top= 60.dp,start=32.dp,end=32.dp,bottom=16.dp),
     ) {
-
-
-        //image
-
         Image(
             painter = painterResource(id = R.mipmap.ic_launcher_foreground), // Replace with your image name
             contentDescription = "Description of your image",
-            modifier = Modifier.clip(RoundedCornerShape(16.dp)), // Adjust the size as needed, // Adjust the modifier as needed
-            contentScale = ContentScale.Crop // Adjust content scaling as needed
+            //contentScale = ContentScale.Fit,
+            //modifier = Modifier.clip(RoundedCornerShape(15.dp)), // Adjust the size as needed, // Adjust the modifier as needed
+            //contentScale = ContentScale.Crop // Adjust content scaling as needed
         )
-
-
 
         Text(
             text = "CollaborAnt", // App title
@@ -91,10 +80,7 @@ fun SignInPage(
 
         Button(
             shape = RoundedCornerShape(16.dp),
-            onClick = {
-                if (isSignedIn) onSignInClick()
-                setIsSignedInValue(true)
-            },
+            onClick = {onSignInClick() },
             colors = ButtonDefaults.buttonColors(
                 containerColor = CollaborantColors.DarkBlue,
                 contentColor = Color.White
@@ -105,7 +91,7 @@ fun SignInPage(
                 .fillMaxWidth()
         ) {
             Text(
-                text = if (isSignedIn) "SIGN IN WITH GOOGLE" else "GET STARTED",
+                text = "LOGIN WITH GOOGLE",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 20.sp // Adjusted text size to fit inside the button

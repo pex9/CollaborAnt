@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import it.polito.lab5.model.MyApplication
 import it.polito.lab5.model.MyModel
 
-class AppFactory(context: Context, val teamId: Int? = null, val userId: Int? = null, val taskId: Int? = null) : ViewModelProvider.Factory {
+class AppFactory(context: Context, val teamId: String? = null, val userId: String? = null, val taskId: String? = null) : ViewModelProvider.Factory {
     val model: MyModel = (context.applicationContext as? MyApplication)?.model ?:
         throw java.lang.IllegalArgumentException("Bad application class")
 
@@ -41,11 +41,7 @@ class AppFactory(context: Context, val teamId: Int? = null, val userId: Int? = n
                 MyChatsViewModel(model) as T
             }
             modelClass.isAssignableFrom(ChatViewViewModel::class.java) -> {
-                teamId?.let {
-                    userId?.let {
-                        ChatViewViewModel(teamId, userId, model)
-                    }
-                } as T
+                teamId?.let { ChatViewViewModel(teamId, userId, model) } as T
             }
             modelClass.isAssignableFrom(IndividualStatsViewModel::class.java) -> {
                 teamId?.let {

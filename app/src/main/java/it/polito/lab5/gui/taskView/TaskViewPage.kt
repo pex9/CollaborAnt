@@ -46,7 +46,7 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskTopBar(
-    taskId: Int,
+    taskId: String,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     state: TaskState,
@@ -132,8 +132,8 @@ fun TaskPage(
     users: List<User>,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
-    addAttachment: (Int, Attachment) -> Unit,
-    removeAttachment: (Int, Int) -> Unit,
+    addAttachment: (String, Attachment) -> Unit,
+    removeAttachment: (String, String) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit
 ) {
     Column(

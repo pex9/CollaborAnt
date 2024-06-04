@@ -33,9 +33,9 @@ class MyTasksViewModel(val model: MyModel): ViewModel() {
         }
     }
 
-    var targetTaskId: Int? by mutableStateOf(null)
+    var targetTaskId: String? by mutableStateOf(null)
         private set
-    fun setTargetTaskIdValue(id: Int?) { targetTaskId = id }
+    fun setTargetTaskIdValue(id: String?) { targetTaskId = id }
 
     var myTasksHideSheet by mutableStateOf(false)
         private set
@@ -124,14 +124,14 @@ class MyTasksViewModel(val model: MyModel): ViewModel() {
             ""
     }
 
-    private fun addCategoryToUser(userId: Int, newCategory: String) = model.addCategoryToUser(userId, newCategory)
+    private fun addCategoryToUser(userId: String, newCategory: String) = model.addCategoryToUser(userId, newCategory)
 
-    private fun updateCategory(userId: Int, oldCategory: String, newCategory: String) = model.updateCategory(userId, oldCategory, newCategory)
+    private fun updateCategory(userId: String, oldCategory: String, newCategory: String) = model.updateCategory(userId, oldCategory, newCategory)
 
-    fun updateCategoryFromTask(taskId: Int, userId: Int, newCategory: String) = model.updateCategoryFromTask(taskId,userId, newCategory)
+    fun updateCategoryFromTask(taskId: String, userId: String, newCategory: String) = model.updateCategoryFromTask(taskId,userId, newCategory)
 
     // check if the category has no tasks associated
-    fun deleteCategoryFromUser(userId: Int, category: String) = model.deleteCategoryFromUser(userId, category)
+    fun deleteCategoryFromUser(userId: String, category: String) = model.deleteCategoryFromUser(userId, category)
 
     var errMsg by mutableStateOf("")
         private set

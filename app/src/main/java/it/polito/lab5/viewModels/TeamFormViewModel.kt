@@ -11,13 +11,13 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 
-class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): ViewModel() {
+class TeamFormViewModel(private val currentTeamId: String?, val model: MyModel): ViewModel() {
     val currentTeam = model.teams.value.find { it.id == currentTeamId }
-    private fun addTeam(team: Team): Int = model.addTeam(team)
-    private fun updateTeam(teamId: Int, team: Team) = model.updateTeam(teamId, team)
+    private fun addTeam(team: Team): String = model.addTeam(team)
+    private fun updateTeam(teamId: String, team: Team) = model.updateTeam(teamId, team)
 
-    fun validate(): Int {
-        var id = -1
+    fun validate(): String {
+        var id = ""
 
         checkName()
         checkDescription()
@@ -25,7 +25,7 @@ class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): Vi
         if(nameError.isBlank() && descriptionError.isBlank()) {
             if(currentTeam == null) {
                 id = addTeam(team = Team(
-                    id = -1,
+                    id = "",
                     image = image,
                     name = name,
                     description = description,

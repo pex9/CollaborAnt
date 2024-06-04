@@ -50,9 +50,9 @@ import java.time.LocalDate
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskFormTopBar(
-    taskId: Int?,
+    taskId: String?,
     navController: NavController,
-    validate: () -> Int,
+    validate: () -> String,
     resetErrorMsg: (Boolean) -> Unit
 ) {
     CenterAlignedTopAppBar(
@@ -94,7 +94,7 @@ fun TaskFormTopBar(
             TextButton(
                 onClick = {
                     val id = validate()
-                    if(id != -1) {
+                    if(id.isNotBlank()) {
                         navController.popBackStack()
                         navController.navigate("viewTask/${id}")
                     } },
@@ -130,9 +130,9 @@ fun TaskFormPage(
     dueDate: LocalDate?,
     setDueDateValue: (LocalDate) -> Unit,
     dueDateError: String,
-    delegatedMembers: List<Int>,
-    addMember: (Int) -> Unit,
-    removeMember: (Int) -> Unit,
+    delegatedMembers: List<String>,
+    addMember: (String) -> Unit,
+    removeMember: (String) -> Unit,
     delegatedMembersError: String,
     repeat: Repeat,
     setRepeatValue: (Repeat) -> Unit,

@@ -17,7 +17,7 @@ fun TeamStatsScreen(
     vm: TeamStatsViewModel = viewModel(),
     navController: NavController,
     membersList: List<User>,
-    teamId: Int,
+    teamId: String,
 ) {
     val teams = vm.teams.collectAsState().value
     val team = teams.find { it.id == teamId }

@@ -5,15 +5,11 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -59,20 +55,14 @@ import it.polito.lab5.viewModels.TeamInvitationViewModel
 import it.polito.lab5.viewModels.TeamStatsViewModel
 import it.polito.lab5.viewModels.TeamViewModel
 import it.polito.lab5.viewModels.UserProfileViewModel
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import it.polito.lab5.model.MyApplication
-import it.polito.lab5.screens.SignInScreen
+import it.polito.lab5.screens.LoginScreen
 import java.io.File
 import java.io.IOException
 
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
-fun AppNavigation(vm: AppViewModel) {
+fun AppNavigation(vm: AppViewModel, startDestination: String) {
     val context = LocalContext.current
-    val googleAuthUiClient = (context.applicationContext as MyApplication).auth
-    val scope = rememberCoroutineScope()
     val navController = rememberNavController() // Remember the navigation controller
     val myChatViewModel: MyChatsViewModel = viewModel(
         factory = AppFactory(context = context)
@@ -81,59 +71,13 @@ fun AppNavigation(vm: AppViewModel) {
     // Set up navigation graph
     NavHost(
         navController = navController,
-        startDestination = "login"   // Starting destination
+        startDestination = startDestination   // Starting destination
     ) {
 
-            composable("login") {
-                val logInViewModel = viewModel<LogInViewModel>()
-                val state by logInViewModel.state.collectAsState()
-                LaunchedEffect(key1 = Unit) {
-                    //if already logged
-                    if (googleAuthUiClient.getSignedInUserId() != null) {
-                        navController.navigate("myTeams?teamId={teamId}")
-                    }
-                }
-
-                val launcher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartIntentSenderForResult(),
-                    onResult = { result ->
-                        if (result.resultCode == ComponentActivity.RESULT_OK) {
-                            scope.launch {
-                                val signInResult = googleAuthUiClient.signInWithIntent(
-                                    intent = result.data ?: return@launch
-                                )
-                                logInViewModel.onSignInResult(signInResult)
-                            }
-                        }
-                    }
-                )
-                LaunchedEffect(key1 = state.isSignInSuccessful) {
-                    if (state.isSignInSuccessful) {
-                        Toast.makeText(
-                            context,
-                            "Sign in successful",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        navController.navigate("myTeams?teamId={teamId}")
-                        logInViewModel.resetState()
-                    }
-                }
-
-                SignInScreen(
-                    vm = logInViewModel,
-                    state = state,
-                    onSignInClick = {
-                        scope.launch {
-                            val signInIntentSender = googleAuthUiClient.signIn()
-                            launcher.launch(
-                                IntentSenderRequest.Builder(
-                                    signInIntentSender ?: return@launch
-                                ).build()
-                            )
-                        }
-                    }
-                )
-            }
+        composable("login") {
+            val logInViewModel: LogInViewModel = viewModel()
+            LoginScreen(vm = logInViewModel, navController = navController)
+        }
 
         // MyTeams screen
         composable(
@@ -145,11 +89,11 @@ fun AppNavigation(vm: AppViewModel) {
                 }
             ),
             arguments = listOf(navArgument("teamId") {
-                type = NavType.IntType
-                defaultValue = -1
+                type = NavType.StringType
+                nullable = true
             })
         ) {entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val myTeamsViewModel: MyTeamsViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -212,9 +156,9 @@ fun AppNavigation(vm: AppViewModel) {
         // Team edit screen
         composable(
             route = "myTeams/edit/{teamId}",
-            arguments = listOf(navArgument("teamId") { type = NavType.IntType })
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
         ) {entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val teamFormViewModel: TeamFormViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -273,9 +217,9 @@ fun AppNavigation(vm: AppViewModel) {
         // Team view screen
         composable(
             route = "myTeams/{teamId}",
-            arguments = listOf(navArgument("teamId") { type = NavType.IntType })
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val teamId = backStackEntry.arguments?.getInt("teamId") ?: -1
+            val teamId = backStackEntry.arguments?.getString("teamId")
             val teamViewModel: TeamViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -292,9 +236,9 @@ fun AppNavigation(vm: AppViewModel) {
         //  Team Info view screen
         composable(
             route = "infoTeam/{teamId}",
-            arguments = listOf(navArgument("teamId") { type = NavType.IntType })
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
         ) { entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val teamInfoViewModel: TeamInfoViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -307,9 +251,9 @@ fun AppNavigation(vm: AppViewModel) {
 
         composable(
             route = "myTeams/{teamId}/invite",
-            arguments = listOf(navArgument("teamId") { type = NavType.IntType })
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
         ) {entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val teamInvitationViewModel: TeamInvitationViewModel = viewModel(
                 factory = AppFactory(teamId = teamId, context = context)
             )
@@ -320,9 +264,9 @@ fun AppNavigation(vm: AppViewModel) {
         // View task screen
         composable(
             route = "viewTask/{taskId}",
-            arguments = listOf(navArgument("taskId") { type = NavType.IntType })
+            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
         ) { entry ->
-            val taskId = entry.arguments?.getInt("taskId")
+            val taskId = entry.arguments?.getString("taskId")
             val taskViewViewModel: TaskViewViewModel = viewModel(
                 factory = AppFactory(
                     taskId = taskId,
@@ -338,9 +282,9 @@ fun AppNavigation(vm: AppViewModel) {
         // Add task screen
         composable(
             route = "{teamId}/addTask",
-            arguments = listOf(navArgument("teamId") { type = NavType.IntType })
+            arguments = listOf(navArgument("teamId") { type = NavType.StringType })
         ) {entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val taskFormViewModel: TaskFormViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -355,9 +299,9 @@ fun AppNavigation(vm: AppViewModel) {
         // Edit task screen
         composable(
             route = "editTask/{taskId}",
-            arguments = listOf(navArgument("taskId") { type = NavType.IntType })
+            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
         ) { entry ->
-            val taskId = entry.arguments?.getInt("taskId")
+            val taskId = entry.arguments?.getString("taskId")
             val taskFormViewModel: TaskFormViewModel = viewModel(
                 factory = AppFactory(
                     taskId = taskId,
@@ -371,9 +315,9 @@ fun AppNavigation(vm: AppViewModel) {
         // Task history screen
         composable(
             route = "history/{taskId}",
-            arguments = listOf(navArgument("taskId") { type = NavType.IntType })
+            arguments = listOf(navArgument("taskId") { type = NavType.StringType })
         ) { entry ->
-            val taskId = entry.arguments?.getInt("taskId")
+            val taskId = entry.arguments?.getString("taskId")
             val taskHistoryViewModel: TaskHistoryViewModel = viewModel(
                 factory = AppFactory(taskId = taskId, context = context)
             )
@@ -385,8 +329,6 @@ fun AppNavigation(vm: AppViewModel) {
         composable(
             route = "myChats",
         ) {
-
-
 
             MyChatsScreen(
                 vm = myChatViewModel,
@@ -400,12 +342,15 @@ fun AppNavigation(vm: AppViewModel) {
         composable(
             route = "viewChat/{teamId}/{userId}",
             arguments = listOf(
-                navArgument("teamId") { type = NavType.IntType },
-                navArgument("userId") { type = NavType.IntType }
+                navArgument("teamId") { type = NavType.StringType },
+                navArgument("userId") {
+                    type = NavType.StringType
+                    nullable = true
+                }
             )
         ) { entry ->
-            val teamId = entry.arguments?.getInt("teamId")
-            val userId = entry.arguments?.getInt("userId")
+            val teamId = entry.arguments?.getString("teamId")
+            val userId = entry.arguments?.getString("userId")
             val chatViewViewModel: ChatViewViewModel = viewModel(
                 factory = AppFactory(
                     teamId = teamId,
@@ -426,12 +371,12 @@ fun AppNavigation(vm: AppViewModel) {
         composable(
             route = "viewIndividualStats/{teamId}/{userId}",
             arguments = listOf(
-                navArgument("teamId") { type = NavType.IntType },
-                navArgument("userId") { type = NavType.IntType }
+                navArgument("teamId") { type = NavType.StringType },
+                navArgument("userId") { type = NavType.StringType }
             )
         ){ entry ->
-            val teamId = entry.arguments?.getInt("teamId")
-            val userId = entry.arguments?.getInt("userId")
+            val teamId = entry.arguments?.getString("teamId")
+            val userId = entry.arguments?.getString("userId")
             val individualStatsViewModel: IndividualStatsViewModel = viewModel(
                 factory = AppFactory(teamId = teamId, userId = userId, context = context)
             )
@@ -454,10 +399,10 @@ fun AppNavigation(vm: AppViewModel) {
         composable(
             route = "viewTeamStats/{teamId}",
             arguments = listOf(
-                navArgument("teamId") { type = NavType.IntType },
+                navArgument("teamId") { type = NavType.StringType },
             )
         ){ entry ->
-            val teamId = entry.arguments?.getInt("teamId")
+            val teamId = entry.arguments?.getString("teamId")
             val teamStatsViewModel: TeamStatsViewModel = viewModel(
                 factory = AppFactory(teamId = teamId, context = context)
             )
@@ -480,20 +425,11 @@ fun AppNavigation(vm: AppViewModel) {
                 factory = AppFactory(context = context)
             )
 
-            MyProfileScreen(vm = myProfileViewModel,
+            MyProfileScreen(
+                vm = myProfileViewModel,
                 navController = navController,
-                onSignOut = {
-                    scope.launch {
-                        googleAuthUiClient.signOut()
-                        Toast.makeText(
-                            context,
-                            "Signed out",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        navController.navigate("login")
-                    }},
-                isReadState = myChatViewModel.chatsReadState)
+                isReadState = myChatViewModel.chatsReadState
+            )
         }
 
         composable(route = "myProfile/edit"){
@@ -533,7 +469,8 @@ fun AppNavigation(vm: AppViewModel) {
                 }
             }
 
-            MyProfileFormScreen(vm=myProfileFormViewModel,
+            MyProfileFormScreen(
+                vm = myProfileFormViewModel,
                 navController = navController,
                 cameraContract = cameraContract,
                 galleryContract = galleryContract,
@@ -542,16 +479,14 @@ fun AppNavigation(vm: AppViewModel) {
 
         composable(
             route = "users/{userId}/profile",
-            arguments = listOf(navArgument("userId") { type = NavType.IntType })
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) {entry ->
-
-
-            val userId = entry.arguments?.getInt("userId")
+            val userId = entry.arguments?.getString("userId")
             val userProfileViewModel: UserProfileViewModel = viewModel(
                 factory = AppFactory(userId = userId, context = context)
             )
 
-           UserProfileScreen(vm = userProfileViewModel, navController = navController)
+            UserProfileScreen(vm = userProfileViewModel, navController = navController)
         }
     }
 }

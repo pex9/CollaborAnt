@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.Message
 import it.polito.lab5.model.MyModel
 
-class ChatViewViewModel(val teamId: Int, userId: Int, val model: MyModel): ViewModel() {
+class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel): ViewModel() {
     val teams = model.teams
     val users = model.users
 
-    fun addMessage(teamId: Int, message: Message) = model.addMessage(teamId, message)
+    fun addMessage(teamId: String, message: Message) = model.addMessage(teamId, message)
 
     var newMessage by mutableStateOf("")
         private set
@@ -19,9 +19,9 @@ class ChatViewViewModel(val teamId: Int, userId: Int, val model: MyModel): ViewM
         newMessage = c
     }
 
-    var targetReceiver: Int? by mutableStateOf(if(userId != -1) userId else null)
+    var targetReceiver: String? by mutableStateOf(userId)
         private set
-    fun setTargetReceiverValue(r: Int?) {
+    fun setTargetReceiverValue(r: String?) {
         targetReceiver = r
     }
 

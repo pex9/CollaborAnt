@@ -173,7 +173,7 @@ fun OptionsComp(
 }
 
 @Composable
-fun MembersHeaderComp(teamId: Int, loggedInUserRole: Role, navController: NavController) {
+fun MembersHeaderComp(teamId: String, loggedInUserRole: Role, navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,9 +205,9 @@ fun TeamMembersComp(
     team: Team,
     users: List<User>,
     loggedInUserRole: Role,
-    updateRole: (Int, Int, Role) -> Unit,
-    roleSelectionOpened: List<Pair<Int, Boolean>>,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    updateRole: (String, String, Role) -> Unit,
+    roleSelectionOpened: List<Pair<String, Boolean>>,
+    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
@@ -229,12 +229,12 @@ fun TeamMembersComp(
 @Composable
 fun MemberRow(
     users: List<User>,
-    memberId: Int,
+    memberId: String,
     role: Role,
     loggedInUserRole: Role,
-    updateRole: (Int, Role) -> Unit,
-    roleSelectionOpened: List<Pair<Int, Boolean>>,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    updateRole: (String, Role) -> Unit,
+    roleSelectionOpened: List<Pair<String, Boolean>>,
+    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
@@ -310,11 +310,11 @@ fun MemberRow(
 
 @Composable
 fun RoleOptionsComp(
-    memberId: Int,
+    memberId: String,
     role: Role,
-    updateRole: (Int, Role) -> Unit,
+    updateRole: (String, Role) -> Unit,
     roleSelectionOpened: Boolean,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
 ) {
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
@@ -415,7 +415,7 @@ fun MemberOptionsBottomSheet(
     member: User,
     team: Team,
     loggedInUserRole: Role,
-    removeMember: (Int) -> Unit,
+    removeMember: (String) -> Unit,
     navController: NavController,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,
     setSelectedUserValue: (User?) -> Unit
@@ -673,10 +673,10 @@ fun MemberOptionsBottomSheet(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MemberSelectionBottomSheet(
-    members: List<Pair<Int, Role>>,
+    members: List<Pair<String, Role>>,
     users: List<User>,
-    chosenMember: Int?,
-    setChosenMemberValue: (Int?) -> Unit,
+    chosenMember: String?,
+    setChosenMemberValue: (String?) -> Unit,
     setErrorMsgValue: (String) -> Unit,
     setShowLeaveDialogValue: (Boolean) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,

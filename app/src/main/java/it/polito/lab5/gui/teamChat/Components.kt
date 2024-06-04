@@ -73,13 +73,13 @@ fun MessageTextField(
     // Callback to update the value of the text field
     updateValue: (String) -> Unit,
     // Task ID associated with the comment
-    taskId: Int,
+    taskId: String,
     // Callback to add a comment
-    addMessage: (Int, Message) -> Unit,
+    addMessage: (String, Message) -> Unit,
     // Modifier for styling and layout customization
-    newMessageReceiver: Int?,
-    setIsReadState: (Int, Boolean) -> Unit,
-    teamId: Int
+    newMessageReceiver: String?,
+    setIsReadState: (String, Boolean) -> Unit,
+    teamId: String
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -386,8 +386,8 @@ fun ReceiverSelector(
     users: List<User>,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
-    targetReceiver: Int?,
-    setReceiverTargetValue: (Int?) -> Unit
+    targetReceiver: String?,
+    setReceiverTargetValue: (String?) -> Unit
 ) {
     val members = team.members.map { it.first }.toSet()
     val receiverList =
@@ -517,9 +517,9 @@ fun ReceiverSelector(
 @Composable
 fun SelectorItem(
     member: User,
-    targetReceiver: Int?,
+    targetReceiver: String?,
     setOptionsOpenedValue: (Boolean) -> Unit,
-    setReceiverTargetValue: (Int?) -> Unit
+    setReceiverTargetValue: (String?) -> Unit
 ) {
     DropdownMenuItem(
         text = {

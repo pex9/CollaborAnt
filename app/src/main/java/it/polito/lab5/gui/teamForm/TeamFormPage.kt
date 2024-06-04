@@ -50,7 +50,7 @@ import it.polito.lab5.ui.theme.interFamily
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team?) {
+fun TeamFormTopBar(validate: () -> String, navController: NavController, team: Team?) {
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
@@ -90,7 +90,7 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
             TextButton(
                 onClick = {
                     val teamId = validate()
-                    if(teamId != -1) {
+                    if(teamId.isNotBlank()) {
                         navController.popBackStack()
                         if(team == null) {
                             navController.navigate("infoTeam/${teamId}")

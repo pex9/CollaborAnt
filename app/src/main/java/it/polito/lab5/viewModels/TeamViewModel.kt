@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
 
-class TeamViewModel(val teamId: Int, val model: MyModel): ViewModel() {
+class TeamViewModel(val teamId: String, val model: MyModel): ViewModel() {
     val teams = model.teams
     val tasks = model.tasks
     val users = model.users

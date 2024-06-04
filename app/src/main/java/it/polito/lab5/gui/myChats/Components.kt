@@ -29,8 +29,8 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 fun ChatItem(
     team: Team,
-    isReadState: MutableList<Pair<Int, Boolean>>,
-    setIsReadStateValue: (Int, Boolean) -> Unit,
+    isReadState: MutableList<Pair<String, Boolean>>,
+    setIsReadStateValue: (String, Boolean) -> Unit,
     navController: NavController
 ) {
     val teamChat = team.chat.sortedBy { it.date }

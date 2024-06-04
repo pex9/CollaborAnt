@@ -15,19 +15,19 @@ import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import java.time.LocalDate
 
-class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val model: MyModel): ViewModel() {
+class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?, val model: MyModel): ViewModel() {
     val teams = model.teams
     val users = model.users
     val currentTask = model.tasks.value.find { it.id == currentTaskId }
 
-    private fun addTask(task: Task): Int = model.addTask(task)
+    private fun addTask(task: Task): String = model.addTask(task)
 
-    private fun updateTask(taskId: Int, task: Task) = model.updateTask(taskId, task)
+    private fun updateTask(taskId: String, task: Task) = model.updateTask(taskId, task)
 
-    private fun updateKpi(userId: Int, teamId: Int, kpiCategory: String, value: Int = 1) = model.updateKpi(userId, teamId, kpiCategory, value)
+    private fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) = model.updateKpi(userId, teamId, kpiCategory, value)
 
-    fun validate(): Int {
-        var id = -1
+    fun validate(): String {
+        var id = ""
 
         checkTitle()
         checkDescription()
@@ -36,10 +36,10 @@ class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val m
 
         if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank()) {
             if (currentTask == null) {
-                val categories: MutableMap<Int, String> = mutableMapOf()
+                val categories: MutableMap<String, String> = mutableMapOf()
                 val history = mutableListOf(
                     Action(
-                        id = 0,
+                        id = 0.toString(),
                         memberId = DataBase.LOGGED_IN_USER_ID,
                         taskState = TaskState.NOT_ASSIGNED,
                         date = LocalDate.now(),
@@ -50,7 +50,7 @@ class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val m
                 if(delegatedMembers.isNotEmpty()) {
                     history.add(
                         Action(
-                            id = 1,
+                            id = 1.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,
                             taskState = TaskState.PENDING,
                             date = LocalDate.now(),
@@ -66,7 +66,7 @@ class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val m
                 teamId?.let {
                     id = addTask(
                         Task(
-                            id = -1,
+                            id = "",
                             title = title,
                             description = description,
                             teamId = teamId,
@@ -86,13 +86,13 @@ class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val m
             } else {
                 id = currentTask.id
                 var taskState = currentTask.state
-                val categories: MutableMap<Int, String> = currentTask.categories.toMutableMap()
+                val categories: MutableMap<String, String> = currentTask.categories.toMutableMap()
                 val history: MutableList<Action> = currentTask.history.toMutableList()
 
                 if(currentTask.teamMembers.isEmpty() && delegatedMembers.isNotEmpty()) {
                     history.add(
                         Action(
-                            id = currentTask.history.size,
+                            id = currentTask.history.size.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,
                             taskState = TaskState.PENDING,
                             date = LocalDate.now(),
@@ -188,18 +188,18 @@ class TaskFormViewModel(val teamId: Int?, private val currentTaskId: Int?, val m
             else ""
     }
 
-    var delegatedMembers: MutableList<Int> = mutableStateListOf<Int>().apply {
+    var delegatedMembers: MutableList<String> = mutableStateListOf<String>().apply {
         currentTask?.teamMembers?.let { addAll(it) }
     }
         private set
     var delegatedMembersError by mutableStateOf("")
         private set
-    fun addMember(memberId: Int) {
+    fun addMember(memberId: String) {
         if(!delegatedMembers.contains(memberId)) {
             delegatedMembers.add(memberId)
         }
     }
-    fun removeMember(memberId: Int) {
+    fun removeMember(memberId: String) {
         delegatedMembers.removeIf { id -> id == memberId }
     }
 

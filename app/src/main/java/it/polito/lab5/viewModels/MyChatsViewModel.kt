@@ -9,8 +9,8 @@ class MyChatsViewModel(val model: MyModel): ViewModel() {
     val teams = model.teams
     private val userTeams = teams.value.filter { team -> team.members.any {it.first == DataBase.LOGGED_IN_USER_ID}}
 
-    var chatsReadState: MutableList<Pair<Int, Boolean>> = mutableStateListOf()
-    fun setChatsReadStateValue(teamId: Int, b: Boolean) {
+    var chatsReadState: MutableList<Pair<String, Boolean>> = mutableStateListOf()
+    fun setChatsReadStateValue(teamId: String, b: Boolean) {
         val idx = chatsReadState.indexOfFirst { it.first == teamId }
         chatsReadState[idx] = teamId to b
     }

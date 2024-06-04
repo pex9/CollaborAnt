@@ -12,14 +12,6 @@ import it.polito.lab5.gui.teamStats.StatsTopBar
 import it.polito.lab5.model.User
 import it.polito.lab5.viewModels.IndividualStatsViewModel
 
-// team info -> members
-// each user has a score
-// mi serve il membro oggetto dell'individual, poi con l'id mi recupero lo user per il first, last, ect.
-
-// tasks of team A assigned to user A (team Members), count state = assigned and state = completed
-// approccio 1: calcola in modo dinamico il numero di task assegnati e completati e poi calcola lo score
-// approccio 2: aggiorna lo score ogni volta che un task viene assegnato o completato, poi leggi lo score
-
 @Composable
 fun IndividualStatsScreen(
     vm: IndividualStatsViewModel = viewModel(),
@@ -27,7 +19,7 @@ fun IndividualStatsScreen(
     targetMember: User?,
     targetMemberRanking: Int,
     membersList: List<User>,
-    teamId: Int,
+    teamId: String,
 ) {
     val teams = vm.teams.collectAsState().value
     val team = teams.find { it.id == teamId }

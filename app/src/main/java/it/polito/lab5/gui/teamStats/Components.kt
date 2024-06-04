@@ -336,7 +336,7 @@ fun StatsTopBar(team: Team, navController: NavController) {
 }
 
 @Composable
-fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController: NavController, teamId: Int){
+fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController: NavController, teamId: String){
     Text(
         text = "Team Members Ranking",
         overflow = TextOverflow.Ellipsis,
@@ -410,7 +410,7 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
                     },
                     trailingContent = {
                         Text(
-                            text = "${member.kpiValues.find { it.first == teamId }?.second?.score}",
+                            text = "${member.kpiValues[teamId]?.score}",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 15.sp,

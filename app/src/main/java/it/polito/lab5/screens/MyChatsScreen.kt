@@ -13,8 +13,8 @@ import it.polito.lab5.viewModels.MyChatsViewModel
 @Composable
 fun MyChatsScreen(
     vm: MyChatsViewModel,
-    isReadState: MutableList<Pair<Int, Boolean>>,
-    setIsReadStateValue: (Int, Boolean) -> Unit,
+    isReadState: MutableList<Pair<String, Boolean>>,
+    setIsReadStateValue: (String, Boolean) -> Unit,
     navController: NavController
 ) {
     Scaffold(

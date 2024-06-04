@@ -1,8 +1,5 @@
 package it.polito.lab5.viewModels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.SignInResult
 import it.polito.lab5.model.SignInState
@@ -14,11 +11,6 @@ class LogInViewModel: ViewModel() {
 
     private val _state = MutableStateFlow(SignInState())
     val state = _state.asStateFlow()
-
-    var isSignedIn by mutableStateOf(false)
-    fun setIsSignedInValue(value: Boolean) {
-        isSignedIn = value
-    }
 
     fun onSignInResult(result: SignInResult) {
         _state.update { it.copy(

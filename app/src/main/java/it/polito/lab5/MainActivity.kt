@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import it.polito.lab5.model.MyApplication
 import it.polito.lab5.navigation.AppNavigation
 import it.polito.lab5.ui.theme.Lab4Theme
 import it.polito.lab5.viewModels.AppViewModel
@@ -20,13 +21,18 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val auth = (this.applicationContext as MyApplication).auth
+        val startDestination = if(auth.getSignedInUserId() != null) { "myTeams?teamId={teamId}" }
+            else { "login" }
+
         setContent {
             Lab4Theme(darkTheme= false) {
                 if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
                 }
 
-                AppNavigation(vm = appViewModel)
+                AppNavigation(vm = appViewModel, startDestination = startDestination)
             }
         }
 

@@ -1,7 +1,7 @@
 package it.polito.lab5.model
 
 import android.content.Context
-import android.provider.ContactsContract.CommonDataKinds.Email
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -17,14 +17,15 @@ class MyModel(context: Context) {
 
     private val db = Firebase.firestore
 
-     fun createUser(userId: String, name: String?, email: String? , telephone: String?) {
+     fun createUser(userId: String, name: String?, email: String? , telephone: String?, image: Uri?) {
         val documentReference = db.collection("Users").document(userId)
 
         documentReference.set(
             hashMapOf(
                 "name" to name,
                 "email" to email,
-                "telephone" to telephone
+                "telephone" to telephone,
+                "image" to image
             )
         )
             .addOnSuccessListener { Log.d("New User", userId) }
@@ -35,7 +36,7 @@ class MyModel(context: Context) {
     private val _users = MutableStateFlow(DataBase.users)
     val users: StateFlow<List<User>> = _users
 
-    fun updateUser(userId: Int, user: User) {
+    fun updateUser(userId: String, user: User) {
         val updatedUsers = _users.value.toMutableList()
         val index = updatedUsers.indexOfFirst { it.id == userId }
 
@@ -45,24 +46,22 @@ class MyModel(context: Context) {
         }
     }
 
-    fun updateKpi(userId: Int, teamId: Int, kpiCategory: String, value: Int = 1) {
+    fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) {
         _users.value.find { it.id == userId }?.let { user ->
-            val kpiValues = user.kpiValues.toMutableList()
-            val index = kpiValues.indexOfFirst { it.first == teamId }
+            val kpiValues = user.kpiValues.toMutableMap()
+            val kpi = kpiValues[teamId]
 
-            if (index != -1) {
-                val kpi = kpiValues[index].second
-
+            if (kpi != null) {
                 if(kpiCategory == "assignedTasks") {
                     val newAssignedTasks = kpi.assignedTasks + value
                     val newScore = calculateScore(newAssignedTasks, kpi.completedTasks)
 
-                    kpiValues[index] = teamId to kpi.copy(assignedTasks = newAssignedTasks, score = newScore)
+                    kpiValues[teamId] = kpi.copy(assignedTasks = newAssignedTasks, score = newScore)
                 } else {
                     val newCompletedTasks = kpi.completedTasks + value
                     val newScore = calculateScore(kpi.assignedTasks, newCompletedTasks)
 
-                    kpiValues[index] = teamId to kpi.copy(completedTasks = newCompletedTasks, score = newScore)
+                    kpiValues[teamId] = kpi.copy(completedTasks = newCompletedTasks, score = newScore)
                 }
 
                 updateUser(userId, user.copy(kpiValues = kpiValues))
@@ -71,14 +70,14 @@ class MyModel(context: Context) {
     }
 
     // add a new string category to the user
-    fun addCategoryToUser(userId: Int, c: String) {
+    fun addCategoryToUser(userId: String, c: String) {
         _users.value.find { it.id == userId }?.let { user ->
             val categories = user.categories.toMutableList().apply { add(c) }
             updateUser(userId, user.copy(categories = categories))
         }
     }
 
-    fun updateCategory(userId: Int, old: String, new: String) {
+    fun updateCategory(userId: String, old: String, new: String) {
         if(old != "Recently assigned") {
             _users.value.find { it.id == userId }?.let { user ->
                 val categories = user.categories.toMutableList()
@@ -90,7 +89,7 @@ class MyModel(context: Context) {
         }
     }
 
-    fun updateCategoryFromTask(taskId: Int, userId: Int, new: String) {
+    fun updateCategoryFromTask(taskId: String, userId: String, new: String) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             val categories = task.categories.toMutableMap()
             categories[userId] = new
@@ -98,7 +97,7 @@ class MyModel(context: Context) {
         }
     }
 
-    fun deleteCategoryFromUser(userId: Int, c: String){
+    fun deleteCategoryFromUser(userId: String, c: String){
         if(c != "Recently assigned") {
             _users.value.find { it.id == userId }?.let { user ->
                 val categories = user.categories.toMutableList()
@@ -113,16 +112,16 @@ class MyModel(context: Context) {
     private val _teams = MutableStateFlow(DataBase.teams)
     val teams: StateFlow<List<Team>> = _teams
 
-    fun addTeam(team: Team): Int {
+    fun addTeam(team: Team): String {
         val updatedTeams = _teams.value.toMutableList()
-        val id = updatedTeams.maxOfOrNull { it.id } ?: -1
+        val id = updatedTeams.size
 
-        updatedTeams.add(team.copy(id = id + 1))
+        updatedTeams.add(team.copy(id = (id + 1).toString()))
         _teams.value = updatedTeams
-        return id + 1
+        return (id + 1).toString()
     }
 
-    fun updateTeam(teamId: Int, team: Team) {
+    fun updateTeam(teamId: String, team: Team) {
         val updatedTeams = _teams.value.toMutableList()
         val index = updatedTeams.indexOfFirst { it.id == teamId }
 
@@ -132,7 +131,7 @@ class MyModel(context: Context) {
         }
     }
 
-    fun deleteTeam(teamId: Int) {
+    fun deleteTeam(teamId: String) {
         val updatedTeams = _teams.value.toMutableList()
         val teamTasks = _tasks.value.filter {it.teamId == teamId }.map { it.id }
 
@@ -144,9 +143,9 @@ class MyModel(context: Context) {
         _teams.value = updatedTeams
     }
 
-    fun updateRole(teamId: Int, memberId: Int, role: Role) {
+    fun updateRole(teamId: String, memberId: String, role: Role) {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<Int, Role>> = team.members.toMutableList()
+            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
             val idx = team.members.indexOfFirst { it.first == memberId }
 
             if(idx != -1) {
@@ -156,9 +155,9 @@ class MyModel(context: Context) {
         }
     }
 
-    fun addMember(teamId: Int, memberId: Int): Boolean {
+    fun addMember(teamId: String, memberId: String): Boolean {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<Int, Role>> = team.members.toMutableList()
+            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
 
             if(members.none { it.first == memberId }) {
                 members.add(memberId to Role.JUNIOR_MEMBER)
@@ -166,12 +165,12 @@ class MyModel(context: Context) {
 
                 //  Update Kpi for new member
                 _users.value.find { it.id == memberId }?.let { user ->
-                    val updatedKpiValues = user.kpiValues.toMutableList()
-                    updatedKpiValues.add(teamId to KPI(
+                    val updatedKpiValues = user.kpiValues.toMutableMap()
+                    updatedKpiValues[teamId] = KPI(
                         assignedTasks = 0,
                         completedTasks = 0,
                         score = calculateScore(0, 0)
-                    ))
+                    )
 
                     updateUser(user.id, user.copy(
                         joinedTeams = user.joinedTeams + 1,
@@ -185,16 +184,16 @@ class MyModel(context: Context) {
         return false
     }
 
-    fun removeMember(teamId: Int, memberId: Int) {
+    fun removeMember(teamId: String, memberId: String) {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<Int, Role>> = team.members.toMutableList()
+            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
             members.removeIf { it.first == memberId }
 
             updateTeam(teamId, team.copy(members = members))
         }
     }
 
-    fun addMessage(teamId: Int, message: Message) {
+    fun addMessage(teamId: String, message: Message) {
         _teams.value.find { it.id == teamId }?.let { team ->
             val chat = team.chat.toMutableList()
 
@@ -207,16 +206,16 @@ class MyModel(context: Context) {
     private val _tasks = MutableStateFlow(DataBase.tasks)
     val tasks: StateFlow<List<Task>> = _tasks
 
-    fun addTask(task: Task): Int {
+    fun addTask(task: Task): String {
         val updatedTasks = _tasks.value.toMutableList()
-        val id = updatedTasks.maxOfOrNull { it.id } ?: -1
-        updatedTasks.add(task.copy(id = id + 1))
+        val id = updatedTasks.size
+        updatedTasks.add(task.copy(id = (id + 1).toString()))
 
         _tasks.value = updatedTasks
-        return id + 1
+        return (id + 1).toString()
     }
 
-    fun updateTask(taskId: Int, task: Task) {
+    fun updateTask(taskId: String, task: Task) {
         val updatedTasks = _tasks.value.toMutableList()
         val index = updatedTasks.indexOfFirst { it.id == taskId }
 
@@ -226,7 +225,7 @@ class MyModel(context: Context) {
         }
     }
 
-    fun deleteTask(taskId: Int) {
+    fun deleteTask(taskId: String) {
         val updatedTask = _tasks.value.toMutableList()
 
         //  If state of deleted task is different of Completed, we decrease the assignedTasks Kpi value for all delegated members
@@ -242,7 +241,7 @@ class MyModel(context: Context) {
         _tasks.value = updatedTask
     }
 
-    fun setTaskState(taskId: Int, state: TaskState) {
+    fun setTaskState(taskId: String, state: TaskState) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             //  Increase completeTasks Kpi value for all delegated members when the state is Completed
             if(state == TaskState.COMPLETED) {
@@ -254,7 +253,7 @@ class MyModel(context: Context) {
             val history = task.history.toMutableList()
             history.add(
                 Action(
-                    id = task.history.size,
+                    id = task.history.size.toString(),
                     memberId = DataBase.LOGGED_IN_USER_ID,
                     taskState = state,
                     date = LocalDate.now(),
@@ -267,7 +266,7 @@ class MyModel(context: Context) {
         }
     }
 
-    fun addComment(taskId: Int, comment: Comment) {
+    fun addComment(taskId: String, comment: Comment) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             val comments = task.comments.toMutableList()
 
@@ -276,17 +275,17 @@ class MyModel(context: Context) {
         }
     }
 
-    fun addAttachment(taskId: Int, attachment: Attachment) {
+    fun addAttachment(taskId: String, attachment: Attachment) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             val attachments = task.attachments.toMutableList()
-            val id = attachments.maxOfOrNull { it.id } ?: -1
+            val id = attachments.size
 
-            attachments.add(attachment.copy(id = id + 1))
+            attachments.add(attachment.copy(id = (id + 1).toString()))
             updateTask(taskId, task.copy(attachments = attachments))
         }
     }
 
-    fun removeAttachment(taskId: Int, attachmentId: Int) {
+    fun removeAttachment(taskId: String, attachmentId: String) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             val attachments = task.attachments.toMutableList()
 

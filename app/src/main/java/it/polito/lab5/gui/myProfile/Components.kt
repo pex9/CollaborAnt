@@ -98,7 +98,7 @@ fun OverlappingComponents(
     last: String,
     imageProfile: ImageProfile,
     joinedTeams: Int,
-    kpi: List<Pair<Int, KPI>>
+    kpi: Map<String, KPI>
 ) {
 
     //val user = Firebase.auth.currentUser
@@ -135,11 +135,11 @@ fun OverlappingComponents(
 }
 
 @Composable
-fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
+fun KPIPresentationComp(kpi: Map<String, KPI>, joinedTeams: Int) {
     val c = CollaborantColors.BorderGray.copy(0.4f)
     val overallUserKPI = mapOf(
-        "assigned" to kpi.sumOf{ it.second.assignedTasks },
-        "completed" to kpi.sumOf{ it.second.completedTasks }
+        "assigned" to kpi.values.sumOf{ it.assignedTasks },
+        "completed" to kpi.values.sumOf{ it.completedTasks }
     )
 
     Card(

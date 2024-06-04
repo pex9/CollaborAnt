@@ -15,7 +15,7 @@ import it.polito.lab5.viewModels.ChatViewViewModel
 @Composable
 fun TeamChatScreen (
     vm: ChatViewViewModel,
-    setIsReadState: (Int, Boolean) -> Unit,
+    setIsReadState: (String, Boolean) -> Unit,
     navController: NavController, // NavController for navigation
 ) {
     val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }

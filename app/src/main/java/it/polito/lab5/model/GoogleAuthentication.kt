@@ -40,11 +40,13 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
 
             if (isNewUser == true) {
                 user?.let {
+
                     (context.applicationContext as MyApplication).model.createUser(
                         userId = user.uid,
                         name = user.displayName,
                         email = user.email,
-                        telephone = user.phoneNumber
+                        telephone = user.phoneNumber,
+                        image = user.photoUrl
                     )
                 }
             }
@@ -79,7 +81,7 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {
-        return BeginSignInRequest.Builder()
+        return BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)

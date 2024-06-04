@@ -28,7 +28,7 @@ fun MyTeamsScreen (
     showDialog: Boolean,
     setShowDialogValue: (Boolean) -> Unit,
     navController: NavController,
-    isReadState: MutableList<Pair<Int, Boolean>>,
+    isReadState: MutableList<Pair<String, Boolean>>,
 ) {
     val teams = vm.teams.collectAsState().value.filter { team ->
         team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)

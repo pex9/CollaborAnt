@@ -83,7 +83,7 @@ import kotlin.math.min
 
 @Composable
 fun OptionsComp(
-    taskId: Int,
+    taskId: String,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
@@ -437,7 +437,7 @@ fun DueDateComp(
 
 @Composable
 fun DelegatedMemberComp(
-    members: List<Int>, // List of member IDs
+    members: List<String>, // List of member IDs
     users: List<User>,
     setShowBottomSheetValue: (Boolean) -> Unit, // Function to set the visibility of the bottom sheet
     isEdit: Boolean = false // Flag indicating if the component is in edit mode
@@ -600,9 +600,9 @@ fun AttachmentItem(
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     context: Context, // Android context
-    taskId: Int, // ID of the task to which the attachment belongs
+    taskId: String, // ID of the task to which the attachment belongs
     attachment: Attachment, // Attachment data
-    removeAttachment: (Int, Int) -> Unit // Function to remove the attachment
+    removeAttachment: (String, String) -> Unit // Function to remove the attachment
 ) {
     // Row containing the attachment item
     Row(
@@ -679,12 +679,12 @@ fun AttachmentItem(
 
 @Composable
 fun AttachmentComponent(
-    taskId: Int,
+    taskId: String,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     attachments: List<Attachment>,
-    addAttachment: (Int, Attachment) -> Unit,
-    removeAttachment: (Int, Int) -> Unit
+    addAttachment: (String, Attachment) -> Unit,
+    removeAttachment: (String, String) -> Unit
 ) {
     // Accessing the current context
     val context = LocalContext.current
@@ -700,7 +700,7 @@ fun AttachmentComponent(
                     // Adding the attachment to the list
                     addAttachment(
                         taskId, Attachment(
-                            id = -1,
+                            id = "",
                             name = name,
                             type = mimeType,
                             size = size,
@@ -955,9 +955,9 @@ fun CommentTextField(
     // Callback to update the value of the text field
     updateValue: (String) -> Unit,
     // Task ID associated with the comment
-    taskId: Int,
+    taskId: String,
     // Callback to add a comment
-    addComment: (Int, Comment) -> Unit,
+    addComment: (String, Comment) -> Unit,
     // Modifier for styling and layout customization
     modifier: Modifier
 ) {
@@ -1123,7 +1123,7 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
 fun MembersBottomSheet(
     team: Team,
     users: List<User>,
-    members: List<Int>,
+    members: List<String>,
     setShowBottomSheetValue: (Boolean) -> Unit,
     navController: NavController
 ) {

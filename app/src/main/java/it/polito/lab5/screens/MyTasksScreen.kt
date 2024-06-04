@@ -21,7 +21,7 @@ import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyTasksViewModel
 
 @Composable
-fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadState: MutableList<Pair<Int, Boolean>>,) {
+fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadState: MutableList<Pair<String, Boolean>>,) {
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
         topBar = { MyTasksTopBar() },

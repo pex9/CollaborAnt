@@ -110,7 +110,7 @@ fun CategoryItem(
     categorySelectionOpened: MutableList<Pair<String, Boolean>>,
     setCategory: (String) -> Unit,
     setMyTasksHideSheet: (Boolean) -> Unit,
-    setTargetTaskIdValue: (Int) -> Unit,
+    setTargetTaskIdValue: (String) -> Unit,
     expandCategory: MutableList<Pair<String, Boolean>>,
     setExpandCategory: (String, Boolean) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
@@ -232,7 +232,7 @@ fun TaskItem(
     task: Task,
     navController: NavController,
     setMyTasksHideSheet: (Boolean) -> Unit,
-    setTargetTaskIdValue: (Int) -> Unit,
+    setTargetTaskIdValue: (String) -> Unit,
     setChosenCategory: () -> Unit
 ) {
     // Column for displaying task details
@@ -432,8 +432,8 @@ fun CategoryOptionsComp(
 fun MyTasksModalBottomSheet(
     setMyTasksHideSheet: (Boolean) -> Unit,
     categories: List<String>,
-    updateCategoryFromTask: ( Int, Int, String) -> Unit,
-    taskId: Int?,
+    updateCategoryFromTask: (String, String, String) -> Unit,
+    taskId: String?,
     chosenCategory: String,
     setChosenCategoryValue: (String) -> Unit,
 ){

@@ -32,7 +32,7 @@ import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
-fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>, teamId: Int) {
+fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>, teamId: String) {
     val teamTasks = tasks.filter { it.teamId == teamId }
     val literalTotTasks = teamTasks.count()
     val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
@@ -100,7 +100,7 @@ fun VerticalTeamStatsPane(
     navController: NavController, // NavController for navigation
     p: PaddingValues, // Padding values for layout
     membersList: List<User>,
-    teamId: Int,
+    teamId: String,
 )
 {
     val teamTasks = tasks.filter { it.teamId == teamId }

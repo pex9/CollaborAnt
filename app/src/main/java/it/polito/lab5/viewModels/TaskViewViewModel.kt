@@ -9,20 +9,20 @@ import it.polito.lab5.model.Comment
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.TaskState
 
-class TaskViewViewModel(val taskId: Int, val model: MyModel): ViewModel() {
+class TaskViewViewModel(val taskId: String, val model: MyModel): ViewModel() {
     val teams = model.teams
     val users = model.users
     val tasks = model.tasks
 
-    fun deleteTask(taskId: Int) = model.deleteTask(taskId)
+    fun deleteTask(taskId: String) = model.deleteTask(taskId)
 
-    fun setTaskState(taskId: Int, state: TaskState) = model.setTaskState(taskId, state)
+    fun setTaskState(taskId: String, state: TaskState) = model.setTaskState(taskId, state)
 
-    fun addComment(taskId: Int, comment: Comment) = model.addComment(taskId, comment)
+    fun addComment(taskId: String, comment: Comment) = model.addComment(taskId, comment)
 
-    fun addAttachment(taskId: Int, attachment: Attachment) = model.addAttachment(taskId, attachment)
+    fun addAttachment(taskId: String, attachment: Attachment) = model.addAttachment(taskId, attachment)
 
-    fun removeAttachment(taskId: Int, attachmentId: Int) = model.removeAttachment(taskId, attachmentId)
+    fun removeAttachment(taskId: String, attachmentId: String) = model.removeAttachment(taskId, attachmentId)
 
     var comment by mutableStateOf("")
         private set

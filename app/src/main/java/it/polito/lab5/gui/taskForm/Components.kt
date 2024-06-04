@@ -343,10 +343,10 @@ fun RepeatMenuComp(
 fun MembersPickerBottomSheet(
     team: Team,
     users: List<User>,
-    members: List<Int>, // List of selected member IDs
+    members: List<String>, // List of selected member IDs
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
-    addMember: (Int) -> Unit, // Callback to add a member
-    removeMember: (Int) -> Unit, // Callback to remove a member
+    addMember: (String) -> Unit, // Callback to add a member
+    removeMember: (String) -> Unit, // Callback to remove a member
     triState: ToggleableState,
     setTriStateValue: (ToggleableState) -> Unit,
     toggleTriState: () -> Unit

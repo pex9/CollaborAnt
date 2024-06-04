@@ -71,7 +71,7 @@ fun MyTeamsTopBar() {
 fun MyTeamsPage(
     teams: List<Team>,
     invitationTeam: Team?,
-    addMember: (Int, Int) -> Boolean,
+    addMember: (String, String) -> Boolean,
     showBottomSheet: Boolean,
     setShowBottomSheetValue: (Boolean) -> Unit,
     showDialog: Boolean,

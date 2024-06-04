@@ -50,7 +50,7 @@ fun VerticalIndividualStatsPane(
     targetMember: User,
     targetMemberRanking: Int,
     membersList: List<User>,
-    teamId: Int,
+    teamId: String,
 ) {
     Column(
         modifier = Modifier
@@ -168,9 +168,7 @@ fun VerticalIndividualStatsPane(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val points =
-                                targetMember.kpiValues.find { it.first == teamId }?.second?.score
-                                    ?: 0
+                            val points = targetMember.kpiValues[teamId]?.score ?: 0
                            val position = when(targetMemberRanking) {
                                 1 -> R.drawable.first_place
                                 2 -> R.drawable.second_place
@@ -216,10 +214,8 @@ fun VerticalIndividualStatsPane(
                         containerColor = Color.White,
                     )
                 ) {
+                    val literalAssignedTask = targetMember.kpiValues[teamId]?.assignedTasks ?: 0
 
-                    val literalAssignedTask =
-                        targetMember.kpiValues.find { it.first == teamId }?.second?.assignedTasks
-                            ?: 0
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -257,9 +253,8 @@ fun VerticalIndividualStatsPane(
                         containerColor = Color.White,
                     )
                 ) {
-                    val literalCompletedTask =
-                        targetMember.kpiValues.find { it.first == teamId }?.second?.completedTasks
-                            ?: 0
+                    val literalCompletedTask = targetMember.kpiValues[teamId]?.completedTasks ?: 0
+
                     Row(
                         modifier = Modifier
                             .fillMaxSize()
@@ -373,7 +368,7 @@ fun VerticalIndividualStatsPane(
                             },
                             trailingContent = {
                                 Text(
-                                    text = "${member.kpiValues.find { it.first == teamId }?.second?.score}",
+                                    text = "${member.kpiValues[teamId]?.score}",
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
@@ -397,7 +392,7 @@ fun HorizontalIndividualStatsPane(
     targetMember: User,
     targetMemberRanking: Int,
     membersList: List<User>,
-    teamId: Int,
+    teamId: String,
 ) {
     Row(
         modifier = Modifier
@@ -518,9 +513,7 @@ fun HorizontalIndividualStatsPane(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val points =
-                                    targetMember.kpiValues.find { it.first == teamId }?.second?.score
-                                        ?: 0
+                                val points = targetMember.kpiValues[teamId]?.score ?: 0
                                 val position = when (targetMemberRanking) {
                                     1 -> R.drawable.first_place
                                     2 -> R.drawable.second_place
@@ -567,10 +560,8 @@ fun HorizontalIndividualStatsPane(
                             containerColor = Color.White,
                         )
                     ) {
+                        val literalAssignedTask = targetMember.kpiValues[teamId]?.assignedTasks ?: 0
 
-                        val literalAssignedTask =
-                            targetMember.kpiValues.find { it.first == teamId }?.second?.assignedTasks
-                                ?: 0
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -608,9 +599,8 @@ fun HorizontalIndividualStatsPane(
                             containerColor = Color.White,
                         )
                     ) {
-                        val literalCompletedTask =
-                            targetMember.kpiValues.find { it.first == teamId }?.second?.completedTasks
-                                ?: 0
+                        val literalCompletedTask = targetMember.kpiValues[teamId]?.completedTasks ?: 0
+
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -727,7 +717,7 @@ fun HorizontalIndividualStatsPane(
                             },
                             trailingContent = {
                                 Text(
-                                    text = "${member.kpiValues.find { it.first == teamId }?.second?.score}",
+                                    text = "${member.kpiValues[teamId]?.score}",
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,

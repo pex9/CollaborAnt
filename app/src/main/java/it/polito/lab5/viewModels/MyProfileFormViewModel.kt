@@ -15,7 +15,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
 
     val user = model.users.value.find{it.id == DataBase.LOGGED_IN_USER_ID}
 
-    private fun updateUser(userid:Int, user: User) = model.updateUser(userid, user)
+    private fun updateUser(userid: String, user: User) = model.updateUser(userid, user)
 
     fun  validate() : Boolean {
         checkFirstName()

@@ -61,8 +61,8 @@ fun MyChatsTopBar() {
 @Composable
 fun MyChatsPage(
     userTeams: List<Team>,
-    isReadState: MutableList<Pair<Int, Boolean>>,
-    setIsReadStateValue: (Int, Boolean) -> Unit,
+    isReadState: MutableList<Pair<String, Boolean>>,
+    setIsReadStateValue: (String, Boolean) -> Unit,
     navController: NavController, // NavController for navigation
     paddingValues: PaddingValues // Padding values for layout
 ) {

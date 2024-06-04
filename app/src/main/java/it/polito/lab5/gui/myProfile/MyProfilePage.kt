@@ -79,7 +79,8 @@ fun MyProfileTopBar(onSignOut : () -> Unit,
                     modifier = Modifier.size(26.dp)
                 )
             }
-            OptionsComp(onSignOut,optionsOpened,setOptionsOpenedValue);
+
+            OptionsComp(onSignOut,optionsOpened,setOptionsOpenedValue)
         }
     )
 }
@@ -95,7 +96,7 @@ fun MyProfilePage(
     description: String,
     imageProfile: ImageProfile,
     joinedTeams: Int,
-    kpi: List<Pair<Int, KPI>>,
+    kpi: Map<String, KPI>,
     paddingValues: PaddingValues
 ) {
     Column(
