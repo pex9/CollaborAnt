@@ -166,7 +166,7 @@ fun PersonalTaskListPane(
                 setIsDialogDeleteOpen(false)
                 if(numberOfTasksForCategory == 0){
                     deleteCategoryFromUser(DataBase.LOGGED_IN_USER_ID, currentCategory)
-                } else{ setErrMsgValue("Cannot delete category which contains tasks!") }
+                } else{ setErrMsgValue("Cannot delete category which contains tasks!")}
             },
             onDismiss = { setIsDialogDeleteOpen(false) }
         )

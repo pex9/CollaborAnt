@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -131,13 +132,16 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
         "completed" to kpi.sumOf{ it.second.completedTasks }
     )
 
+    val colors = MaterialTheme.colorScheme
+
     Card(
         border = BorderStroke(1.dp, CollaborantColors.BorderGray),
         shape = CardDefaults.outlinedShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
-            contentColor = Color.Black
-        )
+            containerColor = MaterialTheme.colorScheme.surface,
+//            contentColor = Color.Black
+        ),
+        elevation = CardDefaults.cardElevation(4.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -154,6 +158,7 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 22.sp,
+                    color = colors.onBackground
                 )
 
                 Text(
@@ -177,7 +182,9 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     text = "${overallUserKPI["assigned"]}",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 22.sp
+                    fontSize = 22.sp,
+                    color = colors.onBackground
+
                 )
 
                 Text(
@@ -201,7 +208,9 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     text = "${overallUserKPI["completed"]}",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 22.sp
+                    fontSize = 22.sp,
+                    color = colors.onBackground
+
                 )
 
                 Text(

@@ -42,6 +42,20 @@ import it.polito.lab5.ui.theme.interFamily
 fun MyProfileTopBar(navController: NavController) {
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+    val iconColor = if(LocalTheme.current.isDark) colors.primary else colors.onBackground
+
+    val gradientColors =
+        if(LocalTheme.current.isDark)
+            listOf(
+                colors.secondary,
+                colors.primary,
+            )
+        else
+            listOf(
+                colors.onSurface,
+                colors.secondaryContainer,
+            )
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
@@ -56,20 +70,18 @@ fun MyProfileTopBar(navController: NavController) {
                 fontSize = 22.sp,
                 style = TextStyle(
                     brush = Brush.linearGradient(
-                        colors = listOf(
-                            CollaborantColors.DarkBlue,
-                            CollaborantColors.Yellow
+                        colors = gradientColors
                         ) // Gradient colors
                     )
-                )
             )
+
         } ,
         actions = {
             IconButton(
                 onClick = { navController.navigate("myProfile/edit") },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = iconColor,
                 )
             ) {
                 Icon(
@@ -106,7 +118,7 @@ fun MyProfilePage(
             .verticalScroll(rememberScrollState())
     ) {
         val spacerModifier = Modifier.height(18.dp)
-
+        val colors = MaterialTheme.colorScheme
         OverlappingComponents(
             first = first,
             last = last,
@@ -114,11 +126,14 @@ fun MyProfilePage(
             joinedTeams = joinedTeams,
             kpi = kpi
         )
+        val iconColor = if(LocalTheme.current.isDark) colors.primary else colors.onBackground
+
 
         TextPresentationComp(
             text = first.plus(" ").plus(last),
             fontWeight = FontWeight.Bold,
-            fontSize = 28.sp
+            fontSize = 28.sp,
+            color = iconColor
         )
         
         Spacer(modifier = Modifier.height(4.dp))
@@ -131,17 +146,18 @@ fun MyProfilePage(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
-
         TextPresentationComp(
             text = nickname,
             label = "Nickname",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
+            color = colors.onBackground,
+
             icon = {
                 Icon(
                     painterResource(id = R.drawable.profile_bold),
                     contentDescription = "Nickname Icon",
-                    tint = CollaborantColors.DarkBlue,
+                    tint = iconColor,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -154,11 +170,13 @@ fun MyProfilePage(
             label = "Email",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
+            color = colors.onBackground,
+
             icon = {
                 Icon(
                     painterResource(id = R.drawable.mail),
                     contentDescription = "Email Icon",
-                    tint = CollaborantColors.DarkBlue,
+                    tint = iconColor,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -171,11 +189,13 @@ fun MyProfilePage(
             label = "Telephone",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
+            color = colors.onBackground,
+
             icon = {
                 Icon(
                     painterResource(id = R.drawable.telephone),
                     contentDescription = "Telephone Icon",
-                    tint = CollaborantColors.DarkBlue,
+                    tint = iconColor,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -188,11 +208,13 @@ fun MyProfilePage(
             label = "Location",
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
+            color = colors.onBackground,
+
             icon = {
                 Icon(
                     painterResource(id = R.drawable.location),
                     contentDescription = "Email Icon",
-                    tint = CollaborantColors.DarkBlue,
+                    tint = iconColor,
                     modifier = Modifier.size(32.dp)
                 )
             }
