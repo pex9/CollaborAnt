@@ -499,7 +499,6 @@ fun AppNavigation(vm: AppViewModel,
 
                         navController.navigate("login")
                     }},
-                userData = googleAuthUiClient.getSignedInUser(),
                 isReadState = myChatViewModel.chatsReadState)
         }
 

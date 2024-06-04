@@ -18,7 +18,6 @@ import it.polito.lab5.viewModels.MyProfileViewModel
 fun MyProfileScreen (
     vm: MyProfileViewModel,
     navController: NavController,
-    userData: UserData?,
     onSignOut : () -> Unit,
     isReadState: MutableList<Pair<Int, Boolean>>,
 ) {

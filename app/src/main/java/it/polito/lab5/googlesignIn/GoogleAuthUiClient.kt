@@ -8,6 +8,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import it.polito.lab5.R
 import it.polito.lab5.model.SignInResult
 import it.polito.lab5.model.UserData
 import kotlinx.coroutines.tasks.await
@@ -82,7 +83,7 @@ class GoogleAuthUiClient(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId("91485008846-ic56uh8b9jnlr9jfavlj8i160llag8au.apps.googleusercontent.com") //take from firebase
+                    .setServerClientId(context.getString(R.string.server_client_id)) //take from firebase
                     .build()
             )
             .setAutoSelectEnabled(true)
