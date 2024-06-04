@@ -12,8 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,10 +34,13 @@ import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileTopBar(onSignOut : () -> Unit,
-                    optionsOpened: Boolean,
-                    setOptionsOpenedValue: (Boolean) -> Unit,
-                    navController: NavController) {
+fun MyProfileTopBar(
+    onSignOut : () -> Unit,
+    optionsOpened: Boolean,
+    setOptionsOpenedValue: (Boolean) -> Unit,
+    setShowDialogValue: (Boolean) -> Unit,
+    navController: NavController
+) {
     val colors = MaterialTheme.colorScheme
 
     TopAppBar(
@@ -66,21 +66,13 @@ fun MyProfileTopBar(onSignOut : () -> Unit,
             )
         } ,
         actions = {
-            IconButton(
-                onClick = { navController.navigate("myProfile/edit") },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
-                )
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.edit_square),
-                    contentDescription = "Back Icon",
-                    modifier = Modifier.size(26.dp)
-                )
-            }
-
-            OptionsComp(onSignOut,optionsOpened,setOptionsOpenedValue)
+            OptionsComp(
+                onSignOut = onSignOut,
+                optionsOpened = optionsOpened,
+                setOptionsOpenedValue = setOptionsOpenedValue,
+                setShowDialogValue = setShowDialogValue,
+                navController = navController
+            )
         }
     )
 }

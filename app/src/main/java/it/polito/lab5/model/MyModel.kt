@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,31 @@ class MyModel(val context: Context) {
     }
 
     private val db = Firebase.firestore
+    private val storage = FirebaseStorage.getInstance()
+
+    private suspend fun uploadImage(userId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
+        val storageRef = storage.reference
+
+        try {
+            val fileName = "images/${userId}.jpg"
+            val imageRef = storageRef.child(fileName)
+
+            // Upload ByteArray to Firebase Storage
+            imageRef.putBytes(byteArray).await()
+            val downloadUrl = imageRef.downloadUrl.await()
+            onSuccess(downloadUrl.toString())
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+    private suspend fun deleteImage(userId: String) {
+        val storageRef = storage.reference
+
+        val fileName = "images/${userId}.jpg"
+        val imageRef = storageRef.child(fileName)
+        imageRef.delete().await()
+    }
 
     fun createUser(user: User) {
         val documentReference = db.collection("Users").document(user.id)
@@ -75,34 +101,82 @@ class MyModel(val context: Context) {
                     categories = snapshot.get("categories") as List<String>
                 ))
             } else {
-                Log.e("Error", e.toString())
+                Log.e("Server Error", e.toString())
                 trySend(null)
             }
         }
         awaitClose { snapshotListener.remove() }
     }
 
-    suspend fun updateUser1(userId: String, user: User) {
+    suspend fun updateUser1(userId: String, user: User, deletePrevious: Boolean) {
         val documentReference = db.collection("Users").document(userId)
+        val byteArray = when (user.imageProfile) {
+            is Empty -> null
+            is Taken -> bitmapToByteArray(user.imageProfile.image)
+            is Uploaded -> uriToBitmap(context, user.imageProfile.image)?.let {
+                bitmapToByteArray(it)
+            }
+        }
 
-        documentReference.update(
-             hashMapOf(
-                "first" to user.first,
-                "last" to user.last,
-                "nickname" to user.nickname,
-                "email" to user.email,
-                "telephone" to user.telephone,
-                "location" to user.location,
-                "description" to user.description,
-                "image" to mapOf(
-                    "color" to if(user.imageProfile is Empty) user.imageProfile.color.value.toString() else null,
-                    "url" to if(user.imageProfile is Uploaded) user.imageProfile.image else null
-                ),
-                "joinedTeams" to user.joinedTeams,
-                "kpiValues" to user.kpiValues,
-                "categories" to user.categories
+        if(byteArray != null) {
+            uploadImage(
+                userId = userId,
+                byteArray = byteArray,
+                onSuccess = {
+                    documentReference.update(
+                        hashMapOf(
+                            "first" to user.first,
+                            "last" to user.last,
+                            "nickname" to user.nickname,
+                            "email" to user.email,
+                            "telephone" to user.telephone,
+                            "location" to user.location,
+                            "description" to user.description,
+                            "image" to mapOf(
+                                "color" to null,
+                                "url" to it
+                            ),
+                            "joinedTeams" to user.joinedTeams,
+                            "kpiValues" to user.kpiValues,
+                            "categories" to user.categories
+                        )
+                    ).await()
+                },
+                onFailure = { Log.e("Server Error", it.toString()) }
             )
-        ).await()
+        } else {
+            try {
+                documentReference.update(
+                    hashMapOf(
+                        "first" to user.first,
+                        "last" to user.last,
+                        "nickname" to user.nickname,
+                        "email" to user.email,
+                        "telephone" to user.telephone,
+                        "location" to user.location,
+                        "description" to user.description,
+                        "image" to mapOf(
+                            "color" to (user.imageProfile as Empty).color.value.toString(),
+                            "url" to null
+                        ),
+                        "joinedTeams" to user.joinedTeams,
+                        "kpiValues" to user.kpiValues,
+                        "categories" to user.categories
+                    )
+                ).await()
+
+                if(deletePrevious) {
+                    deleteImage(userId)
+                }
+            } catch (e: Exception) {
+                Log.e("Server Error", e.toString())
+            }
+        }
+    }
+
+    suspend fun deleteUser(userId: String) {
+        deleteImage(userId)
+        db.collection("Users").document(userId).delete().await()
     }
 
     //  Users

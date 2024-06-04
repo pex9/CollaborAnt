@@ -12,15 +12,13 @@ import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.User
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthentication) : ViewModel() {
-    private val user = MutableStateFlow<User?>(null)
+    private var user: User? = null
 
-    private suspend fun updateUser(userid: String, user: User) = model.updateUser1(userid, user)
+    private suspend fun updateUser(userid: String, user: User, deletePrevious: Boolean) = model.updateUser1(userid, user, deletePrevious)
 
     suspend fun  validate() : Boolean {
         checkFirstName()
@@ -35,13 +33,12 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             && emailError.isBlank() && locationError.isBlank() && descriptionError.isBlank()
             && telephoneError.isBlank())
         {
-            user.value?.let { user ->
 
-                val scope = viewModelScope
-
-                scope.async {
+            user?.let { user ->
+                viewModelScope.async {
                     updateUser(
-                        user.id, user.copy(
+                        userid = user.id,
+                        user = user.copy(
                             first = firstNameValue,
                             last = lastNameValue,
                             nickname = nicknameValue,
@@ -50,7 +47,8 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
                             description = descriptionValue,
                             telephone = telephoneValue,
                             imageProfile = imageProfile
-                        )
+                        ),
+                        deletePrevious = user.imageProfile !is Empty && imageProfile is Empty
                     )
                 }.await()
 
@@ -91,26 +89,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
         else ""
     }
 
-    init {
-        val userid = auth.getSignedInUserId()
-        if (userid != null) {
-            viewModelScope.launch {
-                val u = model.getUser(userid).first()
-                user.value = u
-            }
-        }
-
-        // Observe user changes and update state
-        viewModelScope.launch {
-            user.collectLatest { newUser ->
-                firstNameValue = newUser?.first ?: ""
-                lastNameValue = newUser?.last ?: ""
-            }
-        }
-    }
-
-
-    var nicknameValue by mutableStateOf(user.value?.nickname?: "")
+    var nicknameValue by mutableStateOf("")
         private set
     var nicknameError by mutableStateOf("")
         private set
@@ -126,7 +105,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var emailValue by mutableStateOf(user.value?.email?: "")
+    var emailValue by mutableStateOf("")
         private set
     var emailError by mutableStateOf("")
         private set
@@ -144,7 +123,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var telephoneValue by mutableStateOf(user.value?.telephone?: "")
+    var telephoneValue by mutableStateOf("")
         private set
     var telephoneError by mutableStateOf("")
         private set
@@ -160,7 +139,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var locationValue by mutableStateOf(user.value?.location?: "")
+    var locationValue by mutableStateOf("")
         private set
     var locationError by mutableStateOf("")
         private set
@@ -176,7 +155,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var descriptionValue by mutableStateOf(user.value?.description?: "")
+    var descriptionValue by mutableStateOf("")
         private set
     var descriptionError by mutableStateOf("")
         private set
@@ -192,7 +171,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var imageProfile: ImageProfile by mutableStateOf(user.value?.imageProfile?: Empty(pickRandomColor()))
+    var imageProfile: ImageProfile by mutableStateOf(user?.imageProfile?: Empty(pickRandomColor()))
         private set
     fun setImageProfileValue(i: ImageProfile) {
         imageProfile = i
@@ -202,6 +181,23 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
         private set
     fun setShowBottomSheetValue(b: Boolean) {
         showBottomSheet = b
+    }
+
+    init {
+        val userid = auth.getSignedInUserId()
+        if (userid != null) {
+            viewModelScope.launch {
+                user = model.getUser(userid).first()
+                firstNameValue = user?.first ?: ""
+                lastNameValue = user?.last ?: ""
+                nicknameValue = user?.nickname ?: ""
+                emailValue = user?.email ?: ""
+                telephoneValue = user?.telephone ?: ""
+                locationValue = user?.location ?: ""
+                descriptionValue = user?.description ?: ""
+                imageProfile = user?.imageProfile ?: Empty(pickRandomColor())
+            }
+        }
     }
 
 }

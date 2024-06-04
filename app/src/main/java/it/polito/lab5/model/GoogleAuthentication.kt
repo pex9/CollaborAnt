@@ -94,6 +94,10 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
         return auth.currentUser?.uid
     }
 
+    suspend fun deleteGoogleAccount() {
+        auth.currentUser?.delete()?.await()
+    }
+
     private fun buildSignInRequest(): BeginSignInRequest {
         return BeginSignInRequest.builder()
             .setGoogleIdTokenRequestOptions(

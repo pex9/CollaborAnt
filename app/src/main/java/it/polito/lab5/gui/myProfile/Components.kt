@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.ImageProfile
@@ -231,6 +232,8 @@ fun KPIPresentationComp(kpi: Map<String, KPI>, joinedTeams: Long) {
 fun OptionsComp(
     onSignOut: ()-> Unit,
     optionsOpened: Boolean,
+    navController: NavController,
+    setShowDialogValue: (Boolean) -> Unit,
     setOptionsOpenedValue: (Boolean) -> Unit,
 ) {
     // Box to align content at the bottom end of the layout
@@ -255,8 +258,34 @@ fun OptionsComp(
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.logout),
+                            painter = painterResource(id = R.drawable.edit_square),
                             contentDescription = "Edit Icon",
+                            tint = CollaborantColors.DarkBlue
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Edit Profile",
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
+                    },
+                    onClick = { setOptionsOpenedValue(false) ; navController.navigate("myProfile/edit") },
+                    modifier = Modifier.offset(y = (-4).dp) // Offset for better alignment
+                )
+
+                Divider(
+                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 15.dp).offset(y = (-2).dp)
+                )
+
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.logout),
+                            contentDescription = "Logout Icon",
                             tint = CollaborantColors.DarkBlue
                         )
                     },
@@ -268,8 +297,34 @@ fun OptionsComp(
                             fontSize = 16.sp
                         )
                     },
-                    onClick = { setOptionsOpenedValue(false) ;onSignOut() },
-                    modifier = Modifier.offset(y = (-4).dp) // Offset for better alignment
+                    onClick = { setOptionsOpenedValue(false) ; onSignOut() },
+                )
+
+                Divider(
+                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 15.dp).offset(y = 2.dp)
+                )
+
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.delete),
+                            contentDescription = "Delete Icon",
+                            tint = CollaborantColors.PriorityRed
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Delete account",
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = CollaborantColors.PriorityRed
+                        )
+                    },
+                    onClick = { setOptionsOpenedValue(false) ; setShowDialogValue(true) },
+                    modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }
         }

@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -53,6 +54,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MyProfileFormTopBar(validate: suspend () -> Boolean, navController: NavController) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(

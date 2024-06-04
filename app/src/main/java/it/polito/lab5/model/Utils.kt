@@ -1,8 +1,12 @@
 package it.polito.lab5.model
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -86,21 +90,6 @@ data class User(
     val categories: List<String>
 )
 
-data class U(
-    val id: String,
-    val first: String,
-    val last: String,
-    val nickname: String,
-    val email: String,
-    val telephone: String,
-    val location: String,
-    val description: String,
-    val imageProfile: String,
-    val joinedTeams: Int,
-    val kpiValues: Map<String, KPI>,//List<Pair<Int, KPI>>, // [(teamId, KPI)]
-    val categories: List<String>
-)
-
 data class Task(
     val id: String,
     val title: String,
@@ -146,4 +135,18 @@ fun calculateScore(assignedTasks: Int, completedTasks: Int): Int {
     return Math.round(n * completedTasks.toFloat() * (completedTasks.toFloat() / assignedTasks.toFloat()))
 }
 
+fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+    return byteArrayOutputStream.toByteArray()
+}
 
+fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
+    return try {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        BitmapFactory.decodeStream(inputStream)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}

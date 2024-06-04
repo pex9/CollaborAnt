@@ -9,10 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.myProfile.MyProfileTopBar
-import it.polito.lab5.model.DataBase
-import it.polito.lab5.model.MyApplication
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyProfileViewModel
 import kotlinx.coroutines.launch
@@ -30,16 +29,21 @@ fun MyProfileScreen (
 
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController, isReadState) },
-        topBar = { MyProfileTopBar(
-            onSignOut = {
-                scope.launch {
-                    vm.auth.signOut()
-                    Toast.makeText(context, "Logout", Toast.LENGTH_LONG).show()
-                    navController.navigate("login")
-                }},
-            optionsOpened= vm.optionsOpened,
-            setOptionsOpenedValue = vm::setOptionsOpenedValue,
-            navController) },
+        topBar = {
+            MyProfileTopBar(
+                onSignOut = {
+                    scope.launch {
+                        vm.auth.signOut()
+                        Toast.makeText(context, "Logout", Toast.LENGTH_LONG).show()
+                        navController.navigate("login")
+                    }
+                },
+                optionsOpened = vm.optionsOpened,
+                setOptionsOpenedValue = vm::setOptionsOpenedValue,
+                setShowDialogValue = vm::setShowDialogValue,
+                navController = navController
+            )
+        },
    
     ) { paddingValues ->
         user?.let { user ->
@@ -57,6 +61,22 @@ fun MyProfileScreen (
                 paddingValues = paddingValues
             )
         }
+
+        if(vm.showDialog) {
+            DialogComp(
+                title = "Confirm Delete",
+                text = "Are you sure to delete your account?",
+                onConfirmText = "Delete",
+                onConfirm = {
+                    vm.setShowDialogValue(false)
+                    navController.navigate("login")
+                    scope.launch {
+                        vm.deleteAccount()
+                        Toast.makeText(context, "Account successfully deleted", Toast.LENGTH_LONG).show()
+                    }
+                },
+                onDismiss = { vm.setShowDialogValue(false) }
+            )
+        }
     }
 }
-
