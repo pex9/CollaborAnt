@@ -9,7 +9,6 @@ import androidx.navigation.NavController
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.myProfile.MyProfileTopBar
 import it.polito.lab5.model.DataBase
-import it.polito.lab5.model.UserData
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyProfileViewModel
 

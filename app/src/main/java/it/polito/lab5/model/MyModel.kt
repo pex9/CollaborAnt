@@ -1,10 +1,33 @@
 package it.polito.lab5.model
 
+import android.content.Context
+import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.time.LocalDate
 
-class MyModel {
+class MyModel(context: Context) {
+    init {
+        FirebaseApp.initializeApp(context)
+    }
+
+    private val db = Firebase.firestore
+
+     fun createUser(userId: String, name: String?) {
+        val documentReference = db.collection("Users").document(userId)
+
+        documentReference.set(
+            hashMapOf(
+                "name" to name
+            )
+        )
+            .addOnSuccessListener { Log.d("New User", userId) }
+            .addOnFailureListener { Log.e("Errore", it.toString()) }
+    }
+
     //  Users
     private val _users = MutableStateFlow(DataBase.users)
     val users: StateFlow<List<User>> = _users

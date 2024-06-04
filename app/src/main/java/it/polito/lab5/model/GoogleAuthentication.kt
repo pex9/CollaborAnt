@@ -12,10 +12,7 @@ import it.polito.lab5.R
 import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.cancellation.CancellationException
 
-class GoogleAuthentication(
-    private val context: Context,
-    private val oneTapClient: SignInClient
-) {
+class GoogleAuthentication(private val context: Context, private val oneTapClient: SignInClient) {
     private val auth = Firebase.auth
 
     suspend fun signIn(): IntentSender? {
@@ -36,22 +33,32 @@ class GoogleAuthentication(
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
         return try {
-            val user = auth.signInWithCredential(googleCredentials).await().user
-            SignInResult(
-                data = user?.run {
-                    UserData(
-                        userId = uid,
-                        username = displayName,
-                        profilePictureUrl = photoUrl?.toString()
+
+            val authResult = auth.signInWithCredential(googleCredentials).await()
+            val user = authResult.user
+            val isNewUser = authResult.additionalUserInfo?.isNewUser ?: false
+
+
+            if (isNewUser) {
+                user?.let {
+                    (context.applicationContext as MyApplication).model.createUser(
+                        userId = user.uid,
+                        name = user.displayName
                     )
-                },
+                }
+
+            }
+
+            SignInResult(
+                signedInUserId = user?.uid,
                 errorMessage = null
             )
+
         } catch(e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+
             SignInResult(
-                data = null,
+                signedInUserId = null,
                 errorMessage = e.message
             )
         }
@@ -67,12 +74,8 @@ class GoogleAuthentication(
         }
     }
 
-    fun getSignedInUser(): UserData? = auth.currentUser?.run {
-        UserData(
-            userId = uid,
-            username = displayName,
-            profilePictureUrl = photoUrl?.toString()
-        )
+    fun getSignedInUserId(): String? {
+        return auth.currentUser?.uid
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {

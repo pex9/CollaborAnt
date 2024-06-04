@@ -89,7 +89,7 @@ fun AppNavigation(vm: AppViewModel) {
                 val state by logInViewModel.state.collectAsState()
                 LaunchedEffect(key1 = Unit) {
                     //if already logged
-                    if (googleAuthUiClient.getSignedInUser() != null) {
+                    if (googleAuthUiClient.getSignedInUserId() != null) {
                         navController.navigate("myTeams?teamId={teamId}")
                     }
                 }

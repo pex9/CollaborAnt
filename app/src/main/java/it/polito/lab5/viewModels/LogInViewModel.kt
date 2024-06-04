@@ -22,7 +22,7 @@ class LogInViewModel: ViewModel() {
 
     fun onSignInResult(result: SignInResult) {
         _state.update { it.copy(
-            isSignInSuccessful = result.data != null,
+            isSignInSuccessful = result.signedInUserId != null,
             signInError = result.errorMessage
         ) }
     }
