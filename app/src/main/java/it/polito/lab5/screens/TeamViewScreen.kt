@@ -138,7 +138,7 @@ fun TeamViewScreen(
                             },
                             onClick = {
                                 vm.setOptionsOpenedValue(false)
-                                navController.navigate("viewChat/${vm.teamId}/-1")
+                                navController.navigate("viewChat/${vm.teamId}/${null}")
                             },
                             colors = MenuDefaults.itemColors(textColor = CollaborantColors.BorderGray)
                         )

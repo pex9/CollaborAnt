@@ -104,7 +104,7 @@ fun ChatItem(
             .height(80.dp)
             .clickable {
                 setIsReadStateValue(team.id, true)
-                navController.navigate("viewChat/${team.id}/-1")
+                navController.navigate("viewChat/${team.id}/${null}")
             }
     )
 }

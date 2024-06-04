@@ -25,8 +25,6 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel)
         targetReceiver = r
     }
 
-
-
     var optionsOpened by mutableStateOf(false)
         private set
     fun setOptionsOpenedValue(state : Boolean){
