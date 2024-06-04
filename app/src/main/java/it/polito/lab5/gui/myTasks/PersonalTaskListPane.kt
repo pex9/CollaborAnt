@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -180,22 +182,23 @@ fun PersonalTaskListPane(
             setChosenCategoryValue = setChosenCategoryValue,
         )
     }
+    
+
 
     // Composable LazyColumn for displaying list
     LazyColumn(
         state = scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(p), // Apply padding
+            .padding(p).padding(top = 10.dp), // Apply padding
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
-        /*item {
-
+/*        item {
+            Spacer(modifier = Modifier.height(20.dp))
         }*/
-
         // Display items for each category
-        itemsIndexed(categories) { index, category ->
+        items(categories) { category ->
             // Display tasks for the current category
             CategoryItem(
                 teams = teams,

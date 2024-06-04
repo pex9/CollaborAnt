@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.KPI
@@ -39,11 +41,11 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 fun MyProfileTopBar(navController: NavController) {
     val colors = MaterialTheme.colorScheme
-
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colors.onSecondary,
-            titleContentColor = colors.onPrimary,
+            containerColor = containerColor,
+           /* titleContentColor = colors.onPrimary,*/
         ),
         title = {
             Text(

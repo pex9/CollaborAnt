@@ -103,14 +103,26 @@ fun MyTasksTopBar() {
             containerColor = containerColor,
         ),
         title = {
-            Text(
-                text = "My Tasks",
-                fontFamily = interFamily,
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 22.sp,
-                letterSpacing = 0.sp,
-                modifier = Modifier.padding(start= 5.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.activity),
+                    contentDescription = "My Tasks",
+                    modifier = Modifier.size(26.dp),
+                )
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(
+                    text = "My Tasks",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 23.sp,
+                    letterSpacing = 0.sp,
+                    modifier = Modifier.padding(start= 5.dp)
+                )
+            }
         },
         actions = {
             Text(
@@ -158,7 +170,7 @@ fun CategoryItem(
     // Row containing category name and task count
     Card(
         modifier = Modifier
-            .padding(horizontal = 15.dp, vertical = 13.dp)
+            .padding(horizontal = 15.dp, vertical = 10.dp)
             .clickable { setExpandCategory(category, !flag) }, // Toggle expansion on click,
         colors = CardDefaults.cardColors(
             containerColor = colors.surface,
@@ -307,7 +319,10 @@ fun TaskItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                modifier = Modifier.weight(0.15f).fillMaxSize().padding(start = 6.dp),
+                modifier = Modifier
+                    .weight(0.15f)
+                    .fillMaxSize()
+                    .padding(start = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -325,7 +340,8 @@ fun TaskItem(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(0.85f).padding(start = 5.dp),
+                    .weight(0.85f)
+                    .padding(start = 5.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {

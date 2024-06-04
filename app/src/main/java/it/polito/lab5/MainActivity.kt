@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import it.polito.lab5.navigation.AppNavigation
@@ -18,11 +19,15 @@ import it.polito.lab5.viewModels.AppViewModel
 
 class MainActivity : ComponentActivity() {
     private val appViewModel: AppViewModel by viewModels()
+    //appViewModel.setThemeUserSetting(isSystemInDarkTheme())
+    //save state value isSystemDarktheme to local storage
+
 
     @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             CompositionLocalProvider(LocalTheme provides DarkTheme(appViewModel.themeUserSetting)) {
                 Lab4Theme(darkTheme = LocalTheme.current.isDark) {
                     if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
