@@ -24,7 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.lifecycle.lifecycleScope
-import it.polito.lab5.googlesignIn.GoogleAuthUiClient
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.Taken
 import it.polito.lab5.model.Uploaded
 import it.polito.lab5.screens.IndividualStatsScreen
@@ -64,7 +64,9 @@ import it.polito.lab5.viewModels.TeamViewModel
 import it.polito.lab5.viewModels.UserProfileViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.LifecycleOwner
+import it.polito.lab5.model.MyApplication
 import it.polito.lab5.screens.SignInScreen
 import java.io.File
 import java.io.IOException
@@ -72,11 +74,13 @@ import java.io.IOException
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
 fun AppNavigation(vm: AppViewModel,
-                  googleAuthUiClient: GoogleAuthUiClient,
-                  applicationContext : Context,
-                  lifecycleOwner: LifecycleOwner
+//                  googleAuthUiClient: GoogleAuthentication,
+//                  applicationContext : Context,
+//                  lifecycleOwner: LifecycleOwner
 ) {
     val context = LocalContext.current
+    val googleAuthUiClient = (context.applicationContext as MyApplication).auth
+    val scope = rememberCoroutineScope()
     val navController = rememberNavController() // Remember the navigation controller
     val myChatViewModel: MyChatsViewModel = viewModel(
         factory = AppFactory(context = context)
@@ -102,7 +106,7 @@ fun AppNavigation(vm: AppViewModel,
                     contract = ActivityResultContracts.StartIntentSenderForResult(),
                     onResult = { result ->
                         if (result.resultCode == ComponentActivity.RESULT_OK) {
-                            lifecycleOwner.lifecycleScope.launch {
+                            scope.launch {
                                 val signInResult = googleAuthUiClient.signInWithIntent(
                                     intent = result.data ?: return@launch
                                 )
@@ -114,7 +118,7 @@ fun AppNavigation(vm: AppViewModel,
                 LaunchedEffect(key1 = state.isSignInSuccessful) {
                     if (state.isSignInSuccessful) {
                         Toast.makeText(
-                            applicationContext,
+                            context,
                             "Sign in successful",
                             Toast.LENGTH_LONG
                         ).show()
@@ -127,7 +131,7 @@ fun AppNavigation(vm: AppViewModel,
                     vm = LogInViewModel,
                     state = state,
                     onSignInClick = {
-                        lifecycleOwner.lifecycleScope.launch {
+                        scope.launch {
                             val signInIntentSender = googleAuthUiClient.signIn()
                             launcher.launch(
                                 IntentSenderRequest.Builder(
@@ -489,10 +493,10 @@ fun AppNavigation(vm: AppViewModel,
             MyProfileScreen(vm = myProfileViewModel,
                 navController = navController,
                 onSignOut = {
-                    lifecycleOwner.lifecycleScope.launch {
+                    scope.launch {
                         googleAuthUiClient.signOut()
                         Toast.makeText(
-                            applicationContext,
+                            context,
                             "Signed out",
                             Toast.LENGTH_LONG
                         ).show()

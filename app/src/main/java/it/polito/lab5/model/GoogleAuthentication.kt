@@ -1,4 +1,4 @@
-package it.polito.lab5.googlesignIn
+package it.polito.lab5.model
 
 import android.content.Context
 import android.content.Intent
@@ -9,12 +9,10 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import it.polito.lab5.R
-import it.polito.lab5.model.SignInResult
-import it.polito.lab5.model.UserData
 import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.cancellation.CancellationException
 
-class GoogleAuthUiClient(
+class GoogleAuthentication(
     private val context: Context,
     private val oneTapClient: SignInClient
 ) {
