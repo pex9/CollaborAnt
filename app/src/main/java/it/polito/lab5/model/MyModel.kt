@@ -1,14 +1,11 @@
 package it.polito.lab5.model
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
@@ -18,9 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
-import java.time.ZoneOffset
-import java.util.Date
-import kotlin.time.TimeMark
 
 class MyModel(val context: Context) {
     init {
@@ -100,9 +94,9 @@ class MyModel(val context: Context) {
 
         for(d in result.documents) {
             kpiValues[d.id] = KPI(
-                assignedTasks = d.get("assignedTasks") as Int,
-                completedTasks = d.get("completedTasks") as Int,
-                score = d.get("score") as Int
+                assignedTasks = d.get("assignedTasks") as Long,
+                completedTasks = d.get("completedTasks") as Long,
+                score = d.get("score") as Long
             )
         }
 

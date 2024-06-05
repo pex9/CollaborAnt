@@ -114,9 +114,9 @@ data class Message(
 )
 
 data class KPI (
-    val assignedTasks: Int,
-    val completedTasks: Int,
-    val score: Int
+    val assignedTasks: Long,
+    val completedTasks: Long,
+    val score: Long
 )
 
 //used for login and registration
@@ -130,9 +130,9 @@ data class SignInResult(
     val errorMessage: String?
 )
 
-fun calculateScore(assignedTasks: Int, completedTasks: Int): Int {
+fun calculateScore(assignedTasks: Long, completedTasks: Long): Long {
     val n = 5
-    return Math.round(n * completedTasks.toFloat() * (completedTasks.toFloat() / assignedTasks.toFloat()))
+    return Math.round(n * completedTasks.toFloat() * (completedTasks.toFloat() / assignedTasks.toFloat())).toLong()
 }
 
 fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
