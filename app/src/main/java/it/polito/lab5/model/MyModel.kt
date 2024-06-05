@@ -1,11 +1,14 @@
 package it.polito.lab5.model
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
@@ -15,6 +18,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
+import java.time.ZoneOffset
+import java.util.Date
+import kotlin.time.TimeMark
 
 class MyModel(val context: Context) {
     init {
@@ -80,7 +86,6 @@ class MyModel(val context: Context) {
                     "url" to null
                 ),
                 "joinedTeams" to user.joinedTeams,
-                "kpiValues" to user.kpiValues,
                 "categories" to user.categories
             )
         ).await()
@@ -89,6 +94,19 @@ class MyModel(val context: Context) {
     @Suppress("unchecked_cast")
     fun getUser(userId: String) : Flow<User?> = callbackFlow{
         val documentReference = db.collection("Users").document(userId)
+
+        val kpiValues: MutableMap<String, KPI> = emptyMap<String, KPI>().toMutableMap()
+        val result = documentReference.collection("kpiValues").get().await()
+
+        for(d in result.documents) {
+            kpiValues[d.id] = KPI(
+                assignedTasks = d.get("assignedTasks") as Int,
+                completedTasks = d.get("completedTasks") as Int,
+                score = d.get("score") as Int
+            )
+        }
+
+
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if(snapshot != null) {
                 val image = snapshot.get("image") as Map<String, String?>
@@ -105,7 +123,7 @@ class MyModel(val context: Context) {
                     imageProfile = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                     joinedTeams = snapshot.get("joinedTeams") as Long,
-                    kpiValues = snapshot.get("kpiValues") as Map<String, KPI>,
+                    kpiValues = kpiValues,
                     categories = snapshot.get("categories") as List<String>
                 ))
             } else {
@@ -166,11 +184,33 @@ class MyModel(val context: Context) {
             }
         }
 
-        if(byteArray != null) {
-            uploadImage(
-                userId = userId,
-                byteArray = byteArray,
-                onSuccess = {
+        try {
+            if(byteArray != null) {
+                uploadImage(
+                    userId = userId,
+                    byteArray = byteArray,
+                    onSuccess = {
+                        documentReference.update(
+                            hashMapOf(
+                                "first" to user.first,
+                                "last" to user.last,
+                                "nickname" to user.nickname,
+                                "email" to user.email,
+                                "telephone" to user.telephone,
+                                "location" to user.location,
+                                "description" to user.description,
+                                "image" to mapOf(
+                                    "color" to null,
+                                    "url" to it
+                                ),
+                                "joinedTeams" to user.joinedTeams,
+                                "categories" to user.categories
+                            )
+                        ).await()
+                    },
+                    onFailure = { Log.e("Server Error", it.message.toString()) }
+                )
+            } else {
                     documentReference.update(
                         hashMapOf(
                             "first" to user.first,
@@ -181,63 +221,54 @@ class MyModel(val context: Context) {
                             "location" to user.location,
                             "description" to user.description,
                             "image" to mapOf(
-                                "color" to null,
-                                "url" to it
+                                "color" to (user.imageProfile as Empty).color.value.toString(),
+                                "url" to null
                             ),
                             "joinedTeams" to user.joinedTeams,
-                            "kpiValues" to user.kpiValues,
                             "categories" to user.categories
                         )
                     ).await()
-                },
-                onFailure = { Log.e("Server Error", it.message.toString()) }
-            )
-        } else {
-            try {
-                documentReference.update(
-                    hashMapOf(
-                        "first" to user.first,
-                        "last" to user.last,
-                        "nickname" to user.nickname,
-                        "email" to user.email,
-                        "telephone" to user.telephone,
-                        "location" to user.location,
-                        "description" to user.description,
-                        "image" to mapOf(
-                            "color" to (user.imageProfile as Empty).color.value.toString(),
-                            "url" to null
-                        ),
-                        "joinedTeams" to user.joinedTeams,
-                        "kpiValues" to user.kpiValues,
-                        "categories" to user.categories
-                    )
-                ).await()
 
-                if(deletePrevious) { deleteImage(userId) }
-            } catch (e: Exception) {
-                Log.e("Server Error", e.message.toString())
+                    if(deletePrevious) { deleteImage(userId) }
             }
+
+            if(user.kpiValues.isNotEmpty()) {
+                user.kpiValues.forEach { (teamId, kpi) ->
+                    documentReference.collection("kpiValues").document(teamId)
+                        .set(
+                            mapOf(
+                                "assignedTasks" to kpi.assignedTasks,
+                                "completedTasks" to kpi.completedTasks,
+                                "score" to kpi.score
+                            )
+                        ).await()
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("Server Error", e.message.toString())
         }
     }
 
     //team
-    suspend fun createTeam(team: Team) {
-        val documentReference = db.collection("Teams").document(team.id)
+    suspend fun createTeam(team: Team): String {
+        val documentReference = db.collection("Teams")
 
-        documentReference.set(
+        val result = documentReference.add(
             hashMapOf(
-                "id" to team.id,
                 "name" to team.name,
                 "description" to team.description,
                 "image" to mapOf(
                     "color" to (team.image as Empty).color.value.toString(),
                     "url" to null
                 ),
-                "members" to team.members,
-                "chat" to team.chat
+                "members" to team.members.mapValues { it.value.ordinal }
             )
         ).await()
+
+        return result.id
     }
+
+
 //    @Suppress("unchecked_cast")
 //    fun getTeam(TeamId: String) : Flow<Team?> = callbackFlow{
 //        val documentReference = db.collection("Teams").document(TeamId)

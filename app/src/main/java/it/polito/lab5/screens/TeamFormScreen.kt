@@ -16,7 +16,8 @@ fun TeamFormScreen (
     vm: TeamFormViewModel,
     cameraContract: ManagedActivityResultLauncher<Intent, ActivityResult>,
     galleryContract: ManagedActivityResultLauncher<String, Uri?>,
-    navController: NavController) {
+    navController: NavController
+) {
     Scaffold(
         topBar = { TeamFormTopBar(validate = vm::validate, team = vm.currentTeam, navController = navController) },
     ) { paddingValues ->

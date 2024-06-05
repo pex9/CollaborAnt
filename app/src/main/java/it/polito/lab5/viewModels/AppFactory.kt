@@ -27,7 +27,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 teamId?.let { TeamInfoViewModel(it, model) } as T
             }
             modelClass.isAssignableFrom(TeamFormViewModel::class.java) -> {
-                TeamFormViewModel(teamId, model)  as T
+                TeamFormViewModel(teamId, model, auth)  as T
             }
             modelClass.isAssignableFrom(TaskViewViewModel::class.java) -> {
                 taskId?.let { TaskViewViewModel(taskId, model) } as T
