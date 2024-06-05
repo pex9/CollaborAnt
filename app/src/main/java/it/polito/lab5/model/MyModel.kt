@@ -115,6 +115,7 @@ class MyModel(val context: Context) {
         }
         awaitClose { snapshotListener.remove() }
     }
+
     @Suppress("unchecked_cast")
     fun getUsers(): Flow<List<User>> = callbackFlow {
         val documentReference = db.collection("Users")
@@ -237,60 +238,60 @@ class MyModel(val context: Context) {
             )
         ).await()
     }
-    @Suppress("unchecked_cast")
-    fun getTeam(TeamId: String) : Flow<Team?> = callbackFlow{
-        val documentReference = db.collection("Teams").document(TeamId)
-        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
-            if(snapshot != null) {
-                val image = snapshot.get("image") as Map<String, String?>
-
-                trySend(Team(
-                    id = TeamId,
-                    name = snapshot.get("name").toString(),
-                    description = snapshot.get("description").toString(),
-                    image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
-                    else Uploaded(image["url"]?.toUri() ?: "".toUri()),
-                    members = snapshot.get("members") as List<Pair<String,Role>>,
-                    chat= snapshot.get("chat") as List<Message>
-                ))
-            } else {
-                if (e != null) { Log.e("Server Error", e.message.toString()) }
-                trySend(null)
-            }
-        }
-        awaitClose { snapshotListener.remove() }
-    }
-    fun getTeamsByUserId(userId: String): Flow<List<Team>> = callbackFlow {
-        val documentReference = db.collection("Teams")
-        val query = documentReference.whereArrayContains("members", userId)
-        val snapshotListener = query.addSnapshotListener { snapshot, e ->
-            if (e != null) {
-                close(e)
-                return@addSnapshotListener
-            }
-
-            if (snapshot != null && !snapshot.isEmpty) {
-                val teams = snapshot.documents.mapNotNull { document ->
-                    val image = document.get("image") as Map<String, String?>
-                    Team(
-                        id = document.get("id").toString(),
-                        name = document.get("name").toString(),
-                        description = document.get("description").toString(),
-                        image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
-                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
-                        members = document.get("members") as List<Pair<String,Role>>,
-                        chat= document.get("chat") as List<Message>
-                    )
-                }
-                trySend(teams).isSuccess
-            } else {
-                trySend(emptyList<Team>()).isSuccess
-            }
-        }
-
-        awaitClose { snapshotListener.remove() }
-
-    }
+//    @Suppress("unchecked_cast")
+//    fun getTeam(TeamId: String) : Flow<Team?> = callbackFlow{
+//        val documentReference = db.collection("Teams").document(TeamId)
+//        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+//            if(snapshot != null) {
+//                val image = snapshot.get("image") as Map<String, String?>
+//
+//                trySend(Team(
+//                    id = TeamId,
+//                    name = snapshot.get("name").toString(),
+//                    description = snapshot.get("description").toString(),
+//                    image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+//                    else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+//                    members = snapshot.get("members") as List<Pair<String,Role>>,
+//                    chat= snapshot.get("chat") as List<Message>
+//                ))
+//            } else {
+//                if (e != null) { Log.e("Server Error", e.message.toString()) }
+//                trySend(null)
+//            }
+//        }
+//        awaitClose { snapshotListener.remove() }
+//    }
+//    fun getTeamsByUserId(userId: String): Flow<List<Team>> = callbackFlow {
+//        val documentReference = db.collection("Teams")
+//        val query = documentReference.whereArrayContains("members", userId)
+//        val snapshotListener = query.addSnapshotListener { snapshot, e ->
+//            if (e != null) {
+//                close(e)
+//                return@addSnapshotListener
+//            }
+//
+//            if (snapshot != null && !snapshot.isEmpty) {
+//                val teams = snapshot.documents.mapNotNull { document ->
+//                    val image = document.get("image") as Map<String, String?>
+//                    Team(
+//                        id = document.get("id").toString(),
+//                        name = document.get("name").toString(),
+//                        description = document.get("description").toString(),
+//                        image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+//                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+//                        members = document.get("members") as List<Pair<String,Role>>,
+//                        chat= document.get("chat") as List<Message>
+//                    )
+//                }
+//                trySend(teams).isSuccess
+//            } else {
+//                trySend(emptyList<Team>()).isSuccess
+//            }
+//        }
+//
+//        awaitClose { snapshotListener.remove() }
+//
+//    }
     //update team riceve il team aggiornanto es nuovo membro, ruolo diverso o altro
     suspend fun updateTeam2(teamId: String, team: Team,deletePrevious: Boolean) {
         val documentReference = db.collection("Teams").document(teamId)
@@ -467,11 +468,10 @@ class MyModel(val context: Context) {
 
     fun updateRole(teamId: String, memberId: String, role: Role) {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
-            val idx = team.members.indexOfFirst { it.first == memberId }
+            val members: MutableMap<String, Role> = team.members.toMutableMap()
 
-            if(idx != -1) {
-                members[idx] = memberId to role
+            if(team.members[memberId] != null) {
+                members[memberId] = role
                 updateTeam(teamId, team.copy(members = members))
             }
         }
@@ -479,10 +479,10 @@ class MyModel(val context: Context) {
 
     fun addMember(teamId: String, memberId: String): Boolean {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
+            val members: MutableMap<String, Role> = team.members.toMutableMap()
 
-            if(members.none { it.first == memberId }) {
-                members.add(memberId to Role.JUNIOR_MEMBER)
+            if(members.none { it.key == memberId }) {
+                members[memberId] = Role.JUNIOR_MEMBER
                 updateTeam(teamId, team.copy(members = members))
 
                 //  Update Kpi for new member
@@ -508,8 +508,8 @@ class MyModel(val context: Context) {
 
     fun removeMember(teamId: String, memberId: String) {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableList<Pair<String, Role>> = team.members.toMutableList()
-            members.removeIf { it.first == memberId }
+            val members: MutableMap<String, Role> = team.members.toMutableMap()
+            members.remove(memberId)
 
             updateTeam(teamId, team.copy(members = members))
         }

@@ -211,7 +211,7 @@ fun TeamMembersComp(
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
-    bringPairToHead(team.members, DataBase.LOGGED_IN_USER_ID).forEach { (memberId, role) ->
+    bringPairToHead(team.members.toList(), DataBase.LOGGED_IN_USER_ID).forEach { (memberId, role) ->
         MemberRow(
             users = users,
             memberId = memberId,
@@ -424,7 +424,7 @@ fun MemberOptionsBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
-    val literalRole = when (team.members.find { it.first == member.id }?.second) {
+    val literalRole = when (team.members[member.id]) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
         Role.JUNIOR_MEMBER -> "Junior Member"

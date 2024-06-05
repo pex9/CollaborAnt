@@ -29,7 +29,7 @@ class TeamFormViewModel(private val currentTeamId: String?, val model: MyModel):
                     image = image,
                     name = name,
                     description = description,
-                    members = listOf(DataBase.LOGGED_IN_USER_ID to Role.TEAM_MANAGER),
+                    members = mapOf(DataBase.LOGGED_IN_USER_ID to Role.TEAM_MANAGER),
                     chat = emptyList()
                 ))
             } else {

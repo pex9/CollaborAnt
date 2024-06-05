@@ -71,7 +71,7 @@ data class Team(
     val name: String,
     val description: String,
     val image: ImageProfile,
-    val members: List<Pair<String, Role>>,
+    val members: Map<String, Role>,
     val chat: List<Message>
 )
 

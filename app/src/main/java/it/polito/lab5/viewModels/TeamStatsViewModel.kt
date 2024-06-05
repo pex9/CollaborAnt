@@ -12,7 +12,7 @@ class TeamStatsViewModel(val teamId: String, val model: MyModel): ViewModel() {
 
     private fun computeRankedMembersList(): List<User> {
         val teamMembersPairs = teams.value.find { it.id == teamId }?.members
-        val teamMembers = users.value.filter { it.id in teamMembersPairs!!.map { pair -> pair.first } }
+        val teamMembers = users.value.filter { it.id in teamMembersPairs!!.toList().map { pair -> pair.first } }
         val orderedTeamMembers = teamMembers.sortedBy { user -> user.kpiValues[teamId]?.score ?: 0 }.reversed()
 
         return orderedTeamMembers

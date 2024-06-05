@@ -27,8 +27,8 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
     var roleSelectionOpened: MutableList<Pair<String, Boolean>> = mutableStateListOf()
     init {
         teams.value.find { it.id == teamId }?.let { team ->
-            team.members.filter { it.second != Role.TEAM_MANAGER } }?.forEach {
-                roleSelectionOpened.add(it.first to false)
+            team.members.filter { it.value != Role.TEAM_MANAGER } }?.forEach {
+                roleSelectionOpened.add(it.key to false)
         }
     }
 

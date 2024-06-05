@@ -344,12 +344,13 @@ fun VerticalIndividualStatsPane(
                                 }
                             },
                             headlineContent = {
-                                val role = when(vm.teams.collectAsState().value.find { it.id == teamId }?.members?.find { it.first == member.id }?.second){
+                                val role = when(vm.teams.collectAsState().value.find { it.id == teamId }?.members?.get(member.id)) {
                                     Role.TEAM_MANAGER -> "Team Manager"
                                     Role.SENIOR_MEMBER -> "Senior Member"
                                     Role.JUNIOR_MEMBER -> "Junior Member"
                                     null -> ""
                                 }
+
                                 Column {
                                     Text(
                                         text = "${member.first} ${member.last}",
@@ -693,7 +694,7 @@ fun HorizontalIndividualStatsPane(
                             },
                             headlineContent = {
                                 val role =
-                                    when (vm.teams.collectAsState().value.find { it.id == teamId }?.members?.find { it.first == member.id }?.second) {
+                                    when (vm.teams.collectAsState().value.find { it.id == teamId }?.members?.get(member.id)) {
                                         Role.TEAM_MANAGER -> "Team Manager"
                                         Role.SENIOR_MEMBER -> "Senior Member"
                                         Role.JUNIOR_MEMBER -> "Junior Member"

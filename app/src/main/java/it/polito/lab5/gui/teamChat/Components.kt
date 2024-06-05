@@ -389,9 +389,8 @@ fun ReceiverSelector(
     targetReceiver: String?,
     setReceiverTargetValue: (String?) -> Unit
 ) {
-    val members = team.members.map { it.first }.toSet()
-    val receiverList =
-        users.filter { members.contains(it.id) && it.id != DataBase.LOGGED_IN_USER_ID }
+    val members = team.members.map { it.key }.toSet()
+    val receiverList = users.filter { members.contains(it.id) && it.id != DataBase.LOGGED_IN_USER_ID }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

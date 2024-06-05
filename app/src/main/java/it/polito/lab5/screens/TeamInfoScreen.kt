@@ -13,7 +13,7 @@ import it.polito.lab5.viewModels.TeamInfoViewModel
 fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
     val users = vm.users.collectAsState().value
     val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
-    val loggedInUserRole =  team?.members?.find { it.first == DataBase.LOGGED_IN_USER_ID }?.second
+    val loggedInUserRole =  team?.members?.get(DataBase.LOGGED_IN_USER_ID)
 
     Scaffold(
         topBar = {

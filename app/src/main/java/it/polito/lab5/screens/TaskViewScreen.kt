@@ -23,7 +23,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
     val team = vm.teams.collectAsState().value.find { it.id == task?.teamId }
     val users = vm.users.collectAsState().value
     val isDelegatedMember = task?.teamMembers?.contains(DataBase.LOGGED_IN_USER_ID)
-    val loggedInUserRole = team?.members?.find { it.first == DataBase.LOGGED_IN_USER_ID }?.second
+    val loggedInUserRole = team?.members?.get(DataBase.LOGGED_IN_USER_ID)
 
     // Scaffold for layout structure
     Scaffold(

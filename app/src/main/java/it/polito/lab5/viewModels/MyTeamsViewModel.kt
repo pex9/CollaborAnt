@@ -21,7 +21,7 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel): ViewModel() {
         showBottomSheet = b
     }
 
-    var joinSuccess by mutableStateOf(invitationTeam?.members?.any { it.first == DataBase.LOGGED_IN_USER_ID } ?: false )
+    var joinSuccess by mutableStateOf(invitationTeam?.members?.any { it.key == DataBase.LOGGED_IN_USER_ID } ?: false )
     fun setJoinSuccessValue(b: Boolean) {
         joinSuccess = b
     }

@@ -22,7 +22,7 @@ fun MyChatsScreen(
         bottomBar = { BottomNavigationBarComp(navController, isReadState)}
     ) { paddingValues ->
         val userTeams = vm.teams.collectAsState().value.filter {
-            it.members.any{ member -> member.first == DataBase.LOGGED_IN_USER_ID }
+            it.members.any{ member -> member.key == DataBase.LOGGED_IN_USER_ID }
         }
 
         MyChatsPage(

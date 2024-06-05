@@ -1185,7 +1185,7 @@ fun MembersBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.first) }, DataBase.LOGGED_IN_USER_ID)
+            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.key) }.toList(), DataBase.LOGGED_IN_USER_ID)
 
             items(sortedMembers) {(memberId, role) ->
                 // Display member items

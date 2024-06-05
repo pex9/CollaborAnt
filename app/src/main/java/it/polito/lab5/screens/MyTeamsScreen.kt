@@ -31,7 +31,7 @@ fun MyTeamsScreen (
     isReadState: MutableList<Pair<String, Boolean>>,
 ) {
     val teams = vm.teams.collectAsState().value.filter { team ->
-        team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)
+        team.members.keys.contains(DataBase.LOGGED_IN_USER_ID)
     }
 
     Scaffold(

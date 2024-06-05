@@ -7,7 +7,7 @@ import it.polito.lab5.model.MyModel
 
 class MyChatsViewModel(val model: MyModel): ViewModel() {
     val teams = model.teams
-    private val userTeams = teams.value.filter { team -> team.members.any {it.first == DataBase.LOGGED_IN_USER_ID}}
+    private val userTeams = teams.value.filter { team -> team.members.any {it.key == DataBase.LOGGED_IN_USER_ID}}
 
     var chatsReadState: MutableList<Pair<String, Boolean>> = mutableStateListOf()
     fun setChatsReadStateValue(teamId: String, b: Boolean) {

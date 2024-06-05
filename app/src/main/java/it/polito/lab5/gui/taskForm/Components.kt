@@ -394,7 +394,7 @@ fun MembersPickerBottomSheet(
                         TriStateCheckbox(
                             state = triState,
                             onClick = {
-                                team.members.map { it.first }.forEach { memberId ->
+                                team.members.keys.forEach { memberId ->
                                     if(triState == ToggleableState.On) { removeMember(memberId) }
                                     else { addMember(memberId) }
                                 }
@@ -462,7 +462,7 @@ fun MembersPickerBottomSheet(
             modifier = Modifier.fillMaxSize()
         ) {
             // Iterate over the list of users and display each as a member item
-            items(team.members.sortedBy { it.second }) {(memberId, role) ->
+            items(team.members.toList().sortedBy { it.second }) {(memberId, role) ->
                 // Display member items
                 users.find { it.id == memberId }?.let { user ->
                     MemberItem(

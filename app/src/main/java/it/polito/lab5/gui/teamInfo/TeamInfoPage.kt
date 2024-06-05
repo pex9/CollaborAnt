@@ -239,7 +239,7 @@ fun TeamInfoPage(
 
     if(showMemberSelBottomSheet) {
         MemberSelectionBottomSheet(
-            members = team.members,
+            members = team.members.toList(),
             users = users,
             chosenMember = chosenMember,
             setChosenMemberValue = setChosenMemberValue,
