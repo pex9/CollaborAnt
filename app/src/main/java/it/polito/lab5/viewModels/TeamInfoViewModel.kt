@@ -13,6 +13,8 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
     val users = model.users
     val teams = model.teams
 
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+
     fun deleteTeam(teamId: String) = model.deleteTeam(teamId)
 
     fun updateRole(teamId: String, memberId: String, role: Role) = model.updateRole(teamId, memberId, role)

@@ -9,6 +9,8 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
 
 class TeamViewModel(val teamId: String, val model: MyModel): ViewModel() {
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+
     val teams = model.teams
     val tasks = model.tasks
     val users = model.users

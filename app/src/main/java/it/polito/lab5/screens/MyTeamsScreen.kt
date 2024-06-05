@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.polito.lab5.gui.myTeams.MyTeamsPage
 import it.polito.lab5.gui.myTeams.MyTeamsTopBar
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyTeamsViewModel
 
@@ -30,9 +29,7 @@ fun MyTeamsScreen (
     navController: NavController,
     isReadState: MutableList<Pair<String, Boolean>>,
 ) {
-    val teams = vm.teams.collectAsState().value.filter { team ->
-        team.members.keys.contains(DataBase.LOGGED_IN_USER_ID)
-    }
+    val teams = vm.auth.getSignedInUserId()?.let { vm.getUserTeams(it) }?.collectAsState(initial = emptyList())?.value
 
     Scaffold(
         bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
@@ -51,19 +48,21 @@ fun MyTeamsScreen (
             }
         }
     ) { paddingValues ->
-        MyTeamsPage(
-            teams = teams,
-            invitationTeam = vm.invitationTeam,
-            addMember = vm::addMember,
-            showBottomSheet = vm.showBottomSheet,
-            setShowBottomSheetValue = vm::setShowBottomSheetValue,
-            showDialog = showDialog,
-            setShowDialogValue = setShowDialogValue,
-            joinSuccess = vm.joinSuccess,
-            setJoinSuccessValue = vm::setJoinSuccessValue,
-            navController = navController,
-            paddingValues = paddingValues
-        )
+        if (teams != null) {
+            MyTeamsPage(
+                teams = teams,
+                invitationTeam = vm.invitationTeam,
+                addMember = vm::addMember,
+                showBottomSheet = vm.showBottomSheet,
+                setShowBottomSheetValue = vm::setShowBottomSheetValue,
+                showDialog = showDialog,
+                setShowDialogValue = setShowDialogValue,
+                joinSuccess = vm.joinSuccess,
+                setJoinSuccessValue = vm::setJoinSuccessValue,
+                navController = navController,
+                paddingValues = paddingValues
+            )
+        }
     }
 }
 

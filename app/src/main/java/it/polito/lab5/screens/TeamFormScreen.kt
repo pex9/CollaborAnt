@@ -19,7 +19,7 @@ fun TeamFormScreen (
     navController: NavController
 ) {
     Scaffold(
-        topBar = { TeamFormTopBar(validate = vm::validate, team = vm.currentTeam, navController = navController) },
+        topBar = { TeamFormTopBar(validate = vm::validate, team = vm.currentTeamId, navController = navController) },
     ) { paddingValues ->
         TeamFormPage(
             name = vm.name,

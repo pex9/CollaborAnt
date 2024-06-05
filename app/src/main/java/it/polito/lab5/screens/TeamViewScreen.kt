@@ -42,7 +42,8 @@ fun TeamViewScreen(
     vm: TeamViewModel, // ViewModel for team data
     navController: NavController, // NavController for navigation
 ) {
-    val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    //val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
     val loggedInUserRole =  team?.members?.get(DataBase.LOGGED_IN_USER_ID)
     val colors = MaterialTheme.colorScheme
 
@@ -88,7 +89,9 @@ fun TeamViewScreen(
                     DropdownMenu(
                         expanded = vm.optionsOpened,
                         onDismissRequest = { vm.setOptionsOpenedValue(false) }, // Dismiss the menu when clicked outside
-                        modifier = Modifier.width(77.dp).background(Color.White),
+                        modifier = Modifier
+                            .width(77.dp)
+                            .background(Color.White),
                     ) {
                         DropdownMenuItem(
                             text = {

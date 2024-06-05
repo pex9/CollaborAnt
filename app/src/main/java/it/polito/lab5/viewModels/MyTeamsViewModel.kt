@@ -5,12 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.DataBase
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 
-class MyTeamsViewModel(val teamId: String?, val model: MyModel): ViewModel() {
+class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     val teams = model.teams
 
-    //fun getTeamsByUserId(userId: String) = model.getTeamsByUserId(userId)
+    fun getUserTeams(userId: String) = model.getUserTeams(userId)
 
     val invitationTeam = teams.value.find { it.id == teamId }
 

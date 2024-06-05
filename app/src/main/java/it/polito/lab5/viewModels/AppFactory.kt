@@ -18,7 +18,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(MyTeamsViewModel::class.java) -> {
-                MyTeamsViewModel(teamId, model) as T
+                MyTeamsViewModel(teamId, model, auth) as T
             }
             modelClass.isAssignableFrom(TeamViewModel::class.java) -> {
                 teamId?.let { TeamViewModel(it, model) } as T

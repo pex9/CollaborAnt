@@ -104,7 +104,7 @@ fun MyTeamsPage(
         }
 
         itemsIndexed(teams) { index, team ->
-            TeamItem(team,navController)
+            TeamItem(team, navController)
 
             // Add divider except for the last category
             if(index != teams.size - 1) {

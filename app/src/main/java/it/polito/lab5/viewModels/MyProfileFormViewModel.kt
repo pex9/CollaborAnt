@@ -177,7 +177,7 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             ""
     }
 
-    var imageProfile: ImageProfile by mutableStateOf(user?.imageProfile?: Empty(pickRandomColor()))
+    var imageProfile: ImageProfile by mutableStateOf(Empty(pickRandomColor()))
         private set
     fun setImageProfileValue(i: ImageProfile) {
         imageProfile = i

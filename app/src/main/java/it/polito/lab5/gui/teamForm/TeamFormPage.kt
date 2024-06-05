@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,14 +44,16 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextFieldComp
-import it.polito.lab5.model.Team
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TeamFormTopBar(validate: () -> String, navController: NavController, team: Team?) {
+fun TeamFormTopBar(validate: suspend () -> String, navController: NavController, team: String?) {
+    val scope = rememberCoroutineScope()
+
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
@@ -89,11 +92,13 @@ fun TeamFormTopBar(validate: () -> String, navController: NavController, team: T
         actions = {
             TextButton(
                 onClick = {
-                    val teamId = validate()
-                    if(teamId.isNotBlank()) {
-                        navController.popBackStack()
-                        if(team == null) {
-                            navController.navigate("infoTeam/${teamId}")
+                    scope.launch {
+                        val teamId = validate()
+                        if(teamId.isNotBlank()) {
+                            navController.popBackStack()
+                            if(team == null) {
+                                navController.navigate("infoTeam/${teamId}")
+                            }
                         }
                     }
                 },

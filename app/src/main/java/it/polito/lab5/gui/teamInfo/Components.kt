@@ -212,10 +212,16 @@ fun TeamMembersComp(
     setSelectedUserValue: (User?) -> Unit
 ) {
     bringPairToHead(team.members.toList(), DataBase.LOGGED_IN_USER_ID).forEach { (memberId, role) ->
+        val memberRole = when(role) {
+            0L -> Role.TEAM_MANAGER
+            1L -> Role.SENIOR_MEMBER
+            else -> Role.JUNIOR_MEMBER
+        }
+
         MemberRow(
             users = users,
             memberId = memberId,
-            role = role as Role,
+            role = memberRole,
             loggedInUserRole = loggedInUserRole,
             updateRole = { id, r -> updateRole(team.id, id, r) },
             roleSelectionOpened = roleSelectionOpened,
