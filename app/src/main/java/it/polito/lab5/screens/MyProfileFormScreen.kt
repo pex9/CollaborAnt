@@ -19,7 +19,13 @@ fun MyProfileFormScreen(
     galleryContract: ManagedActivityResultLauncher<String, Uri?>,
 ) {
     Scaffold(
-        topBar = { MyProfileFormTopBar(vm::validate, navController) },
+        topBar = {
+            MyProfileFormTopBar(
+                validate = vm::validate,
+                showLoading = vm.showLoading,
+                navController = navController
+            )
+        },
     ){ paddingValues ->
         MyProfileFormPage(
             first = vm.firstNameValue,

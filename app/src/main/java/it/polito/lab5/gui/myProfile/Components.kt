@@ -277,7 +277,7 @@ fun OptionsComp(
                 Divider(
                     color = CollaborantColors.BorderGray.copy(0.4f),
                     thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 15.dp).offset(y = (-2).dp)
+                    modifier = Modifier.padding(horizontal = 15.dp)
                 )
 
                 DropdownMenuItem(
@@ -297,6 +297,7 @@ fun OptionsComp(
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; onSignOut() },
+                    modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }
         }

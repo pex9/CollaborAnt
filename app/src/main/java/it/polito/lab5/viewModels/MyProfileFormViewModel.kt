@@ -1,5 +1,6 @@
 package it.polito.lab5.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -33,26 +34,31 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
             && emailError.isBlank() && locationError.isBlank() && descriptionError.isBlank()
             && telephoneError.isBlank())
         {
+            try {
+                user?.let { user ->
+                    viewModelScope.async {
+                        showLoading = true
+                        updateUser(
+                            userid = user.id,
+                            user = user.copy(
+                                first = firstNameValue,
+                                last = lastNameValue,
+                                nickname = nicknameValue,
+                                email = emailValue,
+                                location = locationValue,
+                                description = descriptionValue,
+                                telephone = telephoneValue,
+                                imageProfile = imageProfile
+                            ),
+                            deletePrevious = user.imageProfile !is Empty && imageProfile is Empty
+                        )
+                    }.await()
 
-            user?.let { user ->
-                viewModelScope.async {
-                    updateUser(
-                        userid = user.id,
-                        user = user.copy(
-                            first = firstNameValue,
-                            last = lastNameValue,
-                            nickname = nicknameValue,
-                            email = emailValue,
-                            location = locationValue,
-                            description = descriptionValue,
-                            telephone = telephoneValue,
-                            imageProfile = imageProfile
-                        ),
-                        deletePrevious = user.imageProfile !is Empty && imageProfile is Empty
-                    )
-                }.await()
-
-                return true
+                    return true
+                }
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+                showLoading = false
             }
         }
         return false
@@ -182,6 +188,9 @@ class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthent
     fun setShowBottomSheetValue(b: Boolean) {
         showBottomSheet = b
     }
+
+    var showLoading by mutableStateOf(false)
+        private set
 
     init {
         val userid = auth.getSignedInUserId()

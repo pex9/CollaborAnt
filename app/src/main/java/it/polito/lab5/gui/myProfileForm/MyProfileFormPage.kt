@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -52,9 +52,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileFormTopBar(validate: suspend () -> Boolean, navController: NavController) {
+fun MyProfileFormTopBar(
+    validate: suspend () -> Boolean,
+    showLoading: Boolean,
+    navController: NavController
+) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -86,22 +89,30 @@ fun MyProfileFormTopBar(validate: suspend () -> Boolean, navController: NavContr
             }
         },
         actions = {
-            TextButton(
-                onClick = {
-                    scope.launch { if(validate()) navController.popBackStack() }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text ="Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = CollaborantColors.DarkBlue,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            }
+            else{
+                TextButton(
+                    onClick = {
+                        scope.launch { if(validate()) navController.popBackStack() }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = CollaborantColors.DarkBlue
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text ="Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
     )

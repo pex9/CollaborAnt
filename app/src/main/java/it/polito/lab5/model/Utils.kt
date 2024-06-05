@@ -137,7 +137,7 @@ fun calculateScore(assignedTasks: Int, completedTasks: Int): Int {
 
 fun bitmapToByteArray(bitmap: Bitmap): ByteArray {
     val byteArrayOutputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
     return byteArrayOutputStream.toByteArray()
 }
 

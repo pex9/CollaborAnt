@@ -115,6 +115,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
         is Uploaded ->
             AsyncImage(
                 model = imageProfile.image,
+                placeholder = painterResource(id = R.drawable.profile_placeholder),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Image Profile",
                 modifier = Modifier
