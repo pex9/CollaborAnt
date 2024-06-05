@@ -18,6 +18,8 @@ class TeamViewModel(val teamId: String, val model: MyModel): ViewModel() {
     var prioritySort: MutableState<String> = mutableStateOf("None")
     var dateSort: MutableState<String> = mutableStateOf("None")
 
+    //fun getTeamsByUserId(userId: String) = model.getTeamsByUserId(userId)
+
     fun nextPriority(currentPriority: Tag?){
         when(currentPriority){
             Tag.HIGH -> priorityFilter.value = null

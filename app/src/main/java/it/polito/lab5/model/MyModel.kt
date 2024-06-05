@@ -18,17 +18,32 @@ import java.time.LocalDate
 
 class MyModel(val context: Context) {
     init {
-        FirebaseApp.initializeApp(context)
+            FirebaseApp.initializeApp(context)
+        }
+
+        private val db = Firebase.firestore
+        private val storage = FirebaseStorage.getInstance()
+
+        private suspend fun uploadImage(userId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
+            val storageRef = storage.reference
+
+            try {
+                val fileName = "images/${userId}.jpg"
+                val imageRef = storageRef.child(fileName)
+
+                // Upload ByteArray to Firebase Storage
+                imageRef.putBytes(byteArray).await()
+                val downloadUrl = imageRef.downloadUrl.await()
+                onSuccess(downloadUrl.toString())
+            } catch (e: Exception) {
+                onFailure(e)
+        }
     }
-
-    private val db = Firebase.firestore
-    private val storage = FirebaseStorage.getInstance()
-
-    private suspend fun uploadImage(userId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
+    private suspend fun uploadImageTeam(TeamId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
         val storageRef = storage.reference
 
         try {
-            val fileName = "images/${userId}.jpg"
+            val fileName = "images/${TeamId}.jpg"
             val imageRef = storageRef.child(fileName)
 
             // Upload ByteArray to Firebase Storage
@@ -100,6 +115,45 @@ class MyModel(val context: Context) {
         }
         awaitClose { snapshotListener.remove() }
     }
+    @Suppress("unchecked_cast")
+    fun getUsers(): Flow<List<User>> = callbackFlow {
+        val documentReference = db.collection("Users")
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                close(e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                val users = snapshot.documents.mapNotNull { document ->
+                    val image = document.get("image") as Map<String, String?>
+                    try {
+                        User(
+                            id = document.id,
+                            first = document.getString("first") ?: "",
+                            last = document.getString("last") ?: "",
+                            nickname = document.getString("nickname") ?: "",
+                            email = document.getString("email") ?: "",
+                            telephone = document.getString("telephone") ?: "",
+                            location = document.getString("location") ?: "",
+                            description = document.getString("description") ?: "",
+                            imageProfile = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                            else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                            joinedTeams = document.getLong("joinedTeams") ?: 0L,
+                            kpiValues = document.get("kpiValues") as? Map<String, KPI> ?: emptyMap(),
+                            categories = document.get("categories") as? List<String> ?: emptyList()
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                trySend(users).isSuccess
+            } else {
+                trySend(emptyList<User>()).isSuccess
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
 
     suspend fun updateUser(userId: String, user: User, deletePrevious: Boolean) {
         val documentReference = db.collection("Users").document(userId)
@@ -164,6 +218,141 @@ class MyModel(val context: Context) {
             }
         }
     }
+
+    //team
+    suspend fun createTeam(team: Team) {
+        val documentReference = db.collection("Teams").document(team.id)
+
+        documentReference.set(
+            hashMapOf(
+                "id" to team.id,
+                "name" to team.name,
+                "description" to team.description,
+                "image" to mapOf(
+                    "color" to (team.image as Empty).color.value.toString(),
+                    "url" to null
+                ),
+                "members" to team.members,
+                "chat" to team.chat
+            )
+        ).await()
+    }
+    @Suppress("unchecked_cast")
+    fun getTeam(TeamId: String) : Flow<Team?> = callbackFlow{
+        val documentReference = db.collection("Teams").document(TeamId)
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if(snapshot != null) {
+                val image = snapshot.get("image") as Map<String, String?>
+
+                trySend(Team(
+                    id = TeamId,
+                    name = snapshot.get("name").toString(),
+                    description = snapshot.get("description").toString(),
+                    image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                    else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                    members = snapshot.get("members") as List<Pair<String,Role>>,
+                    chat= snapshot.get("chat") as List<Message>
+                ))
+            } else {
+                if (e != null) { Log.e("Server Error", e.message.toString()) }
+                trySend(null)
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+    fun getTeamsByUserId(userId: String): Flow<List<Team>> = callbackFlow {
+        val documentReference = db.collection("Teams")
+        val query = documentReference.whereArrayContains("members", userId)
+        val snapshotListener = query.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                close(e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                val teams = snapshot.documents.mapNotNull { document ->
+                    val image = document.get("image") as Map<String, String?>
+                    Team(
+                        id = document.get("id").toString(),
+                        name = document.get("name").toString(),
+                        description = document.get("description").toString(),
+                        image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                        members = document.get("members") as List<Pair<String,Role>>,
+                        chat= document.get("chat") as List<Message>
+                    )
+                }
+                trySend(teams).isSuccess
+            } else {
+                trySend(emptyList<Team>()).isSuccess
+            }
+        }
+
+        awaitClose { snapshotListener.remove() }
+
+    }
+    //update team riceve il team aggiornanto es nuovo membro, ruolo diverso o altro
+    suspend fun updateTeam2(teamId: String, team: Team,deletePrevious: Boolean) {
+        val documentReference = db.collection("Teams").document(teamId)
+        val byteArray = when (team.image) {
+            is Empty -> null
+            is Taken -> bitmapToByteArray(team.image.image)
+            is Uploaded -> uriToBitmap(context, team.image.image)?.let {
+                bitmapToByteArray(it)
+            }
+        }
+        if(byteArray != null) {
+            uploadImageTeam(
+                TeamId = teamId,
+                byteArray = byteArray,
+                onSuccess = {
+                    documentReference.update(
+                        hashMapOf(
+                            "name" to team.name,
+                            "description" to team.description,
+                            "image" to mapOf(
+                                "color" to null,
+                                "url" to it
+                            ),
+                            "members" to team.members,
+                            "chat" to team.chat,
+                        )
+                    ).await()
+                },
+                onFailure = { Log.e("Server Error", it.message.toString()) }
+            )
+        } else {
+            try {
+                documentReference.update(
+                    hashMapOf(
+                        "name" to team.name,
+                        "description" to team.description,
+                        "image" to mapOf(
+                            "color" to (team.image as Empty).color.value.toString(),
+                            "url" to null
+                        ),
+                        "members" to team.members,
+                        "chat" to team.chat,
+                    )
+                ).await()
+                if (deletePrevious) {
+                    deleteImage(teamId)
+                }
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+            }
+        }
+
+    }
+    suspend fun deleteTeam2(teamId: String) {
+        val documentReference = db.collection("Teams").document(teamId)
+        try {
+            documentReference.delete().await()
+        } catch (e: Exception) {
+            Log.e("Server Error", e.message.toString())
+        }
+    }
+
 
     //  Users
     private val _users = MutableStateFlow(DataBase.users)

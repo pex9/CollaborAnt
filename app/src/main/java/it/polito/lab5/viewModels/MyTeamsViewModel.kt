@@ -10,6 +10,8 @@ import it.polito.lab5.model.MyModel
 class MyTeamsViewModel(val teamId: String?, val model: MyModel): ViewModel() {
     val teams = model.teams
 
+    //fun getTeamsByUserId(userId: String) = model.getTeamsByUserId(userId)
+
     val invitationTeam = teams.value.find { it.id == teamId }
 
     fun addMember(teamId: String, memberId: String) = model.addMember(teamId, memberId)
