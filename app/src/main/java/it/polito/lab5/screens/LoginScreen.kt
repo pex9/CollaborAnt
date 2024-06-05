@@ -37,28 +37,25 @@ fun LoginScreen(vm : LogInViewModel, navController: NavController) {
         }
     )
 
-    LaunchedEffect(key1 = state.isSignInSuccessful) {
+    LaunchedEffect(key1 = state) {
         if (state.isSignInSuccessful) {
-            Toast.makeText(context, "Sign in successful", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Login successful", Toast.LENGTH_LONG).show()
             navController.navigate("myTeams?teamId={teamId}")
             vm.resetState()
-        }
-    }
-
-    LaunchedEffect(key1 = state.signInError) {
-        state.signInError?.let { error ->
-            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+        } else if(state.signInError != null) {
+            vm.setShowLoadingValue(false)
+            Toast.makeText(context, state.signInError, Toast.LENGTH_LONG).show()
         }
     }
 
     LoginPage(
+        showLoading = vm.showLoading,
         onSignInClick = {
+            vm.setShowLoadingValue(true)
             scope.launch {
                 val signInIntentSender = auth.signIn()
                 launcher.launch(
-                    IntentSenderRequest.Builder(
-                        signInIntentSender ?: return@launch
-                    ).build()
+                    IntentSenderRequest.Builder(signInIntentSender ?: return@launch).build()
                 )
             }
         }

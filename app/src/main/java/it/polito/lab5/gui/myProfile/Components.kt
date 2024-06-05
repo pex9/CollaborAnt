@@ -233,7 +233,6 @@ fun OptionsComp(
     onSignOut: ()-> Unit,
     optionsOpened: Boolean,
     navController: NavController,
-    setShowDialogValue: (Boolean) -> Unit,
     setOptionsOpenedValue: (Boolean) -> Unit,
 ) {
     // Box to align content at the bottom end of the layout
@@ -298,33 +297,6 @@ fun OptionsComp(
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; onSignOut() },
-                )
-
-                Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(horizontal = 15.dp).offset(y = 2.dp)
-                )
-
-                DropdownMenuItem(
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.delete),
-                            contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = "Delete account",
-                            fontFamily = interFamily,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp,
-                            color = CollaborantColors.PriorityRed
-                        )
-                    },
-                    onClick = { setOptionsOpenedValue(false) ; setShowDialogValue(true) },
-                    modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }
         }

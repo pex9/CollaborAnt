@@ -9,7 +9,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
-import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.myProfile.MyProfileTopBar
 import it.polito.lab5.navigation.BottomNavigationBarComp
@@ -40,7 +39,6 @@ fun MyProfileScreen (
                 },
                 optionsOpened = vm.optionsOpened,
                 setOptionsOpenedValue = vm::setOptionsOpenedValue,
-                setShowDialogValue = vm::setShowDialogValue,
                 navController = navController
             )
         },
@@ -59,23 +57,6 @@ fun MyProfileScreen (
                 joinedTeams = user.joinedTeams,
                 kpi = user.kpiValues,
                 paddingValues = paddingValues
-            )
-        }
-
-        if(vm.showDialog) {
-            DialogComp(
-                title = "Confirm Delete",
-                text = "Are you sure to delete your account?",
-                onConfirmText = "Delete",
-                onConfirm = {
-                    vm.setShowDialogValue(false)
-                    navController.navigate("login")
-                    scope.launch {
-                        vm.deleteAccount()
-                        Toast.makeText(context, "Account successfully deleted", Toast.LENGTH_LONG).show()
-                    }
-                },
-                onDismiss = { vm.setShowDialogValue(false) }
             )
         }
     }

@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 class MyProfileFormViewModel(val model: MyModel, private val auth: GoogleAuthentication) : ViewModel() {
     private var user: User? = null
 
-    private suspend fun updateUser(userid: String, user: User, deletePrevious: Boolean) = model.updateUser1(userid, user, deletePrevious)
+    private suspend fun updateUser(userid: String, user: User, deletePrevious: Boolean) = model.updateUser(userid, user, deletePrevious)
 
     suspend fun  validate() : Boolean {
         checkFirstName()

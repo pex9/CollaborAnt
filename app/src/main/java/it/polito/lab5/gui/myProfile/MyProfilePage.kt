@@ -38,7 +38,6 @@ fun MyProfileTopBar(
     onSignOut : () -> Unit,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
-    setShowDialogValue: (Boolean) -> Unit,
     navController: NavController
 ) {
     val colors = MaterialTheme.colorScheme
@@ -70,7 +69,6 @@ fun MyProfileTopBar(
                 onSignOut = onSignOut,
                 optionsOpened = optionsOpened,
                 setOptionsOpenedValue = setOptionsOpenedValue,
-                setShowDialogValue = setShowDialogValue,
                 navController = navController
             )
         }

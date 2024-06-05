@@ -3,6 +3,7 @@ package it.polito.lab5.model
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.auth.GoogleAuthProvider
@@ -71,7 +72,7 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
             )
 
         } catch(e: Exception) {
-            e.printStackTrace()
+            Log.e("Server Error", e.message.toString())
 
             SignInResult(
                 signedInUserId = null,
@@ -92,10 +93,6 @@ class GoogleAuthentication(private val context: Context, private val oneTapClien
 
     fun getSignedInUserId(): String? {
         return auth.currentUser?.uid
-    }
-
-    suspend fun deleteGoogleAccount() {
-        auth.currentUser?.delete()?.await()
     }
 
     private fun buildSignInRequest(): BeginSignInRequest {

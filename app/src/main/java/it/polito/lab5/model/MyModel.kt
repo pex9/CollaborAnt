@@ -2,7 +2,6 @@ package it.polito.lab5.model
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
@@ -49,7 +48,7 @@ class MyModel(val context: Context) {
         imageRef.delete().await()
     }
 
-    fun createUser(user: User) {
+    suspend fun createUser(user: User) {
         val documentReference = db.collection("Users").document(user.id)
 
         documentReference.set(
@@ -69,13 +68,7 @@ class MyModel(val context: Context) {
                 "kpiValues" to user.kpiValues,
                 "categories" to user.categories
             )
-        )
-        .addOnSuccessListener {
-            Toast.makeText(context, "Signed In successfully", Toast.LENGTH_SHORT).show()
-        }
-        .addOnFailureListener {
-            Toast.makeText(context, it.message, Toast.LENGTH_SHORT).show()
-        }
+        ).await()
     }
 
     @Suppress("unchecked_cast")
@@ -101,14 +94,14 @@ class MyModel(val context: Context) {
                     categories = snapshot.get("categories") as List<String>
                 ))
             } else {
-                Log.e("Server Error", e.toString())
+                if (e != null) { Log.e("Server Error", e.message.toString()) }
                 trySend(null)
             }
         }
         awaitClose { snapshotListener.remove() }
     }
 
-    suspend fun updateUser1(userId: String, user: User, deletePrevious: Boolean) {
+    suspend fun updateUser(userId: String, user: User, deletePrevious: Boolean) {
         val documentReference = db.collection("Users").document(userId)
         val byteArray = when (user.imageProfile) {
             is Empty -> null
@@ -142,7 +135,7 @@ class MyModel(val context: Context) {
                         )
                     ).await()
                 },
-                onFailure = { Log.e("Server Error", it.toString()) }
+                onFailure = { Log.e("Server Error", it.message.toString()) }
             )
         } else {
             try {
@@ -165,25 +158,18 @@ class MyModel(val context: Context) {
                     )
                 ).await()
 
-                if(deletePrevious) {
-                    deleteImage(userId)
-                }
+                if(deletePrevious) { deleteImage(userId) }
             } catch (e: Exception) {
-                Log.e("Server Error", e.toString())
+                Log.e("Server Error", e.message.toString())
             }
         }
-    }
-
-    suspend fun deleteUser(userId: String) {
-        deleteImage(userId)
-        db.collection("Users").document(userId).delete().await()
     }
 
     //  Users
     private val _users = MutableStateFlow(DataBase.users)
     val users: StateFlow<List<User>> = _users
 
-    fun updateUser(userId: String, user: User) {
+    fun updateU(userId: String, user: User) {
         val updatedUsers = _users.value.toMutableList()
         val index = updatedUsers.indexOfFirst { it.id == userId }
 
@@ -211,7 +197,7 @@ class MyModel(val context: Context) {
                     kpiValues[teamId] = kpi.copy(completedTasks = newCompletedTasks, score = newScore)
                 }
 
-                updateUser(userId, user.copy(kpiValues = kpiValues))
+                updateU(userId, user.copy(kpiValues = kpiValues))
             }
         }
     }
@@ -220,7 +206,7 @@ class MyModel(val context: Context) {
     fun addCategoryToUser(userId: String, c: String) {
         _users.value.find { it.id == userId }?.let { user ->
             val categories = user.categories.toMutableList().apply { add(c) }
-            updateUser(userId, user.copy(categories = categories))
+            updateU(userId, user.copy(categories = categories))
         }
     }
 
@@ -231,7 +217,7 @@ class MyModel(val context: Context) {
                 val idx = categories.indexOf(old)
                 categories[idx] = new
 
-                updateUser(userId, user.copy(categories = categories))
+                updateU(userId, user.copy(categories = categories))
             }
         }
     }
@@ -250,7 +236,7 @@ class MyModel(val context: Context) {
                 val categories = user.categories.toMutableList()
                 categories.remove(c)
 
-                updateUser(userId, user.copy(categories = categories))
+                updateU(userId, user.copy(categories = categories))
             }
         }
     }
@@ -319,7 +305,7 @@ class MyModel(val context: Context) {
                         score = calculateScore(0, 0)
                     )
 
-                    updateUser(user.id, user.copy(
+                    updateU(user.id, user.copy(
                         joinedTeams = user.joinedTeams + 1,
                         kpiValues = updatedKpiValues
                     ))
