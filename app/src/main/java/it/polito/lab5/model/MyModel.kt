@@ -21,44 +21,31 @@ class MyModel(val context: Context) {
             FirebaseApp.initializeApp(context)
         }
 
-        private val db = Firebase.firestore
-        private val storage = FirebaseStorage.getInstance()
+    private val db = Firebase.firestore
+    private val storage = FirebaseStorage.getInstance()
 
-        private suspend fun uploadImage(userId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
-            val storageRef = storage.reference
-
-            try {
-                val fileName = "images/${userId}.jpg"
-                val imageRef = storageRef.child(fileName)
-
-                // Upload ByteArray to Firebase Storage
-                imageRef.putBytes(byteArray).await()
-                val downloadUrl = imageRef.downloadUrl.await()
-                onSuccess(downloadUrl.toString())
-            } catch (e: Exception) {
-                onFailure(e)
-        }
-    }
-    private suspend fun uploadImageTeam(TeamId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
+    private suspend fun uploadImage(imageId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
         val storageRef = storage.reference
 
         try {
-            val fileName = "images/${TeamId}.jpg"
+            val fileName = "images/${imageId}.jpg"
             val imageRef = storageRef.child(fileName)
-
+            Log.e("Server Error", "D")
             // Upload ByteArray to Firebase Storage
             imageRef.putBytes(byteArray).await()
+            Log.e("Server Error", "C")
             val downloadUrl = imageRef.downloadUrl.await()
+            Log.e("Server Error", "Prima")
             onSuccess(downloadUrl.toString())
         } catch (e: Exception) {
             onFailure(e)
         }
     }
 
-    private suspend fun deleteImage(userId: String) {
+    private suspend fun deleteImage(imageId: String) {
         val storageRef = storage.reference
 
-        val fileName = "images/${userId}.jpg"
+        val fileName = "images/${imageId}.jpg"
         val imageRef = storageRef.child(fileName)
         imageRef.delete().await()
     }
@@ -178,33 +165,12 @@ class MyModel(val context: Context) {
             }
         }
 
-        try {
-            if(byteArray != null) {
-                uploadImage(
-                    userId = userId,
-                    byteArray = byteArray,
-                    onSuccess = {
-                        documentReference.update(
-                            hashMapOf(
-                                "first" to user.first,
-                                "last" to user.last,
-                                "nickname" to user.nickname,
-                                "email" to user.email,
-                                "telephone" to user.telephone,
-                                "location" to user.location,
-                                "description" to user.description,
-                                "image" to mapOf(
-                                    "color" to null,
-                                    "url" to it
-                                ),
-                                "joinedTeams" to user.joinedTeams,
-                                "categories" to user.categories
-                            )
-                        ).await()
-                    },
-                    onFailure = { Log.e("Server Error", it.message.toString()) }
-                )
-            } else {
+
+        if(byteArray != null) {
+            uploadImage(
+                imageId = userId,
+                byteArray = byteArray,
+                onSuccess = {
                     documentReference.update(
                         hashMapOf(
                             "first" to user.first,
@@ -215,53 +181,101 @@ class MyModel(val context: Context) {
                             "location" to user.location,
                             "description" to user.description,
                             "image" to mapOf(
-                                "color" to (user.imageProfile as Empty).color.value.toString(),
-                                "url" to null
+                                "color" to null,
+                                "url" to it
                             ),
                             "joinedTeams" to user.joinedTeams,
                             "categories" to user.categories
                         )
                     ).await()
+                },
+                onFailure = { Log.e("Server Error", it.message.toString()) }
+            )
+        } else {
+                documentReference.update(
+                    hashMapOf(
+                        "first" to user.first,
+                        "last" to user.last,
+                        "nickname" to user.nickname,
+                        "email" to user.email,
+                        "telephone" to user.telephone,
+                        "location" to user.location,
+                        "description" to user.description,
+                        "image" to mapOf(
+                            "color" to (user.imageProfile as Empty).color.value.toString(),
+                            "url" to null
+                        ),
+                        "joinedTeams" to user.joinedTeams,
+                        "categories" to user.categories
+                    )
+                ).await()
 
-                    if(deletePrevious) { deleteImage(userId) }
-            }
+                if(deletePrevious) { deleteImage(userId) }
+        }
 
-            if(user.kpiValues.isNotEmpty()) {
-                user.kpiValues.forEach { (teamId, kpi) ->
-                    documentReference.collection("kpiValues").document(teamId)
-                        .set(
-                            mapOf(
-                                "assignedTasks" to kpi.assignedTasks,
-                                "completedTasks" to kpi.completedTasks,
-                                "score" to kpi.score
-                            )
-                        ).await()
-                }
+        if(user.kpiValues.isNotEmpty()) {
+            user.kpiValues.forEach { (teamId, kpi) ->
+                documentReference.collection("kpiValues").document(teamId)
+                    .set(
+                        mapOf(
+                            "assignedTasks" to kpi.assignedTasks,
+                            "completedTasks" to kpi.completedTasks,
+                            "score" to kpi.score
+                        )
+                    ).await()
             }
-        } catch (e: Exception) {
-            Log.e("Server Error", e.message.toString())
         }
     }
 
     //team
     suspend fun createTeam(team: Team): String {
         val documentReference = db.collection("Teams")
+        val byteArray = when (team.image) {
+            is Empty -> null
+            is Taken -> bitmapToByteArray(team.image.image)
+            is Uploaded -> uriToBitmap(context, team.image.image)?.let {
+                bitmapToByteArray(it)
+            }
+        }
 
+        //  Create the new team document
         val result = documentReference.add(
             hashMapOf(
                 "name" to team.name,
                 "description" to team.description,
-                "image" to mapOf(
-                    "color" to (team.image as Empty).color.value.toString(),
-                    "url" to null
-                ),
                 "members" to team.members.mapValues { it.value.ordinal }
             )
         ).await()
 
+        Log.e("Server Error", "1")
+
+        if(byteArray != null) {
+            Log.e("Server Error", "Foto")
+            uploadImage(
+                imageId = result.id,
+                byteArray = byteArray,
+                onSuccess = {   //  Update the "image" field of the new document
+                    Log.e("Server Error", "Eccomi")
+                    result.update("image",
+                        mapOf(
+                            "color" to null,
+                            "url" to it
+                        )
+                    ).await()
+                },
+                onFailure = { Log.e("Server Error", it.message.toString()) }
+            )
+        } else {
+            result.update("image",
+                mapOf(
+                    "color" to (team.image as Empty).color.value.toString(),
+                    "url" to null
+                )
+            ).await()
+        }
+
         return result.id
     }
-
 
 //    @Suppress("unchecked_cast")
 //    fun getTeam(TeamId: String) : Flow<Team?> = callbackFlow{
@@ -318,66 +332,66 @@ class MyModel(val context: Context) {
 //
 //    }
     //update team riceve il team aggiornanto es nuovo membro, ruolo diverso o altro
-    suspend fun updateTeam2(teamId: String, team: Team,deletePrevious: Boolean) {
-        val documentReference = db.collection("Teams").document(teamId)
-        val byteArray = when (team.image) {
-            is Empty -> null
-            is Taken -> bitmapToByteArray(team.image.image)
-            is Uploaded -> uriToBitmap(context, team.image.image)?.let {
-                bitmapToByteArray(it)
-            }
-        }
-        if(byteArray != null) {
-            uploadImageTeam(
-                TeamId = teamId,
-                byteArray = byteArray,
-                onSuccess = {
-                    documentReference.update(
-                        hashMapOf(
-                            "name" to team.name,
-                            "description" to team.description,
-                            "image" to mapOf(
-                                "color" to null,
-                                "url" to it
-                            ),
-                            "members" to team.members,
-                            "chat" to team.chat,
-                        )
-                    ).await()
-                },
-                onFailure = { Log.e("Server Error", it.message.toString()) }
-            )
-        } else {
-            try {
-                documentReference.update(
-                    hashMapOf(
-                        "name" to team.name,
-                        "description" to team.description,
-                        "image" to mapOf(
-                            "color" to (team.image as Empty).color.value.toString(),
-                            "url" to null
-                        ),
-                        "members" to team.members,
-                        "chat" to team.chat,
-                    )
-                ).await()
-                if (deletePrevious) {
-                    deleteImage(teamId)
-                }
-            } catch (e: Exception) {
-                Log.e("Server Error", e.message.toString())
-            }
-        }
-
-    }
-    suspend fun deleteTeam2(teamId: String) {
-        val documentReference = db.collection("Teams").document(teamId)
-        try {
-            documentReference.delete().await()
-        } catch (e: Exception) {
-            Log.e("Server Error", e.message.toString())
-        }
-    }
+//    suspend fun updateTeam2(teamId: String, team: Team,deletePrevious: Boolean) {
+//        val documentReference = db.collection("Teams").document(teamId)
+//        val byteArray = when (team.image) {
+//            is Empty -> null
+//            is Taken -> bitmapToByteArray(team.image.image)
+//            is Uploaded -> uriToBitmap(context, team.image.image)?.let {
+//                bitmapToByteArray(it)
+//            }
+//        }
+//        if(byteArray != null) {
+//            uploadImageTeam(
+//                TeamId = teamId,
+//                byteArray = byteArray,
+//                onSuccess = {
+//                    documentReference.update(
+//                        hashMapOf(
+//                            "name" to team.name,
+//                            "description" to team.description,
+//                            "image" to mapOf(
+//                                "color" to null,
+//                                "url" to it
+//                            ),
+//                            "members" to team.members,
+//                            "chat" to team.chat,
+//                        )
+//                    ).await()
+//                },
+//                onFailure = { Log.e("Server Error", it.message.toString()) }
+//            )
+//        } else {
+//            try {
+//                documentReference.update(
+//                    hashMapOf(
+//                        "name" to team.name,
+//                        "description" to team.description,
+//                        "image" to mapOf(
+//                            "color" to (team.image as Empty).color.value.toString(),
+//                            "url" to null
+//                        ),
+//                        "members" to team.members,
+//                        "chat" to team.chat,
+//                    )
+//                ).await()
+//                if (deletePrevious) {
+//                    deleteImage(teamId)
+//                }
+//            } catch (e: Exception) {
+//                Log.e("Server Error", e.message.toString())
+//            }
+//        }
+//
+//    }
+//    suspend fun deleteTeam2(teamId: String) {
+//        val documentReference = db.collection("Teams").document(teamId)
+//        try {
+//            documentReference.delete().await()
+//        } catch (e: Exception) {
+//            Log.e("Server Error", e.message.toString())
+//        }
+//    }
 
 
     //  Users

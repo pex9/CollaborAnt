@@ -57,7 +57,7 @@ class TeamFormViewModel(private val currentTeamId: String?, val model: MyModel, 
                     chat = emptyList()
                 ))
 
-                viewModelScope.launch {
+            viewModelScope.launch {     //  TODO: add try/catch
                     loggedInUser?.let { user ->
                         val teamId = createTeam(team = Team(
                             id = "",
