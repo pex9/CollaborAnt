@@ -141,7 +141,7 @@ fun TeamInfoPage(
     setShowLeaveDialogValue: (Boolean) -> Unit,
     showDeleteDialog: Boolean,
     setShowDeleteDialogValue: (Boolean) -> Unit,
-    deleteTeam: suspend (String) -> Unit,
+    deleteTeam: suspend (Team, List<User>) -> Boolean,
     updateRole: (String, String, Role) -> Unit,
     removeMember: (String, String) -> Unit,
     showMemberSelBottomSheet: Boolean,
@@ -269,7 +269,7 @@ fun TeamInfoPage(
                 if(team.members.size > 1) { removeMember(team.id, DataBase.LOGGED_IN_USER_ID) }
                 else {
                     scope.launch {
-                        deleteTeam(team.id)
+                        deleteTeam(team, users) //  TODO: fix this
                         navController.popBackStack(
                             route = "myTeams",
                             inclusive = false
@@ -288,13 +288,15 @@ fun TeamInfoPage(
             onConfirm = {
                 setShowDeleteDialogValue(false)
                 scope.launch {
-                    deleteTeam(team.id)
-                    Log.e("Server Error", "Eccomi")
-                    navController.popBackStack(
-                        route = "myTeams",
-                        inclusive = false
-                    )}
-
+                    Log.e("Server Error", "Ciao")
+                    if (deleteTeam(team, users)) {
+                        Log.e("Server Error", "Eccomi")
+                        navController.popBackStack(
+                            route = "myTeams",
+                            inclusive = false
+                        )
+                    }
+                }
             },
             onDismiss = { setShowDeleteDialogValue(false) }
         )

@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
+import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -25,15 +26,15 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
     fun getUsersTeam(teamId: String) = model.getUsersTeam(teamId)
 
     //TODO FIX DELETE TEAM
-    suspend fun deleteTeam(teamId: String) {
+    suspend fun deleteTeam(team: Team, members: List<User>): Boolean {
         try {
             viewModelScope.async {
-                model.deleteTeam(teamId)
-                // Optionally, perform any additional actions after deletion
-            }.await() // Wait for the coroutine to complete
+                model.deleteTeam(team, members)
+            }.await()
+            return true
         } catch (e: Exception) {
-            // Handle the exception
             Log.e("DeleteTeam", "Failed to delete team", e)
+            return false
         }
     }
 

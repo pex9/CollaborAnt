@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 
@@ -459,25 +460,31 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun deleteTeam(teamId: String) {    //  TODO: add updateKpi, removeTasks and deleteImage
-        val documentReference = db.collection("Teams").document(teamId)
+    suspend fun deleteTeam(team: Team, members: List<User>) {    //  TODO: removeTasks
+        //  Remove Team image if needed
+        if(team.image is Uploaded) {
+            deleteImage(team.id)
+        }
 
-        documentReference.delete().await()
+        //  Update kpi values for all team members
+        members.filter { team.members.containsKey(it.id) }.forEach { member ->
+            val updatedKpiValues = member.kpiValues.toMutableMap()
+            updatedKpiValues.remove(team.id)
+
+            updateUserKpi(member.id, member.joinedTeams - 1, updatedKpiValues)
+        }
+
+        //  Delete Team document
+        db.collection("Teams").document(team.id).delete().await()
     }
 
     suspend fun addUserToTeam(team: Team, user: User) {
-        val documentReference = db.collection("Teams").document(team.id)
         val updatedMembers = team.members.toMutableMap()
         updatedMembers[user.id] = Role.JUNIOR_MEMBER
-
-        val x = updatedMembers.values.toList()//.map { it.ordinal.toLong() }
 
         updateTeam(teamId = team.id, team = team.copy(
             members = updatedMembers
         ), false)
-//        //  Update team fields
-//        documentReference.update("members", updatedMembers.keys.toList()).await()
-//        documentReference.update("roles", x).await()
 
         //  User kpi
         val updatedKpiValues = user.kpiValues.toMutableMap()
