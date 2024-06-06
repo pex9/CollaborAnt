@@ -25,8 +25,8 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
 
     private fun getTeam(teamId: String) = model.getTeam(teamId)
     private suspend fun createTeam(team: Team) = model.createTeam(team)
-    private suspend fun updateUser(userId: String, user: User) = model.updateUser(userId, user, false)
     private suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) = model.updateTeam(teamId, team, deletePrevious)
+    private suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Map<String, KPI>) = model.updateUserKpi(userId, joinedTeams, kpiValues)
 
     suspend fun validate(): String {
         var id = ""
@@ -37,6 +37,8 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
         if(nameError.isBlank() && descriptionError.isBlank()) {
             try {
                 viewModelScope.async {
+                    showLoading = true
+
                     if(currentTeam == null) {
                         loggedInUser?.let { user ->
                             id = createTeam(
@@ -57,13 +59,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
                                 score = calculateScore(0, 0)
                             )
 
-                            updateUser(
-                                user.id,
-                                user.copy(
-                                    joinedTeams = user.joinedTeams + 1,
-                                    kpiValues = updatedKpiValues
-                                )
-                            )
+                            updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues)
                         }
                     } else {
                         currentTeamId?.let {
@@ -84,6 +80,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
             } catch (e: Exception) {
                 Log.e("Server Error", e.message.toString())
                 showLoading = false
+                return ""
             }
         }
         return id
@@ -136,6 +133,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
 
     init {
         val userid = auth.getSignedInUserId()
+
         if (userid != null) {
             viewModelScope.launch {
                 loggedInUser = model.getUser(userid).first()

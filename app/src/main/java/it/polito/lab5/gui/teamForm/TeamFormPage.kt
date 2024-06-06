@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,7 +52,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TeamFormTopBar(validate: suspend () -> String, navController: NavController, team: String?) {
+fun TeamFormTopBar(
+    team: String?,
+    showLoading: Boolean,
+    validate: suspend () -> String,
+    navController: NavController
+) {
     val scope = rememberCoroutineScope()
 
     CenterAlignedTopAppBar(
@@ -90,30 +96,37 @@ fun TeamFormTopBar(validate: suspend () -> String, navController: NavController,
             }
         },
         actions = {
-            TextButton(
-                onClick = {
-                    scope.launch {
-                        val teamId = validate()
-                        if(teamId.isNotBlank()) {
-                            navController.popBackStack()
-                            if(team == null) {
-                                navController.navigate("infoTeam/${teamId}")
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = CollaborantColors.DarkBlue,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+            } else {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            val teamId = validate()
+                            if(teamId.isNotBlank()) {
+                                navController.popBackStack()
+                                if(team == null) {
+                                    navController.navigate("infoTeam/${teamId}")
+                                }
                             }
                         }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text = if (team == null) "Create" else "Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
-                )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = CollaborantColors.DarkBlue
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text = if (team == null) "Create" else "Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
     )

@@ -183,7 +183,6 @@ class MyModel(val context: Context) {
             }
         }
 
-
         if(byteArray != null) {
             uploadImage(
                 imageId = userId,
@@ -209,6 +208,24 @@ class MyModel(val context: Context) {
                 },
                 onFailure = { Log.e("Server Error", it.message.toString()) }
             )
+        } else if(user.imageProfile is Uploaded && user.imageProfile.image.toString().contains("https://firebasestorage.googleapis.com")) {
+            documentReference.update(
+                hashMapOf(
+                    "first" to user.first,
+                    "last" to user.last,
+                    "nickname" to user.nickname,
+                    "email" to user.email,
+                    "telephone" to user.telephone,
+                    "location" to user.location,
+                    "description" to user.description,
+                    "image" to mapOf(
+                        "color" to null,
+                        "url" to user.imageProfile.image
+                    ),
+                    "joinedTeams" to user.joinedTeams,
+                    "categories" to user.categories
+                )
+            ).await()
         } else {
                 documentReference.update(
                     hashMapOf(
@@ -243,6 +260,25 @@ class MyModel(val context: Context) {
                     ).await()
             }
         }
+    }
+
+    suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Map<String, KPI>) {
+        val documentReference = db.collection("Users").document(userId)
+
+        if(kpiValues.isNotEmpty()) {
+            kpiValues.forEach { (teamId, kpi) ->
+                documentReference.collection("kpiValues").document(teamId)
+                    .set(
+                        mapOf(
+                            "assignedTasks" to kpi.assignedTasks,
+                            "completedTasks" to kpi.completedTasks,
+                            "score" to kpi.score
+                        )
+                    ).await()
+            }
+        }
+
+        documentReference.update("joinedTeams", joinedTeams).await()
     }
 
     //team
@@ -350,7 +386,6 @@ class MyModel(val context: Context) {
         awaitClose { snapshotListener.remove() }
     }
 
-
     suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) {
         val documentReference = db.collection("Teams").document(teamId)
         val byteArray = when (team.image) {
@@ -381,8 +416,20 @@ class MyModel(val context: Context) {
                 },
                 onFailure = { Log.e("Server Error", it.message.toString()) }
             )
+        } else if(team.image is Uploaded && team.image.image.toString().contains("https://firebasestorage.googleapis.com")) {
+            documentReference.update(
+                hashMapOf(
+                    "name" to team.name,
+                    "description" to team.description,
+                    "image" to mapOf(
+                        "color" to null,
+                        "url" to team.image.image
+                    ),
+                    "members" to team.members.keys.toList(),
+                    "roles" to team.members.values.toList()
+                )
+            ).await()
         } else {
-
             documentReference.update(
                 hashMapOf(
                     "name" to team.name,
@@ -408,6 +455,24 @@ class MyModel(val context: Context) {
             Log.e("Server Error", e.message.toString())
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     //  Users
@@ -489,15 +554,6 @@ class MyModel(val context: Context) {
     //  Teams
     private val _teams = MutableStateFlow(DataBase.teams)
     val teams: StateFlow<List<Team>> = _teams
-
-    fun addTeam(team: Team): String {
-        val updatedTeams = _teams.value.toMutableList()
-        val id = updatedTeams.size
-
-        updatedTeams.add(team.copy(id = (id + 1).toString()))
-        _teams.value = updatedTeams
-        return (id + 1).toString()
-    }
 
     fun updateT(teamId: String, team: Team) {
         val updatedTeams = _teams.value.toMutableList()
