@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,12 +47,12 @@ import it.polito.lab5.model.TaskState
 import it.polito.lab5.viewModels.TeamViewModel
 import it.polito.lab5.ui.theme.interFamily
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.DataBase.LOGGED_IN_USER_ID
 import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Team
-import it.polito.lab5.ui.theme.CollaborantColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,11 +64,12 @@ fun TeamViewTopBar(
 ) {
     val (first, last) = getMonogramText(team.name)
     val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
     // Center aligned top app bar with title and navigation icon
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = colors.onSecondary,
-            titleContentColor = colors.onPrimary,
+            containerColor = containerColor,
+            //titleContentColor = colors.onBackground,
         ),
         title = {
             Row(
@@ -75,12 +77,14 @@ fun TeamViewTopBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(end = 5.dp)
                     .clickable { navController.navigate("infoTeam/${team.id}") }
             ) {
                 Box(
                     modifier = Modifier
                         .size(48.dp)
                         .padding(4.dp)
+                        .padding(start = 0.dp)
                 ) {
                     ImagePresentationComp(
                         first = first,
@@ -108,7 +112,7 @@ fun TeamViewTopBar(
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
-
+                    val infoColor = if(LocalTheme.current.isDark) colors.outline else colors.onBackground
                     Text(
                         text = if(showInfoText) { infoMsg } else { text },
                         maxLines = 1,
@@ -116,7 +120,7 @@ fun TeamViewTopBar(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 13.sp,
-                        color = colors.outline
+                        color = infoColor
                     )
 
                 }
@@ -124,16 +128,19 @@ fun TeamViewTopBar(
             }
         },
         navigationIcon = {
+            val navIcon = if(LocalTheme.current.isDark) colors.secondary else colors.onBackground
             IconButton(
                 onClick = { navController.popBackStack() },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = navIcon
                 )
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_left),
-                    contentDescription = "Back Icon"
+                    contentDescription = "Back Icon",
+                    tint = colors.onBackground,
+                    modifier = Modifier.size(28.dp)
                 )
             }
         },
@@ -142,7 +149,9 @@ fun TeamViewTopBar(
             IconButton(onClick = { toggleFilterSheet() }) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.filter),
-                    contentDescription = "Localized description"
+                    contentDescription = "Localized description",
+                    tint = colors.onBackground,
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
@@ -157,7 +166,8 @@ fun TeamViewPage(
     p: PaddingValues, // Padding values for layout
     c: ColorScheme, // Color scheme for the UI
     filterState: Boolean, // State for showing/hiding filter sheet
-    hideFilter: () -> Unit // Function to hide the filter sheet
+    hideFilter: () -> Unit, // Function to hide the filter sheet
+    isHorizontal: Boolean = false,
 ) {
     val tasks = vm.tasks.collectAsState().value.filter { it.teamId == vm.teamId }
     val users = vm.users.collectAsState().value
@@ -179,19 +189,17 @@ fun TeamViewPage(
     ) {
         // Automatically scroll to the first visible item on launch
         LaunchedEffect(Unit) { scrollState.animateScrollToItem(scrollState.firstVisibleItemIndex) }
-
         // LazyRow for horizontal scrolling
         LazyRow(
             modifier = Modifier.fillMaxHeight(),
             state = scrollState,
             flingBehavior = snapBehavior,
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
-
             // Iterate over each task state
-            items(TaskState.entries) { state ->
+            itemsIndexed(TaskState.entries) { index, state ->
                 // Convert TaskState enum to literal state string
-                val literalState = when(state) {
+                val literalState = when (state) {
                     TaskState.NOT_ASSIGNED -> "Not Assigned"
                     TaskState.PENDING -> "Pending"
                     TaskState.IN_PROGRESS -> "In Progress"
@@ -210,31 +218,42 @@ fun TeamViewPage(
 
                 // Apply "My Tasks" filter if set
                 if (vm.myTasksFilter.value) {
-                    filteredTasks = filteredTasks.filter { it.teamMembers.contains(LOGGED_IN_USER_ID) }
+                    filteredTasks =
+                        filteredTasks.filter { it.teamMembers.contains(LOGGED_IN_USER_ID) }
                 }
 
                 // Sort tasks by priority
                 when (vm.prioritySort.value) {
                     "Ascending" -> filteredTasks = filteredTasks.sortedBy { it.tag.ordinal }
-                    "Descending" -> filteredTasks = filteredTasks.sortedByDescending { it.tag.ordinal }
+                    "Descending" -> filteredTasks =
+                        filteredTasks.sortedByDescending { it.tag.ordinal }
                 }
 
                 // Sort tasks by due date
                 when (vm.dateSort.value) {
                     "Ascending" -> filteredTasks = filteredTasks.sortedBy { it.dueDate }
-                    "Descending" -> filteredTasks = filteredTasks.sortedByDescending { it.dueDate }
+                    "Descending" -> filteredTasks =
+                        filteredTasks.sortedByDescending { it.dueDate }
                 }
+                val firstItemModifier: Modifier = if(index == 0) Modifier.padding(start = 30.dp) else Modifier
+                val lastItemModifier: Modifier = if(state == TaskState.OVERDUE) Modifier.padding(end = 40.dp) else Modifier
+                val landscapeModifier = if (isHorizontal) Modifier.width(350.dp) else Modifier.width(330.dp)
 
                 // Column for each task state
                 Column(
-                    modifier = Modifier
+                    modifier = firstItemModifier
+                        .then(lastItemModifier)
+                        .then(landscapeModifier)
                         .padding(top = 25.dp)
-                        .fillParentMaxWidth(),
                 ) {
+                    val textStateModifier =
+                        if (isHorizontal) Modifier.padding(start = 30.dp) else Modifier.padding(
+                            start = 20.dp
+                        )
                     // Display literal state text
                     Text(
                         text = literalState,
-                        modifier = Modifier.padding(bottom = 10.dp, start= 45.dp),
+                        modifier = textStateModifier.padding(bottom = 10.dp),
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 18.sp,
@@ -254,6 +273,7 @@ fun TeamViewPage(
                         }
                     }
                 }
+
             }
         }
 

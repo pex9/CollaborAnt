@@ -3,6 +3,7 @@ package it.polito.lab5.gui.taskView
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +42,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -58,6 +60,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.Attachment
@@ -98,7 +101,7 @@ fun OptionsComp(
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
-                tint = CollaborantColors.DarkBlue,
+                tint = colors.onBackground,
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -109,7 +112,7 @@ fun OptionsComp(
                 expanded = optionsOpened,
                 onDismissRequest = { setOptionsOpenedValue(false) },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(colors.surfaceColorAtElevation(4.dp))
             ) {
                 // Task History option
                 DropdownMenuItem(
@@ -117,7 +120,7 @@ fun OptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.time_circle),
                             contentDescription = "History Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.onBackground
                         )
                     },
                     text = {
@@ -125,7 +128,8 @@ fun OptionsComp(
                             text = "Task History",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; navController.navigate("history/${taskId}") },
@@ -146,7 +150,7 @@ fun OptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.edit_square),
                             contentDescription = "Edit Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.onBackground
                         )
                     },
                     text = {
@@ -154,7 +158,8 @@ fun OptionsComp(
                             text = "Edit Task",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; navController.navigate("editTask/${taskId}") },
@@ -174,7 +179,7 @@ fun OptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.delete),
                             contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed
+                            tint = colors.error
                         )
                     },
                     text = {
@@ -183,7 +188,7 @@ fun OptionsComp(
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 16.sp,
-                            color = Color.Red
+                            color = colors.error
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; setShowDeleteDialogValue(true) },
@@ -300,12 +305,13 @@ fun TaskStateSelComp(
 
 @Composable
 fun TagComp(tag: Tag, updateExpanded: (() -> Unit)? = null, trailingIcon: @Composable (() -> Unit)? = null) {
+    val colors = MaterialTheme.colorScheme
     val isEdit = trailingIcon != null // Check if there's a trailing icon (indicating editing mode)
     val (color, text) = when (tag) { // Determine the color and text to display based on the tag type
-        Tag.LOW -> CollaborantColors.PriorityGreen to "Low"
-        Tag.MEDIUM -> CollaborantColors.PriorityOrange to "Medium"
-        Tag.HIGH -> CollaborantColors.PriorityOrange2 to "High"
-        Tag.UNDEFINED -> CollaborantColors.NoPriorityGray to if (isEdit) "Add Priority" else "No Priority"
+        Tag.LOW -> colors.secondary to "Low"
+        Tag.MEDIUM -> colors.primary to "Medium"
+        Tag.HIGH -> colors.error to "High"
+        Tag.UNDEFINED -> colors.onBackground to if (isEdit) "Add Priority" else "No Priority"
     }
 
     // Row to organize the tag icon, text, and trailing icon (if present) horizontally
@@ -329,16 +335,18 @@ fun TagComp(tag: Tag, updateExpanded: (() -> Unit)? = null, trailingIcon: @Compo
             Icon(
                 painter = painterResource(id = R.drawable.tag),
                 contentDescription = "Tag Icon",
-                tint = CollaborantColors.DarkBlue
+                tint = colors.secondaryContainer,
+                modifier = Modifier.size(26.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = "Priority:",
+                text = "Priority",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp,
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
 
@@ -355,7 +363,8 @@ fun TagComp(tag: Tag, updateExpanded: (() -> Unit)? = null, trailingIcon: @Compo
                 text = text,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
 
             // Display trailing icon (e.g., edit icon or custom icon)
@@ -378,6 +387,7 @@ fun DueDateComp(
     isEdit: Boolean = false, // Flag indicating if the component is in edit mode
     updateVisible: (() -> Unit)? = null // Function to update visibility (optional)
 ) {
+    val colors = MaterialTheme.colorScheme
     // Row containing the due date component
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -398,16 +408,18 @@ fun DueDateComp(
             Icon(
                 painter = painterResource(id = R.drawable.calendar), // Calendar icon
                 contentDescription = "Calendar Icon",
-                tint = CollaborantColors.DarkBlue
+                tint = colors.secondaryContainer,
+                modifier = Modifier.size(27.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = "Due date:",
+                text = "Due date",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp,
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
 
@@ -431,7 +443,8 @@ fun DueDateComp(
                 text = text,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
     }
@@ -444,6 +457,7 @@ fun DelegatedMemberComp(
     setShowBottomSheetValue: (Boolean) -> Unit, // Function to set the visibility of the bottom sheet
     isEdit: Boolean = false // Flag indicating if the component is in edit mode
 ) {
+    val colors = MaterialTheme.colorScheme
     // Row containing the delegated member component
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -465,19 +479,21 @@ fun DelegatedMemberComp(
             Icon(
                 painter = painterResource(id = R.drawable.users), // Users icon
                 contentDescription = "Users Icon",
-                tint = CollaborantColors.DarkBlue,
+                tint = colors.secondaryContainer,
+                modifier = Modifier.size(26.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             // Display "Delegated to:" label if not in edit mode or if members are present, else display "Select delegated members"
-            val delegatedToText = if (!isEdit || members.isNotEmpty()) { "Delegated to:" }
+            val delegatedToText = if (!isEdit || members.isNotEmpty()) { "Delegated to" }
             else { "Select delegated members" }
             Text(
                 text = delegatedToText,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp,
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
 
@@ -519,7 +535,7 @@ fun DelegatedMemberComp(
                             first = "+",
                             last = (members.size - 2).toString(),
                             fontSize = 13.sp,
-                            color = CollaborantColors.Yellow
+                            color = colors.primary
                         )
                     }
                 }
@@ -544,6 +560,7 @@ fun RepeatComponent(
         Repeat.WEEKLY -> "Weekly"
         Repeat.MONTHLY -> "Monthly"
     }
+    val colors = MaterialTheme.colorScheme
 
     // Row containing the repeat component
     Row(
@@ -555,19 +572,29 @@ fun RepeatComponent(
             .clickable(enabled = isEdit, onClick = { updateExpanded?.let { updateExpanded() } }) // Enable click handling if in edit mode
     ) {
         // Column for the "Repeat:" label
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .weight(1f)
-                .padding(start = 12.dp)
+                .padding(start = 8.dp)
         ) {
+            Icon(
+                painter = painterResource(id = R.drawable.repeat), // Calendar icon
+                contentDescription = "Repeat Icon",
+                tint = colors.secondaryContainer,
+                modifier = Modifier.size(28.dp)
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Text(
-                text = "Repeat:", // Label text
+                text = "Repeat",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
 
@@ -586,6 +613,7 @@ fun RepeatComponent(
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
+                color = colors.onBackground
             )
 
             // If a trailing icon is provided, display it with some spacing
@@ -606,11 +634,13 @@ fun AttachmentItem(
     attachment: Attachment, // Attachment data
     removeAttachment: (Int, Int) -> Unit // Function to remove the attachment
 ) {
+    val colors = MaterialTheme.colorScheme
     // Row containing the attachment item
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
         modifier = Modifier
+            .background(color = colors.surfaceColorAtElevation(10.dp))
             .defaultMinSize(0.dp, 55.dp)
             .fillMaxSize()
             .clickable { openDocument(context, attachment.uri) } // Click listener to open the attached document
@@ -632,7 +662,7 @@ fun AttachmentItem(
             ) {
                 val (w, h) = size
                 val r = 1f * min(w, h)
-                drawCircle(color = CollaborantColors.DarkBlue, radius = r, center = center)
+                drawCircle(color = colors.onBackground, radius = r, center = center)
             }
 
             // Column containing attachment name and size
@@ -647,7 +677,8 @@ fun AttachmentItem(
                     overflow = TextOverflow.Ellipsis,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
+                    color = colors.onBackground
                 )
 
                 Text(
@@ -655,7 +686,8 @@ fun AttachmentItem(
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Light,
                     fontSize = 10.sp,
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier.padding(start = 4.dp),
+                    color = colors.onBackground
                 )
             }
         }
@@ -671,7 +703,8 @@ fun AttachmentItem(
                 IconButton(onClick = { removeAttachment(taskId, attachment.id) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.cross),
-                        contentDescription = "Remove Icon"
+                        contentDescription = "Remove Icon",
+                        tint = colors.onBackground
                     )
                 }
             }
@@ -688,6 +721,7 @@ fun AttachmentComponent(
     addAttachment: (Int, Attachment) -> Unit,
     removeAttachment: (Int, Int) -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     // Accessing the current context
     val context = LocalContext.current
     // Creating a launcher for activity result to open documents
@@ -721,14 +755,15 @@ fun AttachmentComponent(
             .fillMaxWidth()
             .padding(vertical = 24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CollaborantColors.CardBackGroundGray.copy(0.4f),
-            contentColor = Color.Black
+            containerColor = colors.surfaceColorAtElevation(10.dp),
+            contentColor = colors.onBackground
         ),
+        border = BorderStroke(width = 1.dp, color = colors.outline)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(CollaborantColors.CardBackGroundGray)
+                .background(colors.surfaceColorAtElevation(5.dp))
         ) {
             // Column for displaying the title "Attachments"
             Column(
@@ -743,7 +778,8 @@ fun AttachmentComponent(
                     text = "Attachments",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 19.sp
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
 
@@ -761,7 +797,7 @@ fun AttachmentComponent(
                         Icon(
                             painter = painterResource(id = R.drawable.paper_plus),
                             contentDescription = "Attachment Plus Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.onBackground
                         )
                     }
                 }
@@ -769,7 +805,7 @@ fun AttachmentComponent(
         }
 
         // Divider separating the title and attachments
-        Divider(thickness = 1.dp, color = CollaborantColors.BorderGray)
+        Divider(thickness = 1.dp, color = colors.outline)
 
         Column(modifier = Modifier.fillMaxSize()) {
             // Checking if there are no attachments
@@ -780,7 +816,8 @@ fun AttachmentComponent(
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Light,
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(12.dp)
+                    modifier = Modifier.padding(12.dp),
+                    color = colors.onBackground
                 )
             } else {
                 // Looping through attachments and displaying each attachment item
@@ -805,7 +842,7 @@ fun AttachmentComponent(
                         if (index != attachments.size - 1) {
                             Divider(
                                 thickness = 1.dp,
-                                color = CollaborantColors.BorderGray.copy(0.4f),
+                                color = colors.outline.copy(0.4f),
                                 modifier = Modifier.padding(horizontal = 8.dp)
                             )
                         }
@@ -818,6 +855,7 @@ fun AttachmentComponent(
 
 @Composable
 fun CommentItem(comment: Comment, users: List<User>) {
+    val colors = MaterialTheme.colorScheme
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -860,7 +898,8 @@ fun CommentItem(comment: Comment, users: List<User>) {
                         text = user.first.plus(" ").plus(user.last),
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        color = colors.onBackground
                     )
 
                     // Text for displaying the timestamp using a function to get time ago
@@ -869,7 +908,8 @@ fun CommentItem(comment: Comment, users: List<User>) {
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Light,
                         fontSize = 11.sp,
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        color = colors.onBackground
                     )
                 }
             }
@@ -882,7 +922,8 @@ fun CommentItem(comment: Comment, users: List<User>) {
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp,
             // Applying padding to the comment content
-            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
+            color = colors.onBackground
         )
     }
 }
@@ -894,14 +935,16 @@ fun CommentsComp(comments: List<Comment>, users: List<User>) {
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()
     ) {
+        val colors = MaterialTheme.colorScheme
         // Text for indicating comments section
         Text(
-            text = "Comments:",
+            text = "Comments",
             fontFamily = interFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 20.sp,
             // Applying padding to the comments section title
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 4.dp),
+            color = colors.onBackground
         )
 
         // Card for containing comments
@@ -912,10 +955,11 @@ fun CommentsComp(comments: List<Comment>, users: List<User>) {
                 .fillMaxWidth(),
             // Customizing colors and shape of the card
             colors = CardDefaults.cardColors(
-                containerColor = CollaborantColors.CardBackGroundGray.copy(0.4f),
-                contentColor = Color.Black
+                containerColor = colors.surfaceColorAtElevation(10.dp),
+                contentColor = colors.onBackground
             ),
             shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(width = 1.dp, color = colors.outline)
         ) {
             // Looping through comments and displaying each comment item
             comments.sortedBy { it.date }.forEachIndexed { idx, comment ->
@@ -926,7 +970,7 @@ fun CommentsComp(comments: List<Comment>, users: List<User>) {
                 if (idx < comments.size - 1) {
                     Divider(
                         thickness = 1.dp,
-                        color = CollaborantColors.BorderGray.copy(0.4f),
+                        color = colors.outline.copy(0.4f),
                         // Applying padding to the divider
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -963,12 +1007,13 @@ fun CommentTextField(
     // Modifier for styling and layout customization
     modifier: Modifier
 ) {
+    val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(colors.surfaceColorAtElevation(10.dp))
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -989,7 +1034,7 @@ fun CommentTextField(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
                         fontSize = 16.sp,
-                        color = CollaborantColors.BorderGray
+                        color = colors.onBackground
                     )
                 },
                 // Trailing icon to clear the text field
@@ -999,7 +1044,7 @@ fun CommentTextField(
                             Icon(
                                 painter = painterResource(id = R.drawable.cross),
                                 contentDescription = "Clear Icon",
-                                tint = CollaborantColors.BorderGray
+                                tint = colors.outline
                             )
                         }
                 },
@@ -1023,10 +1068,10 @@ fun CommentTextField(
                 ),
                 // Colors for the outlined text field
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = CollaborantColors.BorderGray,
-                    unfocusedBorderColor = CollaborantColors.BorderGray,
-                    focusedContainerColor = CollaborantColors.CardBackGroundGray.copy(0.2f),
-                    unfocusedContainerColor = CollaborantColors.CardBackGroundGray.copy(0.2f)
+                    focusedBorderColor = colors.outline,
+                    unfocusedBorderColor = colors.outline,
+                    focusedContainerColor = colors.surfaceColorAtElevation(15.dp),
+                    unfocusedContainerColor = colors.surfaceColorAtElevation(25.dp),
                 ),
             )
         }
@@ -1039,6 +1084,7 @@ fun CommentTextField(
             modifier = Modifier
                 .weight(1f)
         ) {
+            val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
             // IconButton for sending the comment
             IconButton(
                 onClick = {
@@ -1056,8 +1102,8 @@ fun CommentTextField(
                 },
                 // Customizing the colors of the IconButton
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = CollaborantColors.Yellow,
-                    contentColor = Color.White
+                    containerColor = containerColor,
+                    contentColor = colors.onSecondary
                 ),
                 modifier = Modifier.size(50.dp)
             ) {

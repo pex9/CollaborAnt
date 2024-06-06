@@ -1,5 +1,7 @@
 package it.polito.lab5.gui.taskView
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.model.Attachment
@@ -40,7 +44,6 @@ import it.polito.lab5.model.Role
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
@@ -58,11 +61,14 @@ fun TaskTopBar(
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController,
 ) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     // Top App Bar for the Task screen
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
+            containerColor = containerColor,
         ),
         title = {}, // No title for this top app bar
         navigationIcon = {
@@ -71,7 +77,7 @@ fun TaskTopBar(
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent, // Transparent background
-                    contentColor = CollaborantColors.DarkBlue // Dark blue icon color
+                    contentColor = colors.onBackground // Dark blue icon color
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding // Standard padding
             ) {
@@ -85,7 +91,8 @@ fun TaskTopBar(
                     style = MaterialTheme.typography.titleLarge, // Text style
                     fontFamily = interFamily, // Custom font family
                     fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                    fontSize = 20.sp // Font size
+                    fontSize = 20.sp, // Font size
+                    color = colors.onBackground
                 )
             }
         },
@@ -116,7 +123,7 @@ fun TaskTopBar(
                     Icon(
                         painter = painterResource(id = R.drawable.time_circle),
                         contentDescription = "History Icon",
-                        tint = CollaborantColors.DarkBlue,
+                        tint = colors.onBackground,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -141,8 +148,9 @@ fun TaskPage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
+            .background(colors.background)
             .fillMaxSize()
-            .padding(start = 28.dp, end = 28.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 10.dp)
             .verticalScroll(rememberScrollState()) // Enable vertical scrolling
     ) {
         Spacer(modifier = Modifier.height(12.dp)) // Spacer for layout spacing
@@ -150,7 +158,7 @@ fun TaskPage(
         // Display task title
         TextComp(
             text = task.title,
-            label = "Task title:", // Label for the title
+            label = "Task title", // Label for the title
             minHeight = 50.dp, // Minimum height for the title container
             modifier = Modifier.padding(14.dp) // Padding for the title
         )
@@ -161,11 +169,12 @@ fun TaskPage(
                 .fillMaxWidth()
                 .padding(vertical = 24.dp), // Padding for the card
             colors = CardDefaults.cardColors(
-                containerColor = Color.White, // White background for the card
-                contentColor = Color.Black // Black text color for content
+                containerColor = colors.background, // White background for the card
+                contentColor = colors.onBackground // Black text color for content
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Card elevation
             shape = CardDefaults.elevatedShape, // Rounded corner shape for the card
+            border = BorderStroke(1.dp, colors.outline),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
@@ -219,7 +228,7 @@ fun TaskPage(
         // Display task description
         TextComp(
             text = task.description.ifBlank { "No description" }, // Default text if description is empty
-            label = "Description:", // Label for the description
+            label = "Description", // Label for the description
             minHeight = 125.dp, // Minimum height for the description container
             modifier = Modifier.padding(10.dp) // Padding for the description
         )

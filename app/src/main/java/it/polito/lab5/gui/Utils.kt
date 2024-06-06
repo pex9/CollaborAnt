@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -298,6 +299,7 @@ fun TagCircleComp(color: Color, modifier: Modifier) {
 
 @Composable
 fun TextComp(text: String, label: String, minHeight: Dp, modifier: Modifier) {
+    val colors = MaterialTheme.colorScheme
     // Column to organize the label and text content vertically
     Column(
         verticalArrangement = Arrangement.Center,
@@ -310,8 +312,9 @@ fun TextComp(text: String, label: String, minHeight: Dp, modifier: Modifier) {
             text = label,
             fontFamily = interFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 20.sp,
-            modifier = Modifier.padding(bottom = 4.dp) // Add bottom padding for separation
+            fontSize = 18.sp,
+            modifier = Modifier.padding(bottom = 4.dp), // Add bottom padding for separation
+            color = colors.onBackground
         )
 
         // Card containing the text content with rounded corners
@@ -320,18 +323,19 @@ fun TextComp(text: String, label: String, minHeight: Dp, modifier: Modifier) {
                 .defaultMinSize(0.dp, minHeight) // Set a minimum height for the card
                 .fillMaxWidth(), // Occupy the entire available width
             colors = CardDefaults.cardColors(
-                containerColor = CollaborantColors.CardBackGroundGray, // Background color of the card
-                contentColor = Color.Black // Text color inside the card
+                containerColor = colors.surfaceColorAtElevation(4.dp), // Background color of the card
+                contentColor = colors.onBackground // Text color inside the card
             ),
-            shape = RoundedCornerShape(16.dp), // Rounded corners for the card
+            border = BorderStroke(1.dp, colors.outline),
         ) {
             // Text content displayed inside the card with a light font weight
             Text(
                 text = text,
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                modifier = modifier // Apply the modifier passed to customize the text appearance
+                modifier = modifier, // Apply the modifier passed to customize the text appearance
+                color = colors.onBackground
             )
         }
     }
@@ -345,6 +349,7 @@ fun DialogComp(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -352,7 +357,8 @@ fun DialogComp(
                 text = title,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Medium,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                color = colors.onBackground
             )
         },
         text = {
@@ -360,19 +366,21 @@ fun DialogComp(
                 text = text,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         },
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                colors = ButtonDefaults.textButtonColors(contentColor = CollaborantColors.PriorityRed)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.error)
             ) {
                 Text(
                     text = onConfirmText,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
         },
@@ -385,13 +393,14 @@ fun DialogComp(
                     text = "Cancel",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
         },
-        containerColor = Color.White,
+        containerColor = colors.background,
         titleContentColor = CollaborantColors.DarkBlue,
-        textContentColor = CollaborantColors.BorderGray,
+        textContentColor = colors.outline,
     )
 }
 

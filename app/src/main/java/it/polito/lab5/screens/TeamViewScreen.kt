@@ -3,6 +3,7 @@ package it.polito.lab5.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
@@ -19,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.teamView.TeamViewPage
 import it.polito.lab5.gui.teamView.TeamViewTopBar
@@ -68,19 +73,21 @@ fun TeamViewScreen(
         floatingActionButton = {
             // Box to wrap the Floating Action Button and Dropdown Menu
             Box(contentAlignment = Alignment.BottomEnd) {
+                val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
                 // Floating Action Button
                 SmallFloatingActionButton(
                     onClick = { vm.setOptionsOpenedValue(true) }, // Show the dropdown menu on click
                     shape = CircleShape,
                     modifier = Modifier
                         .size(60.dp),
-                    containerColor = colors.primary // Button color
+                    containerColor = containerColor // Button color
                 ) {
                     // Icon for the floating action button
                     Icon(
                         painter = painterResource(id = R.drawable.category),
                         contentDescription = "More Options",
-                        tint = Color.White
+                        tint = colors.onSecondary,
+                        modifier = Modifier.size(30.dp)
                     )
                 }
                 // Dropdown Menu
@@ -88,7 +95,9 @@ fun TeamViewScreen(
                     DropdownMenu(
                         expanded = vm.optionsOpened,
                         onDismissRequest = { vm.setOptionsOpenedValue(false) }, // Dismiss the menu when clicked outside
-                        modifier = Modifier.width(77.dp).background(Color.White),
+                        modifier = Modifier
+                            .width(77.dp)
+                            .background(Color.White),
                     ) {
                         DropdownMenuItem(
                             text = {
@@ -177,14 +186,18 @@ fun TeamViewScreen(
             }
         }
     ) { paddingValues ->
-        // Content area
-        TeamViewPage(
-            vm = vm,
-            navController = navController,
-            p = paddingValues,
-            c = colors,
-            filterState = vm.filterState,
-            hideFilter = { vm.setFilterStateValue(false) } // Function to hide filter
-        )
+        BoxWithConstraints {
+            val isHorizontal by remember { mutableStateOf(maxWidth > maxHeight) }
+            // Content area
+            TeamViewPage(
+                vm = vm,
+                navController = navController,
+                p = paddingValues,
+                c = colors,
+                filterState = vm.filterState,
+                hideFilter = { vm.setFilterStateValue(false) }, // Function to hide filter
+                isHorizontal = isHorizontal
+            )
+        }
     }
 }

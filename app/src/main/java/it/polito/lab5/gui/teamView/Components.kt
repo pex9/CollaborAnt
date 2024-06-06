@@ -215,7 +215,7 @@ fun TaskItem(
 @Composable
 fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
+    val colors = MaterialTheme.colorScheme
     // Display the modal bottom sheet for filtering tasks
     ModalBottomSheet(
         onDismissRequest = { hideFilter() },
@@ -223,7 +223,8 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
             .fillMaxWidth()
             .wrapContentHeight(),
         sheetState = modalBottomSheetState,
-        containerColor = CollaborantColors.PageBackGroundGray,
+        containerColor = colors.background,
+        tonalElevation = 2.dp
     ) {
         // Filter section header
         ListItem(
@@ -234,9 +235,10 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
 
         // Priority filter item
@@ -255,7 +257,8 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
             trailingContent = {
@@ -265,13 +268,14 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.outline
                 )
             },
             modifier = Modifier.clickable {
                 vm.nextPriority(vm.priorityFilter.value)
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
 
         // My Tasks filter item
@@ -283,7 +287,8 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
             trailingContent = {
@@ -293,7 +298,7 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     modifier = Modifier.padding(end = 10.dp)
                 )
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
 
         Spacer(modifier = Modifier.height(5.dp))
@@ -308,10 +313,11 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
 
         // Priority sort item
@@ -323,7 +329,8 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
             trailingContent = {
@@ -333,14 +340,15 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.outline
                 )
             },
             modifier = Modifier.clickable {
                 vm.nextSortType(vm.prioritySort.value, vm.prioritySort)
                 vm.checkSortCondition(vm.prioritySort)
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
 
         // Date sort item
@@ -352,7 +360,8 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.onBackground
                 )
             },
             trailingContent = {
@@ -362,14 +371,15 @@ fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 18.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
+                    color = colors.outline
                 )
             },
             modifier = Modifier.clickable {
                 vm.nextSortType(vm.dateSort.value, vm.dateSort)
                 vm.checkSortCondition(vm.dateSort)
             },
-            colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray)
+            colors = ListItemDefaults.colors(containerColor = colors.background)
         )
         Spacer(modifier = Modifier.padding(10.dp))
     }

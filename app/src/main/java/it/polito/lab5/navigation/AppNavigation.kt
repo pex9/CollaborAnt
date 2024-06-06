@@ -66,12 +66,11 @@ fun AppNavigation(vm: AppViewModel) {
         factory = AppFactory(context = context)
     )
 
-    val t = LocalContext.current
     // Set up navigation graph
     NavHost(
         navController = navController,
-        /*startDestination = "myTeams?teamId={teamId}"   // Starting destination*/
-        startDestination = "myTasks"   // Starting destination
+        startDestination = "myTeams?teamId={teamId}"   // Starting destination
+        /*startDestination = "myTasks"   // Starting destination*/
     ) {
 
         // MyTeams screen
