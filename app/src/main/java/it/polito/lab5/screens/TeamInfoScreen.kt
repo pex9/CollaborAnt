@@ -11,8 +11,9 @@ import it.polito.lab5.viewModels.TeamInfoViewModel
 
 @Composable
 fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
-    val users = vm.users.collectAsState().value
+
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val users = vm.getUsersTeam(vm.teamId).collectAsState(initial = emptyList()).value
     val loggedInUserRole =  Role.TEAM_MANAGER//team?.members?.get(DataBase.LOGGED_IN_USER_ID)
 
     Scaffold(

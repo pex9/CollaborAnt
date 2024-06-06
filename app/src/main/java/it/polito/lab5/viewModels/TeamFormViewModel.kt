@@ -36,7 +36,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
 
         if(nameError.isBlank() && descriptionError.isBlank()) {
             try {
-                viewModelScope.async {     //  TODO: add try/catch
+                viewModelScope.async {
                     if(currentTeam == null) {
                         loggedInUser?.let { user ->
                             id = createTeam(
@@ -69,7 +69,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
                         currentTeamId?.let {
                             id = it
 
-                            updateTeam(     // TODO: fix update
+                            updateTeam(
                                 teamId = currentTeamId,
                                 team = currentTeam!!.copy(
                                     name = name,

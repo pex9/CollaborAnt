@@ -1,13 +1,18 @@
 package it.polito.lab5.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.User
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 
 class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
     val users = model.users
@@ -15,7 +20,20 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
 
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    fun deleteTeam(teamId: String) = model.deleteTeam(teamId)
+    fun getUsersTeam(teamId: String) = model.getUsersTeam(teamId)
+
+    //TODO FIX DELETE TEAM
+    suspend fun deleteTeam(teamId: String) {
+        try {
+            viewModelScope.async {
+                model.deleteTeam(teamId)
+                // Optionally, perform any additional actions after deletion
+            }.await() // Wait for the coroutine to complete
+        } catch (e: Exception) {
+            // Handle the exception
+            Log.e("DeleteTeam", "Failed to delete team", e)
+        }
+    }
 
     fun updateRole(teamId: String, memberId: String, role: Role) = model.updateRole(teamId, memberId, role)
 

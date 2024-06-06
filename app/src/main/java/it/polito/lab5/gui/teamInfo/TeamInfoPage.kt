@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.DialogComp
@@ -44,6 +46,8 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,7 +141,7 @@ fun TeamInfoPage(
     setShowLeaveDialogValue: (Boolean) -> Unit,
     showDeleteDialog: Boolean,
     setShowDeleteDialogValue: (Boolean) -> Unit,
-    deleteTeam: (String) -> Unit,
+    deleteTeam: suspend (String) -> Unit,
     updateRole: (String, String, Role) -> Unit,
     removeMember: (String, String) -> Unit,
     showMemberSelBottomSheet: Boolean,
@@ -150,7 +154,7 @@ fun TeamInfoPage(
     paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -260,12 +264,16 @@ fun TeamInfoPage(
                 if (chosenMember != null) { updateRole(team.id, chosenMember, Role.TEAM_MANAGER) }
 
                 if(team.members.size > 1) { removeMember(team.id, DataBase.LOGGED_IN_USER_ID) }
-                else { deleteTeam(team.id) }
+                else {
+                    scope.launch {
+                        deleteTeam(team.id)
+                        navController.popBackStack(
+                            route = "myTeams",
+                            inclusive = false
+                        )
+                    }
+                }
 
-                navController.popBackStack(
-                    route = "myTeams",
-                    inclusive = false
-                )
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )
@@ -276,11 +284,13 @@ fun TeamInfoPage(
             onConfirmText = "Delete",
             onConfirm = {
                 setShowDeleteDialogValue(false)
-                deleteTeam(team.id)
-                navController.popBackStack(
-                    route = "myTeams",
-                    inclusive = false
-                )
+                scope.launch {
+                    deleteTeam(team.id)
+                    navController.popBackStack(
+                        route = "myTeams",
+                        inclusive = false
+                    )}
+
             },
             onDismiss = { setShowDeleteDialogValue(false) }
         )

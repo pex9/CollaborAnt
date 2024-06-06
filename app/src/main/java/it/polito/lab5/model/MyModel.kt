@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
@@ -23,6 +24,7 @@ class MyModel(val context: Context) {
 
     private val db = Firebase.firestore
     private val storage = FirebaseStorage.getInstance()
+
 
     private suspend fun uploadImage(imageId: String, byteArray: ByteArray, onSuccess: suspend (String) -> Unit, onFailure: (Exception) -> Unit) {
         val storageRef = storage.reference
@@ -113,45 +115,63 @@ class MyModel(val context: Context) {
         awaitClose { snapshotListener.remove() }
     }
 
-//    @Suppress("unchecked_cast")
-//    fun getUsers(): Flow<List<User>> = callbackFlow {
-//        val documentReference = db.collection("Users")
-//        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
-//            if (e != null) {
-//                close(e)
-//                return@addSnapshotListener
-//            }
-//
-//            if (snapshot != null && !snapshot.isEmpty) {
-//                val users = snapshot.documents.mapNotNull { document ->
-//                    val image = document.get("image") as Map<String, String?>
-//                    try {
-//                        User(
-//                            id = document.id,
-//                            first = document.getString("first") ?: "",
-//                            last = document.getString("last") ?: "",
-//                            nickname = document.getString("nickname") ?: "",
-//                            email = document.getString("email") ?: "",
-//                            telephone = document.getString("telephone") ?: "",
-//                            location = document.getString("location") ?: "",
-//                            description = document.getString("description") ?: "",
-//                            imageProfile = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
-//                            else Uploaded(image["url"]?.toUri() ?: "".toUri()),
-//                            joinedTeams = document.getLong("joinedTeams") ?: 0L,
-//                            kpiValues = document.get("kpiValues") as? Map<String, KPI> ?: emptyMap(),
-//                            categories = document.get("categories") as? List<String> ?: emptyList()
-//                        )
-//                    } catch (e: Exception) {
-//                        null
-//                    }
-//                }
-//                trySend(users).isSuccess
-//            } else {
-//                trySend(emptyList<User>()).isSuccess
-//            }
-//        }
-//        awaitClose { snapshotListener.remove() }
-//    }
+    @Suppress("unchecked_cast")
+    fun getUsersTeam(teamId: String): Flow<List<User>> = callbackFlow {
+        val teamDocumentReference = db.collection("Teams").document(teamId)
+        val snapshotListener = teamDocumentReference.addSnapshotListener { teamSnapshot, teamError ->
+            if (teamError != null) {
+                close(teamError)
+                return@addSnapshotListener
+            }
+
+            //get the userid
+            val joinedUsersIds = (teamSnapshot?.get("members") as List<String>)
+
+
+            if (joinedUsersIds != null) {
+                val usersDocumentReference = db.collection("Users").whereIn(FieldPath.documentId(), joinedUsersIds)
+
+                val usersSnapshotListener = usersDocumentReference.addSnapshotListener { usersSnapshot, usersError ->
+                    if (usersError != null) {
+                        close(usersError)
+                        return@addSnapshotListener
+                    }
+
+                    val users = usersSnapshot?.documents?.mapNotNull { userDocument ->
+                        try {
+                            val image = userDocument.get("image") as Map<String, String?>
+                            User(
+                                id = userDocument.id,
+                                first = userDocument.getString("first") ?: "",
+                                last = userDocument.getString("last") ?: "",
+                                nickname = userDocument.getString("nickname") ?: "",
+                                email = userDocument.getString("email") ?: "",
+                                telephone = userDocument.getString("telephone") ?: "",
+                                location = userDocument.getString("location") ?: "",
+                                description = userDocument.getString("description") ?: "",
+                                imageProfile = if (image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                                else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                                joinedTeams = userDocument.getLong("joinedTeams") ?: 0L,
+                                kpiValues = userDocument.get("kpiValues") as? Map<String, KPI> ?: emptyMap(),
+                                categories = userDocument.get("categories") as? List<String> ?: emptyList()
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+
+                    if (users != null) {
+                        trySend(users).isSuccess
+                    } else {
+                        trySend(emptyList<User>()).isSuccess
+                    }
+                }
+            } else {
+                close(Exception("Team with ID $teamId not found"))
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
 
     suspend fun updateUser(userId: String, user: User, deletePrevious: Boolean) {
         val documentReference = db.collection("Users").document(userId)
@@ -242,7 +262,7 @@ class MyModel(val context: Context) {
                 "name" to team.name,
                 "description" to team.description,
                 "members" to team.members.keys.toList(),
-                "roles" to team.members.values.map { it.ordinal }
+                "roles" to team.members.values.map { it.ordinal.toLong() }
             )
         ).await()
 
@@ -355,13 +375,14 @@ class MyModel(val context: Context) {
                                 "url" to url
                             ),
                             "members" to team.members.keys.toList(),
-                            "roles" to team.members.values.map { it.ordinal }
+                            "roles" to team.members.values.toList()
                         )
                     ).await()
                 },
                 onFailure = { Log.e("Server Error", it.message.toString()) }
             )
         } else {
+
             documentReference.update(
                 hashMapOf(
                     "name" to team.name,
@@ -371,7 +392,7 @@ class MyModel(val context: Context) {
                         "url" to null
                     ),
                     "members" to team.members.keys.toList(),
-                    "roles" to team.members.values.map { it.ordinal }
+                    "roles" to team.members.values.toList()
                 )
             ).await()
 
@@ -379,14 +400,14 @@ class MyModel(val context: Context) {
         }
     }
 
-//    suspend fun deleteTeam2(teamId: String) {
-//        val documentReference = db.collection("Teams").document(teamId)
-//        try {
-//            documentReference.delete().await()
-//        } catch (e: Exception) {
-//            Log.e("Server Error", e.message.toString())
-//        }
-//    }
+    suspend fun deleteTeam(teamId: String) {
+        val documentReference = db.collection("Teams").document(teamId)
+        try {
+            documentReference.delete().await()
+        } catch (e: Exception) {
+            Log.e("Server Error", e.message.toString())
+        }
+    }
 
 
     //  Users
@@ -488,7 +509,7 @@ class MyModel(val context: Context) {
         }
     }
 
-    fun deleteTeam(teamId: String) {
+    fun deleteTeam2(teamId: String) {
         val updatedTeams = _teams.value.toMutableList()
         val teamTasks = _tasks.value.filter {it.teamId == teamId }.map { it.id }
 
