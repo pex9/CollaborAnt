@@ -23,7 +23,7 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
     val loggedInUserId = auth.getSignedInUserId()
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    fun getUsersTeam(teamId: String) = model.getUsersTeam(teamId)
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
     //TODO FIX DELETE TEAM
     suspend fun deleteTeam(team: Team, members: List<User>): Boolean {

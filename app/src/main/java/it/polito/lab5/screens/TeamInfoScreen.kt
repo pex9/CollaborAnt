@@ -13,7 +13,7 @@ import it.polito.lab5.viewModels.TeamInfoViewModel
 fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
 
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    val users = vm.getUsersTeam(vm.teamId).collectAsState(initial = emptyList()).value
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
     val loggedInUserRole =  team?.members?.get(vm.loggedInUserId)
 
     Scaffold(
@@ -35,7 +35,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
         }
     ) { paddingValues ->
         team?.let {
-            if (loggedInUserRole != null && vm.loggedInUserId != null) {
+            if (loggedInUserRole != null && vm.loggedInUserId != null && users != null) {
                 TeamInfoPage(
                     team = it,
                     users = users,

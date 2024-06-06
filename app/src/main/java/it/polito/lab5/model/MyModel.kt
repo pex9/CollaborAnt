@@ -117,61 +117,45 @@ class MyModel(val context: Context) {
     }
 
     @Suppress("unchecked_cast")
-    fun getUsersTeam(teamId: String): Flow<List<User>> = callbackFlow {
-        val teamDocumentReference = db.collection("Teams").document(teamId)
-        val snapshotListener = teamDocumentReference.addSnapshotListener { teamSnapshot, teamError ->
-            if (teamError != null) {
-                close(teamError)
-                return@addSnapshotListener
-            }
+    fun getUsersTeam(members: List<String>): Flow<List<User>> = callbackFlow {
+        val usersDocumentReference = db.collection("Users").whereIn(FieldPath.documentId(), members)
 
-            //get the userid
-            val joinedUsersIds = (teamSnapshot?.get("members") as List<String>)
+        val usersSnapshotListener = usersDocumentReference.addSnapshotListener { usersSnapshot, e ->
 
-
-            if (joinedUsersIds != null) {
-                val usersDocumentReference = db.collection("Users").whereIn(FieldPath.documentId(), joinedUsersIds)
-
-                val usersSnapshotListener = usersDocumentReference.addSnapshotListener { usersSnapshot, usersError ->
-                    if (usersError != null) {
-                        close(usersError)
-                        return@addSnapshotListener
-                    }
-
-                    val users = usersSnapshot?.documents?.mapNotNull { userDocument ->
-                        try {
-                            val image = userDocument.get("image") as Map<String, String?>
-                            User(
-                                id = userDocument.id,
-                                first = userDocument.getString("first") ?: "",
-                                last = userDocument.getString("last") ?: "",
-                                nickname = userDocument.getString("nickname") ?: "",
-                                email = userDocument.getString("email") ?: "",
-                                telephone = userDocument.getString("telephone") ?: "",
-                                location = userDocument.getString("location") ?: "",
-                                description = userDocument.getString("description") ?: "",
-                                imageProfile = if (image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
-                                else Uploaded(image["url"]?.toUri() ?: "".toUri()),
-                                joinedTeams = userDocument.getLong("joinedTeams") ?: 0L,
-                                kpiValues = userDocument.get("kpiValues") as? Map<String, KPI> ?: emptyMap(),
-                                categories = userDocument.get("categories") as? List<String> ?: emptyList()
+            if (usersSnapshot != null) {
+                val users = usersSnapshot.documents.mapNotNull { userDocument ->
+                    val image = userDocument.get("image") as Map<String, String?>
+                    User(
+                        id = userDocument.id,
+                        first = userDocument.getString("first") ?: "",
+                        last = userDocument.getString("last") ?: "",
+                        nickname = userDocument.getString("nickname") ?: "",
+                        email = userDocument.getString("email") ?: "",
+                        telephone = userDocument.getString("telephone") ?: "",
+                        location = userDocument.getString("location") ?: "",
+                        description = userDocument.getString("description") ?: "",
+                        imageProfile = if (image["color"] != null) Empty(
+                            Color(
+                                image["color"]?.toULong() ?: 0UL
                             )
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
+                        )
+                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                        joinedTeams = userDocument.getLong("joinedTeams") ?: 0L,
+                        kpiValues = userDocument.get("kpiValues") as? Map<String, KPI>
+                            ?: emptyMap(),
+                        categories = userDocument.get("categories") as? List<String>
+                            ?: emptyList()
+                    )
 
-                    if (users != null) {
-                        trySend(users).isSuccess
-                    } else {
-                        trySend(emptyList<User>()).isSuccess
-                    }
                 }
+
+                trySend(users)
             } else {
-                close(Exception("Team with ID $teamId not found"))
+                if (e != null) { Log.e("Server Error", e.message.toString()) }
+                trySend(emptyList())
             }
         }
-        awaitClose { snapshotListener.remove() }
+        awaitClose{ usersSnapshotListener.remove() }
     }
 
     suspend fun updateUser(userId: String, user: User, deletePrevious: Boolean) {
