@@ -40,6 +40,7 @@ import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
@@ -144,7 +145,8 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun InvitationTeamBottomSheet(
     team: Team,
-    addMember: (String, String) -> Boolean,
+    loggedInUser: User,
+    addMember: suspend (Team, User) -> Boolean,
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
     joinSuccess: Boolean,
     setJoinSuccessValue: (Boolean) -> Unit,
@@ -222,7 +224,11 @@ fun InvitationTeamBottomSheet(
             Button(
                 onClick = {
                     if(joinSuccess) { navController.navigate("myTeams/${team.id}") ; setShowBottomSheetValue(false) }
-                    else { setJoinSuccessValue(addMember(team.id, DataBase.LOGGED_IN_USER_ID)) }
+                    else {
+                        coroutineScope.launch {
+                            setJoinSuccessValue(addMember(team, loggedInUser))
+                        }
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = if(joinSuccess) Color.White else Color.Black,

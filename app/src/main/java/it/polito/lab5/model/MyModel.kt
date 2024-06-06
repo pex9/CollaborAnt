@@ -281,7 +281,7 @@ class MyModel(val context: Context) {
         documentReference.update("joinedTeams", joinedTeams).await()
     }
 
-    //team
+    //  Team
     suspend fun createTeam(team: Team): String {
         val documentReference = db.collection("Teams")
         val byteArray = when (team.image) {
@@ -410,7 +410,7 @@ class MyModel(val context: Context) {
                                 "url" to url
                             ),
                             "members" to team.members.keys.toList(),
-                            "roles" to team.members.values.toList()
+                            "roles" to team.members.values.map { it.ordinal.toLong() }
                         )
                     ).await()
                 },
@@ -454,6 +454,28 @@ class MyModel(val context: Context) {
         } catch (e: Exception) {
             Log.e("Server Error", e.message.toString())
         }
+    }
+
+    suspend fun addUserToTeam(team: Team, user: User) {
+        val documentReference = db.collection("Teams").document(team.id)
+        val updatedMembers = team.members.toMutableMap()
+        updatedMembers[user.id] = Role.JUNIOR_MEMBER
+
+        val x = updatedMembers.values.toList()
+
+        //  Update team fields
+        documentReference.update("members", updatedMembers.keys.toList()).await()
+        documentReference.update("roles", x).await()
+
+        //  User kpi
+        val updatedKpiValues = user.kpiValues.toMutableMap()
+        updatedKpiValues[team.id] = KPI(
+            assignedTasks = 0,
+            completedTasks = 0,
+            score = calculateScore(0, 0)
+        )
+
+        updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues )
     }
 
 

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
@@ -64,14 +65,13 @@ fun MyTeamsTopBar() {
     )
 }
 
-
-
 @Composable
 @RequiresApi(Build.VERSION_CODES.S)
 fun MyTeamsPage(
     teams: List<Team>,
+    loggedInUser: User,
     invitationTeam: Team?,
-    addMember: (String, String) -> Boolean,
+    addMember: suspend (Team, User) -> Boolean,
     showBottomSheet: Boolean,
     setShowBottomSheetValue: (Boolean) -> Unit,
     showDialog: Boolean,
@@ -133,6 +133,7 @@ fun MyTeamsPage(
     if(showBottomSheet && invitationTeam != null) {
         InvitationTeamBottomSheet(
             team = invitationTeam,
+            loggedInUser = loggedInUser,
             addMember = addMember,
             setShowBottomSheetValue = setShowBottomSheetValue,
             joinSuccess = joinSuccess,

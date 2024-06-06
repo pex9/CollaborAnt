@@ -29,7 +29,10 @@ fun MyTeamsScreen (
     navController: NavController,
     isReadState: MutableList<Pair<String, Boolean>>,
 ) {
-    val teams = vm.auth.getSignedInUserId()?.let { vm.getUserTeams(it) }?.collectAsState(initial = emptyList())?.value
+    val loggedInUserId = vm.auth.getSignedInUserId()
+    val loggedInUser = loggedInUserId?.let { vm.getUser(it).collectAsState(initial = null).value }
+    val invitationTeam = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
+    val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }
 
     Scaffold(
         bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
@@ -48,11 +51,12 @@ fun MyTeamsScreen (
             }
         }
     ) { paddingValues ->
-        if (teams != null) {
+        if (teams != null && loggedInUser != null) {
             MyTeamsPage(
                 teams = teams,
-                invitationTeam = vm.invitationTeam,
-                addMember = vm::addMember,
+                loggedInUser = loggedInUser,
+                invitationTeam = invitationTeam,
+                addMember = vm::addUserToTeam,
                 showBottomSheet = vm.showBottomSheet,
                 setShowBottomSheetValue = vm::setShowBottomSheetValue,
                 showDialog = showDialog,
