@@ -1125,6 +1125,7 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
         Role.SENIOR_MEMBER -> "Senior Member"
         Role.JUNIOR_MEMBER -> "Junior Member"
     }
+    val colors = MaterialTheme.colorScheme
 
     ListItem(
         leadingContent = {
@@ -1148,19 +1149,21 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
                     text = if (DataBase.LOGGED_IN_USER_ID == user.id) "You" else "${user.first} ${user.last}",
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
-                    fontFamily = interFamily
+                    fontFamily = interFamily,
+                    color = colors.onBackground
                 )
 
                 Text(
                     text = literalRole,
                     fontWeight = FontWeight.Light,
                     fontSize = 14.sp,
-                    fontFamily = interFamily
+                    fontFamily = interFamily,
+                    color = colors.onBackground
                 )
             }
         },
         colors = ListItemDefaults.colors(
-            containerColor = CollaborantColors.PageBackGroundGray
+            containerColor = colors.surfaceColorAtElevation(10.dp),
         ),
         modifier = modifier
     )
@@ -1177,11 +1180,12 @@ fun MembersBottomSheet(
 ) {
     val bottomSheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = { setShowBottomSheetValue(false) },
-        containerColor = CollaborantColors.PageBackGroundGray,
+        containerColor = colors.surfaceColorAtElevation(10.dp),
         dragHandle = {
             // Drag handle for the bottom sheet
             Column(
@@ -1202,8 +1206,8 @@ fun MembersBottomSheet(
                         text = "Delegated members",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 18.sp,
-                        color = CollaborantColors.DarkBlue,
+                        fontSize = 20.sp,
+                        color = colors.onBackground,
                         modifier = Modifier.align(Alignment.Center)
                     )
 
@@ -1218,7 +1222,8 @@ fun MembersBottomSheet(
                         Icon(
                             painter = painterResource(id = R.drawable.cross),
                             contentDescription = "Close Icon",
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(26.dp),
+                            tint = colors.onBackground
                         )
                     }
                 }
@@ -1227,7 +1232,7 @@ fun MembersBottomSheet(
         modifier = Modifier.fillMaxWidth()
     ) {
         // Content of the bottom sheet
-        Divider(thickness = 1.dp, color = CollaborantColors.BorderGray.copy(0.8f))
+        Divider(thickness = 1.dp, color = colors.outline.copy(0.8f))
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -1255,7 +1260,8 @@ fun MembersBottomSheet(
                                     Icon(
                                         painter = painterResource(id = R.drawable.chart),
                                         contentDescription = "Chart Icon",
-                                        modifier = Modifier.size(24.dp)
+                                        modifier = Modifier.size(24.dp),
+                                        tint = colors.onBackground
                                     )
                                 }
 
@@ -1270,7 +1276,8 @@ fun MembersBottomSheet(
                                         Icon(
                                             painter = painterResource(id = R.drawable.send),
                                             contentDescription = "Send Icon",
-                                            modifier = Modifier.size(24.dp)
+                                            modifier = Modifier.size(24.dp),
+                                            tint = colors.onBackground
                                         )
                                     }
                                 }

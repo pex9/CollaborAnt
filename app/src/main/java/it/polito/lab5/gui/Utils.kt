@@ -192,15 +192,27 @@ fun TextFieldComp(
     val colors = MaterialTheme.colorScheme
     // Define colors for the text field
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedLabelColor = colors.outline,
-        unfocusedLabelColor = colors.outline,
-        focusedBorderColor = colors.onBackground,
-        unfocusedBorderColor = colors.onBackground,
+        focusedLabelColor = colors.secondaryContainer,
+        unfocusedLabelColor = colors.secondaryContainer,
+        errorLabelColor = colors.error,
+
+
+        focusedBorderColor = colors.outline,
+        unfocusedBorderColor = colors.outline,
         errorBorderColor = colors.error,
-        errorLabelColor = colors.onError,
+
         errorSupportingTextColor = colors.error,
-        focusedContainerColor = colors.surfaceColorAtElevation(15.dp),
-        unfocusedContainerColor = colors.surfaceColorAtElevation(10.dp)
+        focusedSupportingTextColor= colors.secondaryContainer,
+        unfocusedSupportingTextColor = colors.secondaryContainer,
+
+        errorContainerColor = colors.surfaceColorAtElevation(10.dp),
+        focusedContainerColor = colors.surfaceColorAtElevation(10.dp),
+        unfocusedContainerColor = colors.surfaceColorAtElevation(10.dp),
+
+        unfocusedPrefixColor = colors.secondaryContainer,
+        unfocusedSuffixColor = colors.secondaryContainer,
+
+        cursorColor = colors.secondaryContainer,
     )
 
     // Create the OutlinedTextField composable

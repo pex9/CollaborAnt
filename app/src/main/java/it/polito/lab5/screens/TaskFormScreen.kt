@@ -1,7 +1,9 @@
 package it.polito.lab5.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,8 +25,9 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
             )
         }
     ) { paddingValues ->
+        val colors = MaterialTheme.colorScheme
         Box(
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(paddingValues).background(colors.background)
         ) {
             val team = vm.teams.collectAsState().value.find { it.id == (vm.teamId ?: vm.currentTask?.teamId) }
             val users = vm.users.collectAsState().value

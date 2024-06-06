@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
@@ -83,13 +85,13 @@ fun TagMenuComp(
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_up),
                         contentDescription = "Arrow Up Icon",
-                        tint = CollaborantColors.DarkBlue
+                        tint = colors.secondaryContainer
                     )
                 } else {
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_down),
                         contentDescription = "Arrow down Icon",
-                        tint = CollaborantColors.DarkBlue
+                        tint = colors.secondaryContainer
                     )
                 }
             }
@@ -102,7 +104,7 @@ fun TagMenuComp(
                 expanded = showTagMenu,
                 onDismissRequest = { setShowTagMenuValue(false) }, // Dismiss the tag menu when requested
                 modifier = Modifier
-                    .background(Color.White) // Background color of the tag menu
+                    .background(colors.surfaceColorAtElevation(10.dp)) // Background color of the tag menu
                     .width(135.dp), // Width of the tag menu
                 offset = DpOffset(x = 8.dp, y = (-5).dp)
             ) {
@@ -128,7 +130,8 @@ fun TagMenuComp(
                                 text = literalTag,
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
+                                color = colors.onBackground
                             )
                         },
                         trailingIcon = {
@@ -136,8 +139,8 @@ fun TagMenuComp(
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = colors.outline,
-                                    modifier = Modifier.size(13.dp)
+                                    tint = colors.onBackground,
+                                    modifier = Modifier.size(13.dp),
                                 )
                             }
                         },
@@ -170,6 +173,8 @@ fun DatePickerComp(
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
     )
+    val colors = MaterialTheme.colorScheme
+    val customColorBehavior = if(LocalTheme.current.isDark) colors.secondary else colors.primary
 
     // Due date component with an arrow icon to toggle the date picker dialog
     DueDateComp(
@@ -199,7 +204,8 @@ fun DatePickerComp(
                         text = "OK",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = colors.secondaryContainer
                     )
                 }
             },
@@ -216,11 +222,12 @@ fun DatePickerComp(
                         text = "Cancel",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        color = colors.secondaryContainer
                     )
                 }
             },
-            colors = DatePickerDefaults.colors(containerColor = Color.White),
+            colors = DatePickerDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             // Date picker component
@@ -232,12 +239,24 @@ fun DatePickerComp(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp,
-                        modifier = Modifier.offset(x = 25.dp, y = 16.dp)
+                        modifier = Modifier.offset(x = 25.dp, y = 16.dp),
+                        color = colors.secondaryContainer
                     )
                 },
                 colors = DatePickerDefaults.colors(
-                    titleContentColor = CollaborantColors.DarkBlue,
-                    weekdayContentColor = CollaborantColors.DarkBlue
+                    titleContentColor = colors.secondaryContainer,
+                    weekdayContentColor = colors.secondaryContainer,
+
+                    todayDateBorderColor = customColorBehavior,
+                    todayContentColor = colors.onBackground,
+
+                    selectedDayContainerColor = customColorBehavior,
+                    selectedDayContentColor = colors.onSecondary,
+
+                    selectedYearContentColor = colors.onSecondary,
+                    selectedYearContainerColor = customColorBehavior,
+                    currentYearContentColor = customColorBehavior,
+                    yearContentColor = colors.onBackground,
                 ),
                 dateValidator = {
                     // Date validator to allow only future dates

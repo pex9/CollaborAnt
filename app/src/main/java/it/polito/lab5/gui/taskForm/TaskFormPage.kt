@@ -1,6 +1,7 @@
 package it.polito.lab5.gui.taskForm
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
@@ -44,7 +47,6 @@ import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.gui.taskView.DelegatedMemberComp
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import java.time.LocalDate
 
@@ -56,17 +58,20 @@ fun TaskFormTopBar(
     validate: () -> Int,
     resetErrorMsg: (Boolean) -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
+            containerColor = containerColor,
+            titleContentColor = colors.onBackground,
         ),
         title = {
             Text(
                 text = if (taskId == null) { "New Task" } else { "Edit Task" },
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 23.sp
+                fontSize = 23.sp,
+                color = colors.onBackground
             )
         },
         navigationIcon = {
@@ -74,20 +79,22 @@ fun TaskFormTopBar(
                 onClick = { resetErrorMsg(true) ; navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_left),
-                    contentDescription = "Back Icon"
+                    contentDescription = "Back Icon",
+                    tint = colors.onBackground
                 )
 
                 Text(
                     text = "Back",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+                    fontSize = 20.sp,
+                    color = colors.onBackground
                 )
             }
         },
@@ -101,7 +108,7 @@ fun TaskFormTopBar(
                     } },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
@@ -109,7 +116,8 @@ fun TaskFormTopBar(
                     text = if (taskId == null) "Create" else "Save",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+                    fontSize = 20.sp,
+                    color = colors.onBackground
                 )
             }
         }
@@ -169,7 +177,8 @@ fun TaskFormPage(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 28.dp)
+            .padding(horizontal = 20.dp)
+            .padding(top= 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -188,11 +197,12 @@ fun TaskFormPage(
                 .fillMaxWidth()
                 .padding(vertical = 24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
+                containerColor = colors.background, // White background for the card
+                contentColor = colors.onBackground // Black text color for content
             ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            shape = CardDefaults.elevatedShape,
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), // Card elevation
+            shape = CardDefaults.elevatedShape, // Rounded corner shape for the card
+            border = BorderStroke(1.dp, colors.outline),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
