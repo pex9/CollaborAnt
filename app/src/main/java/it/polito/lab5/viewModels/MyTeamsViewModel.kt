@@ -25,11 +25,13 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
     suspend fun addUserToTeam(team: Team, user: User): Boolean {
         try {
             viewModelScope.async {
+                showLoading = true
                 model.addUserToTeam(team, user)
             }.await()
             return true
         } catch (e: Exception) {
             Log.e("Server Error", e.message.toString())
+            showLoading = false
             return false
         }
     }
@@ -44,6 +46,12 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
     var joinSuccess by mutableStateOf(false)
     fun setJoinSuccessValue(b: Boolean) {
         joinSuccess = b
+    }
+
+    var showLoading by mutableStateOf(false)
+        private set
+    fun setShowLoadingValue(b: Boolean) {
+        showLoading = b
     }
 
     init {

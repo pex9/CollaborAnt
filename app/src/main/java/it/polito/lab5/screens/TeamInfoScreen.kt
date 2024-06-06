@@ -14,7 +14,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
 
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
     val users = vm.getUsersTeam(vm.teamId).collectAsState(initial = emptyList()).value
-    val loggedInUserRole =  Role.TEAM_MANAGER//team?.members?.get(DataBase.LOGGED_IN_USER_ID)
+    val loggedInUserRole =  team?.members?.get(vm.loggedInUserId)
 
     Scaffold(
         topBar = {
@@ -35,10 +35,11 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
         }
     ) { paddingValues ->
         team?.let {
-            if (loggedInUserRole != null) {
+            if (loggedInUserRole != null && vm.loggedInUserId != null) {
                 TeamInfoPage(
                     team = it,
                     users = users,
+                    loggedInUserId = vm.loggedInUserId,
                     loggedInUserRole = loggedInUserRole,
                     roleSelectionOpened = vm.roleSelectionOpened,
                     setRoleSelectionOpenedValue = vm::setRoleSelectionOpenedValue,

@@ -15,6 +15,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +39,6 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
@@ -53,8 +53,8 @@ fun TeamItem(team: Team, navController: NavController) {
         leadingContent = {
             Box(
                 modifier = Modifier
-                .size(48.dp)
-                .padding(4.dp)
+                    .size(48.dp)
+                    .padding(4.dp)
             ) {
                 ImagePresentationComp(
                     first = first,
@@ -150,6 +150,8 @@ fun InvitationTeamBottomSheet(
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
     joinSuccess: Boolean,
     setJoinSuccessValue: (Boolean) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
     navController: NavController,
 ) {
     val (first, last) = getMonogramText(team.name)
@@ -221,27 +223,37 @@ fun InvitationTeamBottomSheet(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    if(joinSuccess) { navController.navigate("myTeams/${team.id}") ; setShowBottomSheetValue(false) }
-                    else {
-                        coroutineScope.launch {
-                            setJoinSuccessValue(addMember(team, loggedInUser))
+            if(showLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            } else {
+                Button(
+                    onClick = {
+                        if (joinSuccess) {
+                            navController.navigate("myTeams/${team.id}"); setShowBottomSheetValue(
+                                false
+                            )
+                        } else {
+                            coroutineScope.launch {
+                                val isOk = addMember(team, loggedInUser)
+
+                                setJoinSuccessValue(isOk)
+                                setShowLoadingValue(!isOk)
+                            }
                         }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = if(joinSuccess) Color.White else Color.Black,
-                    containerColor = if(joinSuccess) CollaborantColors.DarkBlue else CollaborantColors.Yellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = if(joinSuccess) "View Team" else "Join Team",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 18.sp
-                )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = if (joinSuccess) Color.White else Color.Black,
+                        containerColor = if (joinSuccess) CollaborantColors.DarkBlue else CollaborantColors.Yellow
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (joinSuccess) "View Team" else "Join Team",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 18.sp
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(40.dp))

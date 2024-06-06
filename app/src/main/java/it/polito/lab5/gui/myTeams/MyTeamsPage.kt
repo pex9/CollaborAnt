@@ -78,6 +78,8 @@ fun MyTeamsPage(
     setShowDialogValue: (Boolean) -> Unit,
     joinSuccess: Boolean,
     setJoinSuccessValue: (Boolean) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
     navController: NavController, // NavController for navigation
     paddingValues: PaddingValues // Padding values for layout
 ){
@@ -138,6 +140,8 @@ fun MyTeamsPage(
             setShowBottomSheetValue = setShowBottomSheetValue,
             joinSuccess = joinSuccess,
             setJoinSuccessValue = setJoinSuccessValue,
+            showLoading = showLoading,
+            setShowLoadingValue = setShowLoadingValue,
             navController = navController
         )
     }

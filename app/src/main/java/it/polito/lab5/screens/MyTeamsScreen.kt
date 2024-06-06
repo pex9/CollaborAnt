@@ -63,6 +63,8 @@ fun MyTeamsScreen (
                 setShowDialogValue = setShowDialogValue,
                 joinSuccess = vm.joinSuccess,
                 setJoinSuccessValue = vm::setJoinSuccessValue,
+                showLoading = vm.showLoading,
+                setShowLoadingValue = vm::setShowLoadingValue,
                 navController = navController,
                 paddingValues = paddingValues
             )

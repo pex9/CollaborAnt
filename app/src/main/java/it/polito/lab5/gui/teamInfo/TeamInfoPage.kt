@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.teamInfo
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.DialogComp
@@ -46,7 +46,6 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,6 +129,7 @@ fun TeamInfoTopBar(
 fun TeamInfoPage(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     loggedInUserRole: Role,
     roleSelectionOpened: List<Pair<String, Boolean>>,
     setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
@@ -219,6 +219,7 @@ fun TeamInfoPage(
             TeamMembersComp(
                 team = team,
                 users = users,
+                loggedInUserId = loggedInUserId,
                 loggedInUserRole = loggedInUserRole,
                 updateRole = updateRole,
                 roleSelectionOpened = roleSelectionOpened,
@@ -237,6 +238,7 @@ fun TeamInfoPage(
             setShowMemberOptBottomSheetValue = setShowMemberOptBottomSheetValue,
             removeMember = { removeMember(team.id, it) },
             navController = navController,
+            loggedInUserId = loggedInUserId,
             setSelectedUserValue = setSelectedUserValue,
         )
     }
@@ -249,7 +251,8 @@ fun TeamInfoPage(
             setChosenMemberValue = setChosenMemberValue,
             setErrorMsgValue = setErrorMsgValue,
             setShowLeaveDialogValue = setShowLeaveDialogValue,
-            setShowBottomSheetValue = setShowMemberSelBottomSheetValue
+            setShowBottomSheetValue = setShowMemberSelBottomSheetValue,
+            loggedInUserId = loggedInUserId
         )
     }
 
@@ -286,6 +289,7 @@ fun TeamInfoPage(
                 setShowDeleteDialogValue(false)
                 scope.launch {
                     deleteTeam(team.id)
+                    Log.e("Server Error", "Eccomi")
                     navController.popBackStack(
                         route = "myTeams",
                         inclusive = false

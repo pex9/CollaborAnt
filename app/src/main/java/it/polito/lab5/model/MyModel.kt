@@ -298,7 +298,7 @@ class MyModel(val context: Context) {
                 "name" to team.name,
                 "description" to team.description,
                 "members" to team.members.keys.toList(),
-                "roles" to team.members.values.map { it.ordinal.toLong() }
+                "roles" to team.members.values.toList()
             )
         ).await()
 
@@ -336,7 +336,13 @@ class MyModel(val context: Context) {
             if(snapshot != null) {
                 val image = snapshot.get("image") as Map<String, String?>
                 val members = (snapshot.get("members") as List<String>)
-                    .zip(snapshot.get("roles") as List<Role>).toMap()
+                    .zip((snapshot.get("roles") as List<String>).map {
+                        when(it) {
+                            "TEAM_MANAGER" -> Role.TEAM_MANAGER
+                            "SENIOR_MEMBER" -> Role.SENIOR_MEMBER
+                            else -> Role.JUNIOR_MEMBER
+                        }
+                    }).toMap()
 
                 trySend(Team(
                     id = teamId,
@@ -365,7 +371,13 @@ class MyModel(val context: Context) {
                 val teams = snapshot.documents.map { document ->
                     val image = document.get("image") as Map<String, String?>
                     val members = (document.get("members") as List<String>)
-                        .zip(document.get("roles") as List<Role>).toMap()
+                        .zip((document.get("roles") as List<String>).map {
+                            when(it) {
+                                "TEAM_MANAGER" -> Role.TEAM_MANAGER
+                                "SENIOR_MEMBER" -> Role.SENIOR_MEMBER
+                                else -> Role.JUNIOR_MEMBER
+                            }
+                        }).toMap()
 
                     Team(
                         id = document.id,
@@ -410,7 +422,7 @@ class MyModel(val context: Context) {
                                 "url" to url
                             ),
                             "members" to team.members.keys.toList(),
-                            "roles" to team.members.values.map { it.ordinal.toLong() }
+                            "roles" to team.members.values.toList()
                         )
                     ).await()
                 },
@@ -447,13 +459,10 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun deleteTeam(teamId: String) {
+    suspend fun deleteTeam(teamId: String) {    //  TODO: add updateKpi, removeTasks and deleteImage
         val documentReference = db.collection("Teams").document(teamId)
-        try {
-            documentReference.delete().await()
-        } catch (e: Exception) {
-            Log.e("Server Error", e.message.toString())
-        }
+
+        documentReference.delete().await()
     }
 
     suspend fun addUserToTeam(team: Team, user: User) {
@@ -461,11 +470,14 @@ class MyModel(val context: Context) {
         val updatedMembers = team.members.toMutableMap()
         updatedMembers[user.id] = Role.JUNIOR_MEMBER
 
-        val x = updatedMembers.values.toList()
+        val x = updatedMembers.values.toList()//.map { it.ordinal.toLong() }
 
-        //  Update team fields
-        documentReference.update("members", updatedMembers.keys.toList()).await()
-        documentReference.update("roles", x).await()
+        updateTeam(teamId = team.id, team = team.copy(
+            members = updatedMembers
+        ), false)
+//        //  Update team fields
+//        documentReference.update("members", updatedMembers.keys.toList()).await()
+//        documentReference.update("roles", x).await()
 
         //  User kpi
         val updatedKpiValues = user.kpiValues.toMutableMap()
@@ -475,7 +487,7 @@ class MyModel(val context: Context) {
             score = calculateScore(0, 0)
         )
 
-        updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues )
+        updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues)
     }
 
 

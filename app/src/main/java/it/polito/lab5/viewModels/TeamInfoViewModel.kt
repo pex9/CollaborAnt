@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.User
@@ -14,10 +15,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 
-class TeamInfoViewModel(val teamId: String, val model: MyModel): ViewModel() {
+class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     val users = model.users
     val teams = model.teams
 
+    val loggedInUserId = auth.getSignedInUserId()
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
     fun getUsersTeam(teamId: String) = model.getUsersTeam(teamId)

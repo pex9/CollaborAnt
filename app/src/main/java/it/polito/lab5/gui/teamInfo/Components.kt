@@ -50,7 +50,6 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.bringPairToHead
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
@@ -204,6 +203,7 @@ fun MembersHeaderComp(teamId: String, loggedInUserRole: Role, navController: Nav
 fun TeamMembersComp(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     loggedInUserRole: Role,
     updateRole: (String, String, Role) -> Unit,
     roleSelectionOpened: List<Pair<String, Boolean>>,
@@ -211,17 +211,13 @@ fun TeamMembersComp(
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
-    bringPairToHead(team.members.toList(), DataBase.LOGGED_IN_USER_ID).forEach { (memberId, role) ->
-        val memberRole = when(role) {
-            0L -> Role.TEAM_MANAGER
-            1L -> Role.SENIOR_MEMBER
-            else -> Role.JUNIOR_MEMBER
-        }
+    bringPairToHead(team.members.toList(), loggedInUserId).forEach { (memberId, role) ->
 
         MemberRow(
             users = users,
             memberId = memberId,
-            role = memberRole,
+            role = role as Role,
+            loggedInUserId = loggedInUserId,
             loggedInUserRole = loggedInUserRole,
             updateRole = { id, r -> updateRole(team.id, id, r) },
             roleSelectionOpened = roleSelectionOpened,
@@ -237,6 +233,7 @@ fun MemberRow(
     users: List<User>,
     memberId: String,
     role: Role,
+    loggedInUserId: String,
     loggedInUserRole: Role,
     updateRole: (String, Role) -> Unit,
     roleSelectionOpened: List<Pair<String, Boolean>>,
@@ -273,7 +270,7 @@ fun MemberRow(
             Column {
                 if (member != null) {
                     Text(
-                        text = if(DataBase.LOGGED_IN_USER_ID == member.id) "You" else "${member.first} ${member.last}",
+                        text = if(loggedInUserId == member.id) "You" else "${member.first} ${member.last}",
                         fontWeight = FontWeight.Medium,
                         fontSize = 18.sp,
                         fontFamily = interFamily,
@@ -420,6 +417,7 @@ fun RoleOptionsComp(
 fun MemberOptionsBottomSheet(
     member: User,
     team: Team,
+    loggedInUserId: String,
     loggedInUserRole: Role,
     removeMember: (String) -> Unit,
     navController: NavController,
@@ -521,7 +519,7 @@ fun MemberOptionsBottomSheet(
     ) {
         Spacer(modifier = Modifier.height(20.dp))
 
-        if(member.id != DataBase.LOGGED_IN_USER_ID) {
+        if(member.id != loggedInUserId) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -599,7 +597,7 @@ fun MemberOptionsBottomSheet(
                 colors = ListItemDefaults.colors(containerColor = Color.White)
             )
 
-            if(member.id != DataBase.LOGGED_IN_USER_ID) {
+            if(member.id != loggedInUserId) {
                 Divider(
                     thickness = 1.dp,
                     color = CollaborantColors.BorderGray.copy(0.4f),
@@ -634,7 +632,7 @@ fun MemberOptionsBottomSheet(
                 )
             }
 
-            if(loggedInUserRole ==  Role.TEAM_MANAGER && member.id != DataBase.LOGGED_IN_USER_ID) {
+            if(loggedInUserRole ==  Role.TEAM_MANAGER && member.id != loggedInUserId) {
                 Divider(
                     thickness = 1.dp,
                     color = CollaborantColors.BorderGray.copy(0.4f),
@@ -681,6 +679,7 @@ fun MemberOptionsBottomSheet(
 fun MemberSelectionBottomSheet(
     members: List<Pair<String, Role>>,
     users: List<User>,
+    loggedInUserId: String,
     chosenMember: String?,
     setChosenMemberValue: (String?) -> Unit,
     setErrorMsgValue: (String) -> Unit,
@@ -826,7 +825,7 @@ fun MemberSelectionBottomSheet(
                             Column {
                                 if (member != null) {
                                     Text(
-                                        text = if (DataBase.LOGGED_IN_USER_ID == member.id) "You" else "${member.first} ${member.last}",
+                                        text = if (loggedInUserId == member.id) "You" else "${member.first} ${member.last}",
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 18.sp,
                                         fontFamily = interFamily,
