@@ -189,15 +189,18 @@ fun TextFieldComp(
     maxChars: Int = -1, // Maximum number of characters allowed (default: unlimited)
     leadingIcon: @Composable (() -> Unit)? = null // Leading icon (if any)
 ) {
+    val colors = MaterialTheme.colorScheme
     // Define colors for the text field
     val fieldColors = OutlinedTextFieldDefaults.colors(
-        focusedLabelColor = MaterialTheme.colorScheme.secondary,
-        unfocusedLabelColor = MaterialTheme.colorScheme.secondary,
-        focusedBorderColor = MaterialTheme.colorScheme.secondary,
-        unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
-        errorBorderColor = CollaborantColors.PriorityRed,
-        errorLabelColor = CollaborantColors.PriorityRed,
-        errorSupportingTextColor = CollaborantColors.PriorityRed
+        focusedLabelColor = colors.outline,
+        unfocusedLabelColor = colors.outline,
+        focusedBorderColor = colors.onBackground,
+        unfocusedBorderColor = colors.onBackground,
+        errorBorderColor = colors.error,
+        errorLabelColor = colors.onError,
+        errorSupportingTextColor = colors.error,
+        focusedContainerColor = colors.surfaceColorAtElevation(15.dp),
+        unfocusedContainerColor = colors.surfaceColorAtElevation(10.dp)
     )
 
     // Create the OutlinedTextField composable
@@ -225,7 +228,7 @@ fun TextFieldComp(
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = CollaborantColors.BorderGray
+                color = colors.outline
             )
         },
         isError = errorMsg.isNotBlank(), // Check if there's an error message to display
@@ -236,7 +239,7 @@ fun TextFieldComp(
                     Icon(
                         painter = painterResource(id = R.drawable.cross),
                         contentDescription = "Clear Icon",
-                        tint = CollaborantColors.BorderGray
+                        tint = colors.outline
                     )
                 }
             }
