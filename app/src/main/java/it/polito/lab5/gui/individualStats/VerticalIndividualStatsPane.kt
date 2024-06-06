@@ -25,7 +25,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,19 +37,18 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.Role
+import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
-import it.polito.lab5.viewModels.IndividualStatsViewModel
 
 @Composable
 fun VerticalIndividualStatsPane(
-    vm: IndividualStatsViewModel,
+    team: Team,
     navController: NavController,
     p: PaddingValues,
     targetMember: User,
     targetMemberRanking: Int,
-    membersList: List<User>,
-    teamId: String,
+    membersList: List<User>
 ) {
     Column(
         modifier = Modifier
@@ -168,7 +166,7 @@ fun VerticalIndividualStatsPane(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val points = targetMember.kpiValues[teamId]?.score ?: 0
+                            val points = targetMember.kpiValues[team.id]?.score ?: 0
                            val position = when(targetMemberRanking) {
                                 1 -> R.drawable.first_place
                                 2 -> R.drawable.second_place
@@ -214,7 +212,7 @@ fun VerticalIndividualStatsPane(
                         containerColor = Color.White,
                     )
                 ) {
-                    val literalAssignedTask = targetMember.kpiValues[teamId]?.assignedTasks ?: 0
+                    val literalAssignedTask = targetMember.kpiValues[team.id]?.assignedTasks ?: 0
 
                     Row(
                         modifier = Modifier
@@ -253,7 +251,7 @@ fun VerticalIndividualStatsPane(
                         containerColor = Color.White,
                     )
                 ) {
-                    val literalCompletedTask = targetMember.kpiValues[teamId]?.completedTasks ?: 0
+                    val literalCompletedTask = targetMember.kpiValues[team.id]?.completedTasks ?: 0
 
                     Row(
                         modifier = Modifier
@@ -344,7 +342,7 @@ fun VerticalIndividualStatsPane(
                                 }
                             },
                             headlineContent = {
-                                val role = when(vm.teams.collectAsState().value.find { it.id == teamId }?.members?.get(member.id)) {
+                                val role = when(team.members[member.id]) {
                                     Role.TEAM_MANAGER -> "Team Manager"
                                     Role.SENIOR_MEMBER -> "Senior Member"
                                     Role.JUNIOR_MEMBER -> "Junior Member"
@@ -369,13 +367,13 @@ fun VerticalIndividualStatsPane(
                             },
                             trailingContent = {
                                 Text(
-                                    text = "${member.kpiValues[teamId]?.score}",
+                                    text = "${member.kpiValues[team.id]?.score}",
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
                                 )
                             },
-                            modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
+                            modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${team.id}/${member.id}") },
                             colors = ListItemDefaults.colors(containerColor = Color.White),
                         )
                     }
@@ -387,13 +385,12 @@ fun VerticalIndividualStatsPane(
 
 @Composable
 fun HorizontalIndividualStatsPane(
-    vm: IndividualStatsViewModel,
+    team: Team,
     navController: NavController,
     p: PaddingValues,
     targetMember: User,
     targetMemberRanking: Int,
-    membersList: List<User>,
-    teamId: String,
+    membersList: List<User>
 ) {
     Row(
         modifier = Modifier
@@ -514,7 +511,7 @@ fun HorizontalIndividualStatsPane(
                                 horizontalArrangement = Arrangement.Center,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val points = targetMember.kpiValues[teamId]?.score ?: 0
+                                val points = targetMember.kpiValues[team.id]?.score ?: 0
                                 val position = when (targetMemberRanking) {
                                     1 -> R.drawable.first_place
                                     2 -> R.drawable.second_place
@@ -561,7 +558,7 @@ fun HorizontalIndividualStatsPane(
                             containerColor = Color.White,
                         )
                     ) {
-                        val literalAssignedTask = targetMember.kpiValues[teamId]?.assignedTasks ?: 0
+                        val literalAssignedTask = targetMember.kpiValues[team.id]?.assignedTasks ?: 0
 
                         Row(
                             modifier = Modifier
@@ -600,7 +597,7 @@ fun HorizontalIndividualStatsPane(
                             containerColor = Color.White,
                         )
                     ) {
-                        val literalCompletedTask = targetMember.kpiValues[teamId]?.completedTasks ?: 0
+                        val literalCompletedTask = targetMember.kpiValues[team.id]?.completedTasks ?: 0
 
                         Row(
                             modifier = Modifier
@@ -694,7 +691,7 @@ fun HorizontalIndividualStatsPane(
                             },
                             headlineContent = {
                                 val role =
-                                    when (vm.teams.collectAsState().value.find { it.id == teamId }?.members?.get(member.id)) {
+                                    when (team.members[member.id]) {
                                         Role.TEAM_MANAGER -> "Team Manager"
                                         Role.SENIOR_MEMBER -> "Senior Member"
                                         Role.JUNIOR_MEMBER -> "Junior Member"
@@ -718,13 +715,13 @@ fun HorizontalIndividualStatsPane(
                             },
                             trailingContent = {
                                 Text(
-                                    text = "${member.kpiValues[teamId]?.score}",
+                                    text = "${member.kpiValues[team.id]?.score}",
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
                                 )
                             },
-                            modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
+                            modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${team.id}/${member.id}") },
                             colors = ListItemDefaults.colors(containerColor = Color.White),
                         )
                     }

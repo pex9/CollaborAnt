@@ -40,7 +40,6 @@ import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.gui.teamForm.getMonogramText
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
@@ -143,7 +142,7 @@ fun TeamInfoPage(
     setShowDeleteDialogValue: (Boolean) -> Unit,
     deleteTeam: suspend (Team, List<User>) -> Boolean,
     updateUserRole: suspend (String, Role, Team) -> Unit,
-    removeUserFromTeam: suspend (User, Team) -> Unit,
+    removeUserFromTeam: suspend (User, Team, String?) -> Unit,
     showMemberSelBottomSheet: Boolean,
     setShowMemberSelBottomSheetValue: (Boolean) -> Unit,
     chosenMember: String?,
@@ -236,7 +235,7 @@ fun TeamInfoPage(
             team = team,
             loggedInUserRole = loggedInUserRole,
             setShowMemberOptBottomSheetValue = setShowMemberOptBottomSheetValue,
-            removeUserFromTeam = { removeUserFromTeam(it, team) },
+            removeUserFromTeam = { removeUserFromTeam(it, team, null) },
             navController = navController,
             loggedInUserId = loggedInUserId,
             setSelectedUserValue = setSelectedUserValue,
@@ -264,23 +263,18 @@ fun TeamInfoPage(
             onConfirm = {
                 setShowLeaveDialogValue(false)
 
-                scope.launch {
-                    if (chosenMember != null) {
-                        updateUserRole(chosenMember, Role.TEAM_MANAGER, team)
-                    }
-                }.invokeOnCompletion {
-                    if(team.members.size > 1) {
-                        users.find { it.id == loggedInUserId }?.let { user ->
-                            scope.launch {
-                                removeUserFromTeam(user, team)
-                            }.invokeOnCompletion {
-                                navController.popBackStack(
-                                    route = "myTeams",
-                                    inclusive = false
-                                )
-                            }
+                if(team.members.size > 1) {
+                    users.find { it.id == loggedInUserId }?.let { user ->
+                        scope.launch {
+                            removeUserFromTeam(user, team, chosenMember)
+                        }.invokeOnCompletion {
+                            navController.popBackStack(
+                                route = "myTeams",
+                                inclusive = false
+                            )
                         }
                     }
+                }
 //                    else {
 //                        scope.launch {
 //                            deleteTeam(team, users) //  TODO: fix this
@@ -291,7 +285,6 @@ fun TeamInfoPage(
 //                            )
 //                        }
 //                    }
-                }
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )

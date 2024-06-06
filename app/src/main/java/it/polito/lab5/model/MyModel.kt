@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 
@@ -118,12 +117,23 @@ class MyModel(val context: Context) {
 
     @Suppress("unchecked_cast")
     fun getUsersTeam(members: List<String>): Flow<List<User>> = callbackFlow {
+        val kpiList = members.map { memberId ->
+            val result = db.collection("Users").document(memberId).collection("kpiValues").get().await()
+
+            result.documents.associate {
+                it.id to KPI(
+                    assignedTasks = it.get("assignedTasks") as Long,
+                    completedTasks = it.get("completedTasks") as Long,
+                    score = it.get("score") as Long
+                )
+            }
+        }
+
         val usersDocumentReference = db.collection("Users").whereIn(FieldPath.documentId(), members)
 
         val usersSnapshotListener = usersDocumentReference.addSnapshotListener { usersSnapshot, e ->
-
             if (usersSnapshot != null) {
-                val users = usersSnapshot.documents.mapNotNull { userDocument ->
+                val users = usersSnapshot.documents.mapIndexed { idx, userDocument ->
                     val image = userDocument.get("image") as Map<String, String?>
                     User(
                         id = userDocument.id,
@@ -134,21 +144,13 @@ class MyModel(val context: Context) {
                         telephone = userDocument.getString("telephone") ?: "",
                         location = userDocument.getString("location") ?: "",
                         description = userDocument.getString("description") ?: "",
-                        imageProfile = if (image["color"] != null) Empty(
-                            Color(
-                                image["color"]?.toULong() ?: 0UL
-                            )
-                        )
-                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                        imageProfile = if (image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
+                            else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         joinedTeams = userDocument.getLong("joinedTeams") ?: 0L,
-                        kpiValues = userDocument.get("kpiValues") as? Map<String, KPI>
-                            ?: emptyMap(),
-                        categories = userDocument.get("categories") as? List<String>
-                            ?: emptyList()
+                        kpiValues = kpiList[idx],
+                        categories = userDocument.get("categories") as? List<String> ?: emptyList()
                     )
-
                 }
-
                 trySend(users)
             } else {
                 if (e != null) { Log.e("Server Error", e.message.toString()) }
@@ -490,9 +492,13 @@ class MyModel(val context: Context) {
         ), false)
     }
 
-    suspend fun removeUserFromTeam(user: User, team: Team) {
+    suspend fun removeUserFromTeam(user: User, team: Team, chosenMember: String? = null) {
         val updatedMembers = team.members.toMutableMap()
         updatedMembers.remove(user.id)
+
+        if(chosenMember != null) {
+            updatedMembers[chosenMember] = Role.TEAM_MANAGER
+        }
 
         updateTeam(teamId = team.id, team = team.copy(
             members = updatedMembers
@@ -504,13 +510,6 @@ class MyModel(val context: Context) {
 
         updateUserKpi(user.id, user.joinedTeams - 1, updatedKpiValues)
     }
-
-
-
-
-
-
-
 
 
 
@@ -612,58 +611,6 @@ class MyModel(val context: Context) {
             updatedTeams[index] = team
             _teams.value = updatedTeams
         }
-    }
-
-    fun deleteTeam2(teamId: String) {
-        val updatedTeams = _teams.value.toMutableList()
-        val teamTasks = _tasks.value.filter {it.teamId == teamId }.map { it.id }
-
-        teamTasks.forEach { taskId ->
-            deleteTask(taskId)
-        }
-
-        updatedTeams.removeIf { it.id == teamId }
-        _teams.value = updatedTeams
-    }
-
-    fun updateRole(teamId: String, memberId: String, role: Role) {
-        _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableMap<String, Role> = team.members.toMutableMap()
-
-            if(team.members[memberId] != null) {
-                members[memberId] = role
-                updateT(teamId, team.copy(members = members))
-            }
-        }
-    }
-
-    fun addMember(teamId: String, memberId: String): Boolean {
-        _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableMap<String, Role> = team.members.toMutableMap()
-
-            if(members.none { it.key == memberId }) {
-                members[memberId] = Role.JUNIOR_MEMBER
-                updateT(teamId, team.copy(members = members))
-
-                //  Update Kpi for new member
-                _users.value.find { it.id == memberId }?.let { user ->
-                    val updatedKpiValues = user.kpiValues.toMutableMap()
-                    updatedKpiValues[teamId] = KPI(
-                        assignedTasks = 0,
-                        completedTasks = 0,
-                        score = calculateScore(0, 0)
-                    )
-
-                    updateU(user.id, user.copy(
-                        joinedTeams = user.joinedTeams + 1,
-                        kpiValues = updatedKpiValues
-                    ))
-                }
-
-                return true
-            }
-        }
-        return false
     }
 
     fun removeMember(teamId: String, memberId: String) {

@@ -8,21 +8,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import it.polito.lab5.gui.individualStats.HorizontalIndividualStatsPane
 import it.polito.lab5.gui.individualStats.VerticalIndividualStatsPane
+import it.polito.lab5.gui.individualStats.computeTargetMemberRanking
 import it.polito.lab5.gui.teamStats.StatsTopBar
-import it.polito.lab5.model.User
 import it.polito.lab5.viewModels.IndividualStatsViewModel
 
 @Composable
 fun IndividualStatsScreen(
     vm: IndividualStatsViewModel = viewModel(),
-    navController: NavController,
-    targetMember: User?,
-    targetMemberRanking: Int,
-    membersList: List<User>,
-    teamId: String,
+    navController: NavController
 ) {
-    val teams = vm.teams.collectAsState().value
-    val team = teams.find { it.id == teamId }
+    val targetMember = vm.getUser(vm.userId).collectAsState(initial = null).value
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+
+
     Scaffold(
         topBar = {
             if (team != null) {
@@ -32,26 +31,29 @@ fun IndividualStatsScreen(
     ) {paddingValues ->
         targetMember?.let {
             BoxWithConstraints {
-                if (this.maxHeight > this.maxWidth) {
-                    VerticalIndividualStatsPane(
-                        vm = vm,
-                        navController = navController,
-                        p = paddingValues,
-                        targetMember = it,
-                        targetMemberRanking = targetMemberRanking,
-                        membersList = membersList,
-                        teamId = teamId,
-                    )
-                } else {
-                    HorizontalIndividualStatsPane(
-                        vm = vm,
-                        navController = navController,
-                        p = paddingValues,
-                        targetMember = it,
-                        targetMemberRanking = targetMemberRanking,
-                        membersList = membersList,
-                        teamId = teamId,
-                    )
+                if(team != null && membersList != null) {
+                    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, team.id, membersList)
+
+                    if (this.maxHeight > this.maxWidth) {
+                        VerticalIndividualStatsPane(
+                            team = team,
+                            navController = navController,
+                            p = paddingValues,
+                            targetMember = it,
+                            targetMemberRanking = targetMemberRanking,
+                            membersList = membersList
+                        )
+
+                    } else {
+                        HorizontalIndividualStatsPane(
+                            team = team,
+                            navController = navController,
+                            p = paddingValues,
+                            targetMember = it,
+                            targetMemberRanking = targetMemberRanking,
+                            membersList = membersList
+                        )
+                    }
                 }
             }
 

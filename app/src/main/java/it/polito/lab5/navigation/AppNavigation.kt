@@ -381,18 +381,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 factory = AppFactory(teamId = teamId, userId = userId, context = context)
             )
 
-            val teams = individualStatsViewModel.teams.collectAsState()
-
-            teams.value.find { it.id == teamId }?.let { team ->
-                IndividualStatsScreen(
-                    vm = individualStatsViewModel,
-                    navController = navController,
-                    targetMember = individualStatsViewModel.targetMember,
-                    targetMemberRanking = individualStatsViewModel.targetMemberRanking,
-                    membersList = individualStatsViewModel.rankedMembersList,
-                    teamId = team.id,
-                )
-            }
+            IndividualStatsScreen(vm = individualStatsViewModel, navController = navController)
         }
 
         // View Team Stats

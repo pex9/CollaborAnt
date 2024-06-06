@@ -1,9 +1,7 @@
 package it.polito.lab5.viewModels
 
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -14,9 +12,6 @@ import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     val users = model.users
@@ -42,7 +37,7 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
 
     suspend fun updateUserRole(userId: String, newRole: Role, team: Team) = model.updateUserRole(userId, newRole, team)
 
-    suspend fun removeUserFromTeam(user: User, team: Team) = model.removeUserFromTeam(user, team)
+    suspend fun removeUserFromTeam(user: User, team: Team, chosenMember: String?) = model.removeUserFromTeam(user, team, chosenMember)
 
     fun removeMember(teamId: String, memberId: String) = model.removeMember(teamId, memberId)
 

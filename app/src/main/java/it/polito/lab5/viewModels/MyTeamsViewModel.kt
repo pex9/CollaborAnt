@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Team
@@ -35,8 +34,6 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
             return false
         }
     }
-
-    fun addMember(teamId: String, memberId: String) = model.addMember(teamId, memberId)
 
     var showBottomSheet by mutableStateOf(teamId != null)
     fun setShowBottomSheetValue(b: Boolean) {
