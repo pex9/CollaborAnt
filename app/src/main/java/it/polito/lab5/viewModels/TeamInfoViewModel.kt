@@ -1,6 +1,7 @@
 package it.polito.lab5.viewModels
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -13,6 +14,7 @@ import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.internal.wait
 
@@ -38,7 +40,9 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
         }
     }
 
-    fun updateRole(teamId: String, memberId: String, role: Role) = model.updateRole(teamId, memberId, role)
+    suspend fun updateUserRole(userId: String, newRole: Role, team: Team) = model.updateUserRole(userId, newRole, team)
+
+    suspend fun removeUserFromTeam(user: User, team: Team) = model.removeUserFromTeam(user, team)
 
     fun removeMember(teamId: String, memberId: String) = model.removeMember(teamId, memberId)
 
@@ -47,18 +51,9 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
         optionsOpened = b
     }
 
-    var roleSelectionOpened: MutableList<Pair<String, Boolean>> = mutableStateListOf()
-    init {
-        teams.value.find { it.id == teamId }?.let { team ->
-            team.members.filter { it.value != Role.TEAM_MANAGER } }?.forEach {
-                roleSelectionOpened.add(it.key to false)
-        }
-    }
-
-    fun setRoleSelectionOpenedValue(memberId: String, b: Boolean) {
-        val idx = roleSelectionOpened.indexOfFirst { it.first == memberId }
-
-        roleSelectionOpened[idx] = memberId to b
+    var roleSelectionOpened by mutableStateOf("")
+    fun setRoleSelectionOpenedValue(s: String) {
+        roleSelectionOpened = s
     }
 
     var showMemberOptBottomSheet by mutableStateOf(false)

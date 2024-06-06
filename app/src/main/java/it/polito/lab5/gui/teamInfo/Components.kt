@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.teamInfo
 
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +56,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @Composable
@@ -205,9 +207,9 @@ fun TeamMembersComp(
     users: List<User>,
     loggedInUserId: String,
     loggedInUserRole: Role,
-    updateRole: (String, String, Role) -> Unit,
-    roleSelectionOpened: List<Pair<String, Boolean>>,
-    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
+    updateUserRole: suspend (String, Role, Team) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
@@ -219,7 +221,7 @@ fun TeamMembersComp(
             role = role as Role,
             loggedInUserId = loggedInUserId,
             loggedInUserRole = loggedInUserRole,
-            updateRole = { id, r -> updateRole(team.id, id, r) },
+            updateUserRole = { id, r -> updateUserRole(id, r, team) },
             roleSelectionOpened = roleSelectionOpened,
             setRoleSelectionOpenedValue = setRoleSelectionOpenedValue,
             setSelectedUserValue = setSelectedUserValue,
@@ -235,14 +237,14 @@ fun MemberRow(
     role: Role,
     loggedInUserId: String,
     loggedInUserRole: Role,
-    updateRole: (String, Role) -> Unit,
-    roleSelectionOpened: List<Pair<String, Boolean>>,
-    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
+    updateUserRole: suspend (String, Role) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
     val member = users.find { it.id == memberId }
-    val optionsOpened = roleSelectionOpened.find { it.first == memberId }?.second
+    val optionsOpened = roleSelectionOpened == memberId
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -279,11 +281,11 @@ fun MemberRow(
                     )
                 }
 
-                if (optionsOpened != null && loggedInUserRole == Role.TEAM_MANAGER) {
+                if (loggedInUserRole == Role.TEAM_MANAGER) {
                     RoleOptionsComp(
                         memberId = memberId,
                         role = role,
-                        updateRole = updateRole,
+                        updateUserRole = updateUserRole,
                         roleSelectionOpened = optionsOpened,
                         setRoleSelectionOpenedValue = setRoleSelectionOpenedValue
                     )
@@ -315,10 +317,11 @@ fun MemberRow(
 fun RoleOptionsComp(
     memberId: String,
     role: Role,
-    updateRole: (String, Role) -> Unit,
+    updateUserRole: suspend (String, Role) -> Unit,
     roleSelectionOpened: Boolean,
-    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
+    setRoleSelectionOpenedValue: (String) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -330,7 +333,7 @@ fun RoleOptionsComp(
         modifier = Modifier
             .padding(top = 1.dp, start = 4.dp)
             .clickable(enabled = role != Role.TEAM_MANAGER) {
-                setRoleSelectionOpenedValue(memberId, true)
+                setRoleSelectionOpenedValue(memberId)
             }
     ) {
 
@@ -366,7 +369,7 @@ fun RoleOptionsComp(
         Box {
             DropdownMenu(
                 expanded = roleSelectionOpened,
-                onDismissRequest = { setRoleSelectionOpenedValue(memberId, false) },
+                onDismissRequest = { setRoleSelectionOpenedValue("") },
                 offset = DpOffset(x = 2.dp, y = 2.dp),
                 modifier = Modifier.background(Color.White)
             ) {
@@ -396,7 +399,12 @@ fun RoleOptionsComp(
                                 fontSize = 16.sp
                             )
                         },
-                        onClick = { setRoleSelectionOpenedValue(memberId, false) ; updateRole(memberId, r) }
+                        onClick = {
+                            scope.launch { updateUserRole(memberId, r) }
+                                .invokeOnCompletion {
+                                    setRoleSelectionOpenedValue("")
+                                }
+                        }
                     )
 
                     if(idx < Role.entries.size - 2) {
@@ -419,7 +427,7 @@ fun MemberOptionsBottomSheet(
     team: Team,
     loggedInUserId: String,
     loggedInUserRole: Role,
-    removeMember: (String) -> Unit,
+    removeUserFromTeam: suspend (User) -> Unit,
     navController: NavController,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,
     setSelectedUserValue: (User?) -> Unit
@@ -660,9 +668,12 @@ fun MemberOptionsBottomSheet(
                     },
                     modifier = Modifier.clickable {
                         coroutineScope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            setShowMemberOptBottomSheetValue(false)
-                            setSelectedUserValue(null)
-                            removeMember(member.id)
+                            coroutineScope.launch {
+                                removeUserFromTeam(member)
+                            }.invokeOnCompletion {
+                                setShowMemberOptBottomSheetValue(false)
+                                setSelectedUserValue(null)
+                            }
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.White)

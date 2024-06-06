@@ -131,8 +131,8 @@ fun TeamInfoPage(
     users: List<User>,
     loggedInUserId: String,
     loggedInUserRole: Role,
-    roleSelectionOpened: List<Pair<String, Boolean>>,
-    setRoleSelectionOpenedValue: (String, Boolean) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     showMemberOptBottomSheet: Boolean,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     selectedUser: User?,
@@ -142,8 +142,8 @@ fun TeamInfoPage(
     showDeleteDialog: Boolean,
     setShowDeleteDialogValue: (Boolean) -> Unit,
     deleteTeam: suspend (Team, List<User>) -> Boolean,
-    updateRole: (String, String, Role) -> Unit,
-    removeMember: (String, String) -> Unit,
+    updateUserRole: suspend (String, Role, Team) -> Unit,
+    removeUserFromTeam: suspend (User, Team) -> Unit,
     showMemberSelBottomSheet: Boolean,
     setShowMemberSelBottomSheetValue: (Boolean) -> Unit,
     chosenMember: String?,
@@ -221,7 +221,7 @@ fun TeamInfoPage(
                 users = users,
                 loggedInUserId = loggedInUserId,
                 loggedInUserRole = loggedInUserRole,
-                updateRole = updateRole,
+                updateUserRole = updateUserRole,
                 roleSelectionOpened = roleSelectionOpened,
                 setRoleSelectionOpenedValue = setRoleSelectionOpenedValue,
                 setSelectedUserValue = setSelectedUserValue,
@@ -236,7 +236,7 @@ fun TeamInfoPage(
             team = team,
             loggedInUserRole = loggedInUserRole,
             setShowMemberOptBottomSheetValue = setShowMemberOptBottomSheetValue,
-            removeMember = { removeMember(team.id, it) },
+            removeUserFromTeam = { removeUserFromTeam(it, team) },
             navController = navController,
             loggedInUserId = loggedInUserId,
             setSelectedUserValue = setSelectedUserValue,
@@ -264,19 +264,34 @@ fun TeamInfoPage(
             onConfirm = {
                 setShowLeaveDialogValue(false)
 
-                if (chosenMember != null) { updateRole(team.id, chosenMember, Role.TEAM_MANAGER) }
-
-                if(team.members.size > 1) { removeMember(team.id, DataBase.LOGGED_IN_USER_ID) }
-                else {
-                    scope.launch {
-                        deleteTeam(team, users) //  TODO: fix this
-                        navController.popBackStack(
-                            route = "myTeams",
-                            inclusive = false
-                        )
+                scope.launch {
+                    if (chosenMember != null) {
+                        updateUserRole(chosenMember, Role.TEAM_MANAGER, team)
                     }
+                }.invokeOnCompletion {
+                    if(team.members.size > 1) {
+                        users.find { it.id == loggedInUserId }?.let { user ->
+                            scope.launch {
+                                removeUserFromTeam(user, team)
+                            }.invokeOnCompletion {
+                                navController.popBackStack(
+                                    route = "myTeams",
+                                    inclusive = false
+                                )
+                            }
+                        }
+                    }
+//                    else {
+//                        scope.launch {
+//                            deleteTeam(team, users) //  TODO: fix this
+//                        }.invokeOnCompletion {
+//                            navController.popBackStack(
+//                                route = "myTeams",
+//                                inclusive = false
+//                            )
+//                        }
+//                    }
                 }
-
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )

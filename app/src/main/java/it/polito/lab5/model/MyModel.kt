@@ -481,6 +481,30 @@ class MyModel(val context: Context) {
         updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues)
     }
 
+    suspend fun updateUserRole(userId: String, newRole: Role, team: Team) {
+        val updatedMembers = team.members.toMutableMap()
+        updatedMembers[userId] = newRole
+
+        updateTeam(teamId = team.id, team = team.copy(
+            members = updatedMembers
+        ), false)
+    }
+
+    suspend fun removeUserFromTeam(user: User, team: Team) {
+        val updatedMembers = team.members.toMutableMap()
+        updatedMembers.remove(user.id)
+
+        updateTeam(teamId = team.id, team = team.copy(
+            members = updatedMembers
+        ), false)
+
+        //  Update User kpi
+        val updatedKpiValues = user.kpiValues.toMutableMap()
+        updatedKpiValues.remove(team.id)
+
+        updateUserKpi(user.id, user.joinedTeams - 1, updatedKpiValues)
+    }
+
 
 
 
