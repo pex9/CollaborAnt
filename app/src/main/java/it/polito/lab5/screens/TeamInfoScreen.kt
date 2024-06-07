@@ -3,15 +3,15 @@ package it.polito.lab5.screens
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
 import it.polito.lab5.gui.teamInfo.TeamInfoPage
 import it.polito.lab5.gui.teamInfo.TeamInfoTopBar
 import it.polito.lab5.viewModels.TeamInfoViewModel
-import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun TeamInfoViewScreen(vm: TeamInfoViewModel, scope: CoroutineScope, navController: NavController) {
-
+fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
+    val scope = rememberCoroutineScope()
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
     val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
         val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
@@ -40,9 +40,9 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, scope: CoroutineScope, navControll
         team?.let {
             if (loggedInUserRole != null && vm.loggedInUserId != null && users != null) {
                 TeamInfoPage(
-                    scope = scope,
                     team = it,
                     users = users,
+                    scope = scope,
                     loggedInUserId = vm.loggedInUserId,
                     loggedInUserRole = loggedInUserRole,
                     roleSelectionOpened = vm.roleSelectionOpened,
