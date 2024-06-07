@@ -255,7 +255,8 @@ object DataBase {
             description = "Description of Team A",
             image = Empty(CollaborantColors.LightBlue),
             members = teamMembers.toMap(),
-            chat = listOf(chats[0], chats[1], chats[2], chats[3], chats[4], chats[5], chats[6], chats[7], chats[8], chats[9], chats[10], chats[11])
+            chat = listOf(chats[0], chats[1], chats[2], chats[3], chats[4], chats[5], chats[6], chats[7], chats[8], chats[9], chats[10], chats[11]),
+            unreadMessage = emptyMap()
         ),
         Team(
             id = 101.toString(),
@@ -270,7 +271,8 @@ object DataBase {
                 Pair(users[0].id, Role.SENIOR_MEMBER),
                 Pair(users[5].id, Role.JUNIOR_MEMBER)
             ).toMap(),
-            chat = listOf(chats[3], chats[4], chats[5])
+            chat = listOf(chats[3], chats[4], chats[5]),
+            unreadMessage = emptyMap()
         ),
         Team(
             id = 102.toString(),
@@ -285,7 +287,8 @@ object DataBase {
                 Pair(users[5].id, Role.JUNIOR_MEMBER),
                 Pair(users[0].id, Role.TEAM_MANAGER)
             ).toMap(),
-            chat = listOf(chats[6], chats[7], chats[8], chats[9])
+            chat = listOf(chats[6], chats[7], chats[8], chats[9]),
+            unreadMessage = emptyMap()
         )
     )
 

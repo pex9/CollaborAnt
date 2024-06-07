@@ -310,7 +310,8 @@ class MyModel(val context: Context) {
                 "name" to team.name,
                 "description" to team.description,
                 "members" to team.members.keys.toList(),
-                "roles" to team.members.values.toList()
+                "roles" to team.members.values.toList(),
+                "unreadMessage" to team.unreadMessage.values.toList()
             )
         ).await()
 
@@ -358,6 +359,9 @@ class MyModel(val context: Context) {
                         }
                     }).toMap()
 
+                val unreadMessage = (snapshot.get("members") as List<String>)
+                    .zip((snapshot.get("roles") as List<Boolean>)).toMap()
+
                 trySend(
                     Team(
                         id = teamId,
@@ -370,7 +374,8 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = emptyList() //   TODO: manage with sub-collection
+                        chat = emptyList(), //   TODO: manage with sub-collection
+                        unreadMessage = unreadMessage
                     )
                 )
             } else {
@@ -400,6 +405,9 @@ class MyModel(val context: Context) {
                                 else -> Role.JUNIOR_MEMBER
                             }
                         }).toMap()
+
+                    val unreadMessage = (document.get("members") as List<String>)
+                        .zip((document.get("roles") as List<Boolean>)).toMap()
 
 //                    val chatCollection =
 //                        db.collection("Teams").document(document.id).collection("chat")
@@ -437,7 +445,8 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = emptyList()//chatTeam
+                        chat = emptyList(),
+                        unreadMessage = unreadMessage
                     )
                 }
                 trySend(teams)
@@ -549,9 +558,13 @@ class MyModel(val context: Context) {
         val updatedMembers = team.members.toMutableMap()
         updatedMembers[user.id] = Role.JUNIOR_MEMBER
 
+        val uploadedUnreadMessage = team.unreadMessage.toMutableMap()
+        uploadedUnreadMessage[user.id] = false
+
         updateTeam(
             teamId = team.id, team = team.copy(
-                members = updatedMembers
+                members = updatedMembers,
+                unreadMessage = uploadedUnreadMessage
             ), false
         )
 

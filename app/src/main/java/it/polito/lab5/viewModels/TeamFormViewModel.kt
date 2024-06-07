@@ -48,7 +48,8 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
                                     name = name,
                                     description = description,
                                     members = mapOf(user.id to Role.TEAM_MANAGER),
-                                    chat = emptyList()
+                                    chat = emptyList(),
+                                    unreadMessage = mapOf(user.id to false)
                                 )
                             )
 

@@ -73,6 +73,7 @@ data class Team(
     val description: String,
     val image: ImageProfile,
     val members: Map<String, Role>,
+    val unreadMessage: Map<String, Boolean>,
     val chat: List<Message>
 )
 
