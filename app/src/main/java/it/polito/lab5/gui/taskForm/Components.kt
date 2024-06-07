@@ -83,13 +83,13 @@ fun TagMenuComp(
             trailingIcon = {
                 if (showTagMenu) {
                     Icon(
-                        painter = painterResource(id = R.drawable.arrow_up),
+                        painter = painterResource(id = R.drawable.arrow_down),
                         contentDescription = "Arrow Up Icon",
                         tint = colors.secondaryContainer
                     )
                 } else {
                     Icon(
-                        painter = painterResource(id = R.drawable.arrow_down),
+                        painter = painterResource(id = R.drawable.arrow_left_2),
                         contentDescription = "Arrow down Icon",
                         tint = colors.secondaryContainer
                     )
@@ -285,15 +285,15 @@ fun RepeatMenuComp(
             // Icon to toggle the visibility of the repeat menu
             if (showRepeatMenu) {
                 Icon(
-                    painter = painterResource(id = R.drawable.arrow_up),
+                    painter = painterResource(id = R.drawable.arrow_down),
                     contentDescription = "Arrow Up Icon",
-                    tint = CollaborantColors.DarkBlue
+                    tint = colors.secondaryContainer
                 )
             } else {
                 Icon(
-                    painter = painterResource(id = R.drawable.arrow_down),
+                    painter = painterResource(id = R.drawable.arrow_left_2),
                     contentDescription = "Arrow down Icon",
-                    tint = CollaborantColors.DarkBlue,
+                    tint = colors.secondaryContainer,
                 )
             }
         }
@@ -304,7 +304,7 @@ fun RepeatMenuComp(
                 expanded = showRepeatMenu,
                 onDismissRequest = { setShowRepeatMenuValue(false) },
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(colors.surfaceColorAtElevation(10.dp))
                     .width(150.dp),
                 offset = DpOffset(x = 8.dp, y = (-5).dp)
             ) {
@@ -330,7 +330,8 @@ fun RepeatMenuComp(
                                 text = literalRepeat,
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
+                                color = colors.onBackground
                             )
                         },
                         trailingIcon = {

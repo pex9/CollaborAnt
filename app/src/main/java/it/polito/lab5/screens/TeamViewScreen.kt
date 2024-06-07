@@ -1,33 +1,44 @@
 package it.polito.lab5.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -72,7 +83,7 @@ fun TeamViewScreen(
         },
         floatingActionButton = {
             // Box to wrap the Floating Action Button and Dropdown Menu
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(contentAlignment = Alignment.BottomCenter) {
                 val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
                 // Floating Action Button
                 SmallFloatingActionButton(
@@ -91,23 +102,34 @@ fun TeamViewScreen(
                     )
                 }
                 // Dropdown Menu
-                Box {
+                Box(
+                    modifier = Modifier
+                        .width(68.dp)
+                        .background(colors.surfaceColorAtElevation(10.dp))
+                        .border(
+                            shape = RoundedCornerShape(20.dp),
+                            width = 1.dp,
+                            color = colors.outline.copy(alpha = 0.5f)
+                        ),
+                        //.offset(x = 3.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
                     DropdownMenu(
                         expanded = vm.optionsOpened,
                         onDismissRequest = { vm.setOptionsOpenedValue(false) }, // Dismiss the menu when clicked outside
-                        modifier = Modifier
-                            .width(77.dp)
-                            .background(Color.White),
+                        modifier = Modifier.width(68.dp)
                     ) {
                         DropdownMenuItem(
                             text = {
                                 Column(
                                     verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+
                                 ) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.chart),
-                                        contentDescription = "Analytics Icon"
+                                        contentDescription = "Analytics Icon",
+                                        modifier = Modifier.size(25.dp)
                                     )
 
                                     Text(
@@ -118,41 +140,45 @@ fun TeamViewScreen(
                                     )
                                 }
                             },
-                            contentPadding = PaddingValues(start = 16.dp),
+                            contentPadding = PaddingValues(start = 12.dp),
                             onClick = {
                                 vm.setOptionsOpenedValue(false)
                                 navController.navigate("viewTeamStats/${vm.teamId}")
                             },
-                            colors = MenuDefaults.itemColors(textColor = CollaborantColors.BorderGray)
+                            colors = MenuDefaults.itemColors(textColor = colors.outline)
                         )
-
+                        Spacer(modifier = Modifier.height(5.dp))
                         DropdownMenuItem(
                             text = {
                                 Column(
                                     verticalArrangement = Arrangement.Center,
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                    horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.send),
-                                        contentDescription = "Team Chat Icon"
+                                        contentDescription = "Team Chat Icon",
+                                        modifier = Modifier.size(25.dp)
                                     )
 
                                     Text(
-                                        text = "Team Chat",
+                                        text = "Chat",
                                         fontFamily = interFamily,
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 10.sp
                                     )
                                 }
                             },
+                            contentPadding = PaddingValues(start = 20.dp),
                             onClick = {
                                 vm.setOptionsOpenedValue(false)
                                 navController.navigate("viewChat/${vm.teamId}/-1")
                             },
-                            colors = MenuDefaults.itemColors(textColor = CollaborantColors.BorderGray)
+                            colors = MenuDefaults.itemColors(textColor = colors.outline),
+                            //modifier = Modifier.padding(vertical = 5.dp)
                         )
 
                         if(loggedInUserRole == Role.TEAM_MANAGER) {
+                            Spacer(modifier = Modifier.height(5.dp))
                             DropdownMenuItem(
                                 text = {
                                     Column(
@@ -161,7 +187,8 @@ fun TeamViewScreen(
                                     ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.plus),
-                                            contentDescription = "New Task Icon"
+                                            contentDescription = "New Task Icon",
+                                            modifier = Modifier.size(25.dp)
                                         )
 
                                         Text(
@@ -173,12 +200,12 @@ fun TeamViewScreen(
                                     }
 
                                 },
-                                contentPadding = PaddingValues(start = 15.dp),
                                 onClick = {
                                     vm.setOptionsOpenedValue(false)
                                     navController.navigate("${vm.teamId}/addTask")
                                 },
-                                colors = MenuDefaults.itemColors(textColor = CollaborantColors.BorderGray)
+                                contentPadding = PaddingValues(start = 10.dp),
+                                colors = MenuDefaults.itemColors(textColor = colors.outline),
                             )
                         }
                     }
