@@ -484,7 +484,8 @@ class MyModel(val context: Context) {
                                 "url" to url
                             ),
                             "members" to team.members.keys.toList(),
-                            "roles" to team.members.values.toList()
+                            "roles" to team.members.values.toList(),
+                            "unreadMessage" to team.unreadMessage.values.toList()
                         )
                     ).await()
                 },
@@ -502,7 +503,8 @@ class MyModel(val context: Context) {
                         "url" to team.image.image
                     ),
                     "members" to team.members.keys.toList(),
-                    "roles" to team.members.values.toList()
+                    "roles" to team.members.values.toList(),
+                    "unreadMessage" to team.unreadMessage.values.toList()
                 )
             ).await()
         } else {
@@ -515,7 +517,8 @@ class MyModel(val context: Context) {
                         "url" to null
                     ),
                     "members" to team.members.keys.toList(),
-                    "roles" to team.members.values.toList()
+                    "roles" to team.members.values.toList(),
+                    "unreadMessage" to team.unreadMessage.values.toList()
                 )
             ).await()
 
