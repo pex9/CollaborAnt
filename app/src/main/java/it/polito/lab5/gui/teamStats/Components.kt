@@ -336,7 +336,7 @@ fun StatsTopBar(team: Team, navController: NavController) {
 }
 
 @Composable
-fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController: NavController, teamId: String){
+fun TeamMembersRanking(membersList: List<User>,team: Team, navController: NavController){
     Text(
         text = "Team Members Ranking",
         overflow = TextOverflow.Ellipsis,
@@ -386,7 +386,7 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
                         }
                     },
                     headlineContent = {
-                        val role = when(teams.find { it.id == teamId }?.members?.get(member.id)) {
+                        val role = when(team.members[member.id]) {
                             Role.TEAM_MANAGER -> "Team Manager"
                             Role.SENIOR_MEMBER -> "Senior Member"
                             Role.JUNIOR_MEMBER -> "Junior Member"
@@ -410,13 +410,13 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
                     },
                     trailingContent = {
                         Text(
-                            text = "${member.kpiValues[teamId]?.score}",
+                            text = "${member.kpiValues[team.id]?.score}",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 15.sp,
                         )
                     },
-                    modifier = Modifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
+                    modifier = Modifier.clickable { navController.navigate("viewIndividualStats/${team.id}/${member.id}") },
                     colors = ListItemDefaults.colors(containerColor = Color.White),
                 )
             }

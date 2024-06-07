@@ -783,6 +783,7 @@ fun MemberSelectionBottomSheet(
                                             setShowBottomSheetValue(false)
                                             setShowLeaveDialogValue(true)
                                             setErrorMsgValue("")
+                                            setChosenMemberValue(chosenMember)
                                         }
                                 }
                             },

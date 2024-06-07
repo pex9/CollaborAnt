@@ -14,10 +14,12 @@ import it.polito.lab5.viewModels.IndividualStatsViewModel
 
 @Composable
 fun IndividualStatsScreen(
-    vm: IndividualStatsViewModel = viewModel(),
+    vm: IndividualStatsViewModel,
+    userId: String,
     navController: NavController
 ) {
-    val targetMember = vm.getUser(vm.userId).collectAsState(initial = null).value
+    // TODO SIAMO SICURI DI USARE VM.userId da qui provo con userId?
+    val targetMember = vm.getUser(userId).collectAsState(initial = null).value
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
     val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
 
@@ -32,7 +34,7 @@ fun IndividualStatsScreen(
         targetMember?.let {
             BoxWithConstraints {
                 if(team != null && membersList != null) {
-                    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, team.id, membersList)
+
 
                     if (this.maxHeight > this.maxWidth) {
                         VerticalIndividualStatsPane(
@@ -40,7 +42,6 @@ fun IndividualStatsScreen(
                             navController = navController,
                             p = paddingValues,
                             targetMember = it,
-                            targetMemberRanking = targetMemberRanking,
                             membersList = membersList
                         )
 
@@ -50,7 +51,6 @@ fun IndividualStatsScreen(
                             navController = navController,
                             p = paddingValues,
                             targetMember = it,
-                            targetMemberRanking = targetMemberRanking,
                             membersList = membersList
                         )
                     }

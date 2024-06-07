@@ -21,7 +21,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 MyTeamsViewModel(teamId, model, auth) as T
             }
             modelClass.isAssignableFrom(TeamViewModel::class.java) -> {
-                teamId?.let { TeamViewModel(it, model) } as T
+                teamId?.let { TeamViewModel(it, model,auth) } as T
             }
             modelClass.isAssignableFrom(TeamInfoViewModel::class.java) -> {
                 teamId?.let { TeamInfoViewModel(it, model, auth) } as T
@@ -42,7 +42,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 MyTasksViewModel(model) as T
             }
             modelClass.isAssignableFrom(MyChatsViewModel::class.java) -> {
-                MyChatsViewModel(model) as T
+                MyChatsViewModel(model,auth) as T
             }
             modelClass.isAssignableFrom(ChatViewViewModel::class.java) -> {
                 teamId?.let { ChatViewViewModel(teamId, userId, model) } as T

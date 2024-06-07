@@ -26,10 +26,10 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            val team = vm.teams.collectAsState().value.find { it.id == (vm.teamId ?: vm.currentTask?.teamId) }
-            val users = vm.users.collectAsState().value
+            val team = vm.teamId?.let { vm.getTeam(teamId = it).collectAsState(initial = null).value }
+            val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
 
-            if (team != null) {
+            if (team != null && users !=null) {
                 TaskFormPage(
                     team = team,
                     users = users,

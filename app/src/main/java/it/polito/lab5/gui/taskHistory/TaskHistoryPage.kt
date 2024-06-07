@@ -70,7 +70,7 @@ fun HistoryTopBar(navController: NavController) {
 }
 
 @Composable
-fun TaskHistoryPage(history: List<Action>, users: List<User>, paddingValues: PaddingValues) {
+fun TaskHistoryPage(history: Map<String,Action>, users: List<User>, paddingValues: PaddingValues) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
@@ -79,13 +79,13 @@ fun TaskHistoryPage(history: List<Action>, users: List<User>, paddingValues: Pad
             .padding(paddingValues)
             .background(CollaborantColors.PageBackGroundGray)
     ) {
-        itemsIndexed(history) { index, action ->
+        itemsIndexed(history.values.toList()) { index, action ->
             // Display each history row
             HistoryRow(
                 action = action,
                 users = users,
                 isFirst = index == 0,
-                isLast = index == history.lastIndex
+                isLast = index == history.values.toList().lastIndex
             )
         }
     }

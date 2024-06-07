@@ -72,7 +72,7 @@ data class Team(
     val description: String,
     val image: ImageProfile,
     val members: Map<String, Role>,
-    val chat: List<Message>
+    val chat: Map<String,Message>
 )
 
 data class User(
@@ -100,10 +100,10 @@ data class Task(
     val tag: Tag,
     val teamMembers: List<String>,
     val state: TaskState,
-    val comments: List<Comment>,
+    var comments: Map <String,Comment>,
     val categories: Map<String, String>,    //  [userId -> category]
-    val attachments: List<Attachment>,
-    val history: List<Action>
+    var attachments: Map<String, Attachment>,
+    var history: Map<String,Action>
 )
 
 data class Message(

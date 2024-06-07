@@ -20,6 +20,10 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
     val users = model.users
     val currentTask = model.tasks.value.find { it.id == currentTaskId }
 
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+    fun getUser(userId: String) = model.getUser(userId)
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
     private fun addTask(task: Task): String = model.addTask(task)
 
     private fun updateTask(taskId: String, task: Task) = model.updateTask(taskId, task)
@@ -37,8 +41,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank()) {
             if (currentTask == null) {
                 val categories: MutableMap<String, String> = mutableMapOf()
-                val history = mutableListOf(
-                    Action(
+                val history = mutableMapOf(
+                    "1" to Action(
                         id = 0.toString(),
                         memberId = DataBase.LOGGED_IN_USER_ID,
                         taskState = TaskState.NOT_ASSIGNED,
@@ -48,7 +52,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                 )
 
                 if(delegatedMembers.isNotEmpty()) {
-                    history.add(
+                    history.put(
+                        (history.size+1).toString(),
                         Action(
                             id = 1.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,
@@ -75,9 +80,9 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                             tag = tag,
                             teamMembers = delegatedMembers,
                             state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
-                            comments = emptyList(),
+                            comments = emptyMap(),
                             categories = categories,
-                            attachments = emptyList(),
+                            attachments = emptyMap(),
                             history = history,
                         )
                     )
@@ -87,10 +92,11 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                 id = currentTask.id
                 var taskState = currentTask.state
                 val categories: MutableMap<String, String> = currentTask.categories.toMutableMap()
-                val history: MutableList<Action> = currentTask.history.toMutableList()
+                val history: MutableMap<String,Action> = currentTask.history.toMutableMap()
 
                 if(currentTask.teamMembers.isEmpty() && delegatedMembers.isNotEmpty()) {
-                    history.add(
+                    history.put(
+                        history.size.toString(),
                         Action(
                             id = currentTask.history.size.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,

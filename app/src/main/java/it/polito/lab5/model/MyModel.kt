@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class MyModel(val context: Context) {
     init {
@@ -338,7 +340,7 @@ class MyModel(val context: Context) {
                     image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                     members = members,
-                    chat = emptyList() //   TODO: manage with sub-collection
+                    chat = emptyMap() //   TODO: manage with sub-collection
                 ))
             } else {
                 if (e != null) { Log.e("Server Error", e.message.toString()) }
@@ -366,14 +368,34 @@ class MyModel(val context: Context) {
                             }
                         }).toMap()
 
-                    Team(
+                    val chatCollection = db.collection("Teams").document(document.id).collection("chat")
+                    val chatTeam = emptyMap <String,Message>().toMutableMap()
+                    // Now we retrieve the chat documents for this team
+                    val chatsSnapshotListener = chatCollection.addSnapshotListener { chatSnapshot, e ->
+                        if (chatSnapshot != null) {
+                             chatSnapshot.documents.mapIndexed { idx, messageDocument ->
+
+                                val m= Message(
+                                   senderId = messageDocument.get("senderId").toString(),
+                                    receiverId = messageDocument.get("receiverId").toString(),
+                                    content = messageDocument.get("content").toString(),
+                                    date = messageDocument.get("date").toString() as LocalDateTime
+                                )
+                                chatTeam[messageDocument.id] = m
+                            }
+                        } else {
+                            if (e != null) { Log.e("Server Error", e.message.toString()) }
+                        }
+                    }
+
+                        Team(
                         id = document.id,
                         name = document.get("name").toString(),
                         description = document.get("description").toString(),
                         image = if(image["color"] != null) Empty(Color(image["color"]?.toULong() ?: 0UL))
                             else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = emptyList() //   TODO: manage with sub-collection
+                        chat = chatTeam
                     )
                 }
                 trySend(teams)
@@ -463,7 +485,16 @@ class MyModel(val context: Context) {
         //  Delete Team document
         db.collection("Teams").document(team.id).delete().await()
     }
-
+    suspend fun addMessageToTeam(teamId: String, message: Message) {
+        val teamReference = db.collection("Teams").document(teamId).collection("chat").add(
+            hashMapOf(
+                "senderId" to message.senderId,
+                "content" to message.content,
+                "receiverId" to message.receiverId,
+                "date" to message.date //TODO CONVERT PROPERLY
+            )
+        )
+    }
     suspend fun addUserToTeam(team: Team, user: User) {
         val updatedMembers = team.members.toMutableMap()
         updatedMembers[user.id] = Role.JUNIOR_MEMBER
@@ -509,6 +540,222 @@ class MyModel(val context: Context) {
         updatedKpiValues.remove(team.id)
 
         updateUserKpi(user.id, user.joinedTeams - 1, updatedKpiValues)
+    }
+
+    // TASKS
+
+    suspend fun createTask(task: Task,userId :String ): String {
+        val documentReference = db.collection("Tasks")
+
+
+        //  Create the new task document
+        val result = documentReference.add(
+            hashMapOf(
+                "title" to task.title,
+                "description" to task.description,
+                "teamId" to task.teamId,
+                "dueDate" to  task.dueDate?.toString(),
+                "repeat" to task.repeat,
+                "tag" to task.tag,
+                "teamMembers" to task.teamMembers,
+                "state" to task.state
+            )
+        ).await()
+        //comments -> empty map  attachments -> empty map
+        //history
+        documentReference.document(result.id).collection("history").add(
+            hashMapOf(
+                "memberId" to userId,
+                "taskState" to TaskState.NOT_ASSIGNED,
+                "date" to Timestamp.now(),
+                "description" to "Task created"
+            )
+        )
+        if(task.teamMembers.size>0) {
+            documentReference.document(result.id).collection("history").add(
+                hashMapOf(
+                    "memberId" to userId,
+                    "taskState" to task.state,
+                    "date" to Timestamp.now(),
+                    "description" to "Task created"
+                )
+            )
+        }
+        //categories
+        for (memberId in task.teamMembers) {
+            documentReference.document(result.id).collection("categories").document(memberId).set("Recently Assigned")
+        }
+        return result.id
+    }
+    suspend fun getComments(taskId: String): MutableMap<String,Comment> {
+        val comments = mutableMapOf<String,Comment>()
+        val documentReference = db.collection("Tasks").document(taskId).collection("comments")
+
+        val snapshot = documentReference.get().await()
+        for (document in snapshot.documents) {
+            val comment= Comment(
+                content = document.get("content").toString(),
+                authorId = document.get("authorId").toString(),
+                date = document.get("date").toString() as LocalDateTime
+            )
+            if (comment != null) {
+                comments[document.id] = comment
+            }
+        }
+        return comments
+    }
+    suspend fun getAttachments(taskId: String): MutableMap<String,Attachment> {
+        val attachments = mutableMapOf<String,Attachment>()
+        val documentReference = db.collection("Tasks").document(taskId).collection("attachments")
+
+        val snapshot = documentReference.get().await()
+        for (document in snapshot.documents) {
+            val attachment = Attachment(
+                id = document.id,
+                name = document.get("name").toString(),
+                type = document.get("type").toString(),
+                uri = document.get("url").toString().toUri(),
+                size = document.get("size") as Float
+            )
+            if (attachment != null) {
+                attachments[document.id] = attachment
+            }
+        }
+        return attachments
+    }
+    suspend fun getHistory(taskId: String): Map<String,Action> {
+        val history = mutableMapOf<String,Action>()
+        val documentReference = db.collection("Tasks").document(taskId).collection("history")
+
+        val snapshot = documentReference.get().await()
+        for (document in snapshot.documents) {
+            val action = Action(
+                id = document.id,
+                memberId = document.get("memberId").toString(),
+                taskState = document.get("taskState") as TaskState,
+                date = document.get("date").toString() as LocalDate,
+                description = document.get("description").toString()
+            )
+            if (action != null) {
+                history[action.id] = action
+            }
+        }
+        return history
+    }
+
+    suspend fun getTask(taskId: String): Task? {
+        val documentReference = db.collection("Tasks").document(taskId)
+
+        val documentSnapshot = documentReference.get().await()
+
+        if (!documentSnapshot.exists()) {
+            return null
+        }
+
+        val task = documentSnapshot.toObject(Task::class.java)
+
+        if (task != null) {
+            task.comments = getComments(taskId)
+            task.attachments = getAttachments(taskId)
+            task.history = getHistory(taskId)
+        }
+
+        return task
+    }
+    suspend fun deleteTask2(taskId: String): Boolean {
+        val documentReference = db.collection("Tasks").document(taskId)
+
+        return try {
+            documentReference.delete().await()
+            true
+        } catch (e: Exception) {
+            println("Error deleting task: $e")
+            false
+        }
+    }
+    suspend fun updateTask(task: Task, userId: String): Boolean {
+        val documentReference = db.collection("Tasks").document(task.id)
+
+        // Update the basic details of the task
+        val taskData = hashMapOf(
+            "title" to task.title,
+            "description" to task.description,
+            "teamId" to task.teamId,
+            "dueDate" to task.dueDate?.toString(),
+            "repeat" to task.repeat,
+            "tag" to task.tag,
+            "teamMembers" to task.teamMembers,
+            "state" to task.state
+        )
+
+        return try {
+            documentReference.set(taskData).await()
+
+            // Update comments
+            val commentsCollection = documentReference.collection("comments")
+            // Delete existing comments
+            commentsCollection.get().await().forEach { it.reference.delete().await() }
+            // Add new comments
+            for (comment in task.comments.values) {
+                commentsCollection.add(
+                    hashMapOf(
+                        "content" to comment.content,
+                        "authorId" to comment.authorId,
+                        "date" to comment.date
+                    )
+                ).await()
+            }
+
+            // Update attachments
+            val attachmentsCollection = documentReference.collection("attachments")
+            // Delete existing attachments
+            attachmentsCollection.get().await().forEach { it.reference.delete().await() }
+            // Add new attachments
+            for (attachment in task.attachments.values) {
+                attachmentsCollection.add(
+                    hashMapOf(
+                        "name" to attachment.name,
+                        "type" to attachment.type,
+                        "url" to attachment.uri.toString(),
+                        "size" to attachment.size
+                    )
+                ).await()
+            }
+
+            // Update history
+            val historyCollection = documentReference.collection("history")
+            // Delete existing history
+            historyCollection.get().await().forEach { it.reference.delete().await() }
+            // Add new history actions
+            for (action in task.history.values) {
+                historyCollection.add(
+                    hashMapOf(
+                        "memberId" to action.memberId,
+                        "taskState" to action.taskState,
+                        "date" to action.date,
+                        "description" to action.description
+                    )
+                ).await()
+            }
+
+            // Update categories
+            val categoriesCollection = documentReference.collection("categories")
+            // Delete existing categories
+            categoriesCollection.get().await().forEach { it.reference.delete().await() }
+            // Add new categories
+            for ((key, value) in task.categories) {
+                categoriesCollection.document(key).set(
+                    hashMapOf(
+                        "category" to value
+                    )
+                ).await()
+            }
+
+            true
+        } catch (e: Exception) {
+            println("Error updating task: ${e.message}")
+            false
+        }
     }
 
 
@@ -624,9 +871,8 @@ class MyModel(val context: Context) {
 
     fun addMessage(teamId: String, message: Message) {
         _teams.value.find { it.id == teamId }?.let { team ->
-            val chat = team.chat.toMutableList()
-
-            chat.add(message)
+            val chat = team.chat.toMutableMap()
+            chat[(chat.size+1).toString()] = message
             updateT(teamId, team.copy(chat = chat))
         }
     }
@@ -679,16 +925,14 @@ class MyModel(val context: Context) {
                 }
             }
 
-            val history = task.history.toMutableList()
-            history.add(
-                Action(
-                    id = task.history.size.toString(),
-                    memberId = DataBase.LOGGED_IN_USER_ID,
-                    taskState = state,
-                    date = LocalDate.now(),
-                    description = if(state == TaskState.COMPLETED) "Task completed"
-                    else "Task state changed"
-                )
+            val history = task.history.toMutableMap()
+            history[(history.size + 1).toString()] = Action(
+                id = task.history.size.toString(),
+                memberId = DataBase.LOGGED_IN_USER_ID,
+                taskState = state,
+                date = LocalDate.now(),
+                description = if(state == TaskState.COMPLETED) "Task completed"
+                else "Task state changed"
             )
 
             updateTask(taskId, task.copy(state = state, history = history))
@@ -697,28 +941,27 @@ class MyModel(val context: Context) {
 
     fun addComment(taskId: String, comment: Comment) {
         _tasks.value.find { it.id == taskId }?.let { task ->
-            val comments = task.comments.toMutableList()
+            val comments= task.comments.toMutableMap();
+            comments[(task.comments.size+1).toString()] = comment
 
-            comments.add(comment)
             updateTask(taskId, task.copy(comments = comments))
         }
     }
 
     fun addAttachment(taskId: String, attachment: Attachment) {
         _tasks.value.find { it.id == taskId }?.let { task ->
-            val attachments = task.attachments.toMutableList()
-            val id = attachments.size
+            val attachments = task.attachments.toMutableMap();
+            attachments[(task.attachments.size+1).toString()] = attachment
 
-            attachments.add(attachment.copy(id = (id + 1).toString()))
             updateTask(taskId, task.copy(attachments = attachments))
         }
     }
 
     fun removeAttachment(taskId: String, attachmentId: String) {
         _tasks.value.find { it.id == taskId }?.let { task ->
-            val attachments = task.attachments.toMutableList()
+            val attachments = task.attachments.toMutableMap()
+            attachments.remove(attachmentId)
 
-            attachments.removeIf { it.id == attachmentId }
             updateTask(taskId, task.copy(attachments = attachments))
         }
     }

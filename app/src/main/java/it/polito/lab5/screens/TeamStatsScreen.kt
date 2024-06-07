@@ -4,23 +4,22 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import it.polito.lab5.gui.teamStats.HorizontalTeamStatsPane
 import it.polito.lab5.gui.teamStats.StatsTopBar
 import it.polito.lab5.gui.teamStats.VerticalTeamStatsPane
-import it.polito.lab5.model.User
 import it.polito.lab5.viewModels.TeamStatsViewModel
 
 @Composable
 fun TeamStatsScreen(
-    vm: TeamStatsViewModel = viewModel(),
+    vm: TeamStatsViewModel,
     navController: NavController,
-    membersList: List<User>,
     teamId: String,
 ) {
-    val teams = vm.teams.collectAsState().value
-    val team = teams.find { it.id == teamId }
+
+
+    val team = vm.getTeam(teamId).collectAsState(initial = null).value
+    val membersList = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
     Scaffold(
         topBar = {
             if (team != null) {
@@ -33,23 +32,25 @@ fun TeamStatsScreen(
 
             val tasks = vm.tasks.collectAsState().value
             if (this.maxHeight > this.maxWidth) {
-                VerticalTeamStatsPane(
-                    teams = teams,
-                    tasks = tasks,
-                    navController = navController,
-                    p = paddingValues,
-                    membersList = membersList,
-                    teamId = teamId,
-                )
+                if (team != null && membersList != null) {
+                    VerticalTeamStatsPane(
+                        team = team,
+                        tasks = tasks,
+                        navController = navController,
+                        p = paddingValues,
+                        membersList = membersList,
+                    )
+                }
             } else {
-                HorizontalTeamStatsPane(
-                    teams = teams,
-                    tasks = tasks,
-                    navController = navController,
-                    p = paddingValues,
-                    membersList = membersList,
-                    teamId = teamId,
-                )
+                if (team != null && membersList != null) {
+                    HorizontalTeamStatsPane(
+                        team = team,
+                        tasks = tasks,
+                        navController = navController,
+                        p = paddingValues,
+                        membersList = membersList,
+                    )
+                }
             }
         }
     }

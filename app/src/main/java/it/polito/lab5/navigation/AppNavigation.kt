@@ -332,8 +332,6 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
 
             MyChatsScreen(
                 vm = myChatViewModel,
-                isReadState = myChatViewModel.chatsReadState,
-                setIsReadStateValue = myChatViewModel::setChatsReadStateValue,
                 navController = navController
             )
         }
@@ -381,7 +379,9 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 factory = AppFactory(teamId = teamId, userId = userId, context = context)
             )
 
-            IndividualStatsScreen(vm = individualStatsViewModel, navController = navController)
+            if (userId != null) {
+                IndividualStatsScreen(vm = individualStatsViewModel,userId = userId, navController = navController)
+            }
         }
 
         // View Team Stats
@@ -402,8 +402,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 TeamStatsScreen(
                     vm = teamStatsViewModel,
                     navController = navController,
-                    membersList = teamStatsViewModel.rankedMembersList,
-                    teamId = team.id,
+                    teamId = team.id
                 )
             }
         }

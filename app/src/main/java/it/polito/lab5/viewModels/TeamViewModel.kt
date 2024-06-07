@@ -5,11 +5,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
 
-class TeamViewModel(val teamId: String, val model: MyModel): ViewModel() {
+class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     fun getTeam(teamId: String) = model.getTeam(teamId)
+    fun getUser(userId: String) = model.getUser(userId)
+
 
     val teams = model.teams
     val tasks = model.tasks

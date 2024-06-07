@@ -13,24 +13,23 @@ import it.polito.lab5.viewModels.MyChatsViewModel
 @Composable
 fun MyChatsScreen(
     vm: MyChatsViewModel,
-    isReadState: MutableList<Pair<String, Boolean>>,
-    setIsReadStateValue: (String, Boolean) -> Unit,
     navController: NavController
 ) {
     Scaffold(
         topBar = { MyChatsTopBar() },
-        bottomBar = { BottomNavigationBarComp(navController, isReadState)}
+        bottomBar = { BottomNavigationBarComp(navController, vm.chatsReadState)}
     ) { paddingValues ->
-        val userTeams = vm.teams.collectAsState().value.filter {
-            it.members.any{ member -> member.key == DataBase.LOGGED_IN_USER_ID }
-        }
+        val loggedInUserId = vm.auth.getSignedInUserId()
+        val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value } //??NULL
 
-        MyChatsPage(
-            userTeams = userTeams,
-            isReadState = isReadState,
-            setIsReadStateValue = setIsReadStateValue,
-            navController = navController,
-            paddingValues = paddingValues
-        )
+        if (teams != null) {
+            MyChatsPage(
+                userTeams = teams,
+                isReadState= vm.chatsReadState,
+                setIsReadStateValue = vm::setChatsReadStateValue,
+                navController = navController,
+                paddingValues = paddingValues
+            )
+        }
     }
 }

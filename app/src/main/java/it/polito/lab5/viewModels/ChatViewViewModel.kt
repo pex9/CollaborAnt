@@ -11,6 +11,16 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel)
     val teams = model.teams
     val users = model.users
 
+
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+    fun getUser(userId: String) = model.getUser(userId)
+
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
+
+
+
+
     fun addMessage(teamId: String, message: Message) = model.addMessage(teamId, message)
 
     var newMessage by mutableStateOf("")

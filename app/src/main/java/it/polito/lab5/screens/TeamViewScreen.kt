@@ -42,9 +42,11 @@ fun TeamViewScreen(
     vm: TeamViewModel, // ViewModel for team data
     navController: NavController, // NavController for navigation
 ) {
+
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    //val user = vm.getUser(vm.userId).collectAsState(initial = null).value
     //val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
-    val loggedInUserRole =  team?.members?.get(DataBase.LOGGED_IN_USER_ID)
+    val loggedInUserRole =  team?.members?.get(vm.auth.getSignedInUserId())
     val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(key1 = vm.showInfoText) {

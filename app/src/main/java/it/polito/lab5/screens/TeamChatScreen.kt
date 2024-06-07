@@ -18,8 +18,8 @@ fun TeamChatScreen (
     setIsReadState: (String, Boolean) -> Unit,
     navController: NavController, // NavController for navigation
 ) {
-    val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
-    val users = vm.users.collectAsState().value
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
 
     // Scaffold for layout structure
     Scaffold(
@@ -32,7 +32,7 @@ fun TeamChatScreen (
             }
         }, // Top app bar for task list
         bottomBar = {
-            if (team != null) {
+            if (team != null && users != null) {
                 Column {
                     ReceiverSelector(
                         team = team,
@@ -60,7 +60,7 @@ fun TeamChatScreen (
         }
     ) { paddingValues ->
         // Content area
-        if (team != null) {
+        if (team != null && users != null ) {
             TeamChatPage(
                 team = team,
                 users = users,
