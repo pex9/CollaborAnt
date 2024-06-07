@@ -20,7 +20,9 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
     private var invitationTeam: Team? = null
 
     fun getUser(userId: String) = model.getUser(userId)
+
     fun getUserKpi(userId: String) = model.getUserKpi(userId)
+
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
     @RequiresApi(Build.VERSION_CODES.O)

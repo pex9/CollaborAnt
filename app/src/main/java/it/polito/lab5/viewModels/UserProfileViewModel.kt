@@ -5,5 +5,6 @@ import it.polito.lab5.model.MyModel
 
 class UserProfileViewModel(val userId: String, val model: MyModel): ViewModel() {
     fun getUser(userId: String) = model.getUser(userId)
+
     fun getUserKpi(userId: String) = model.getUserKpi(userId)
 }

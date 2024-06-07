@@ -11,6 +11,7 @@ class MyProfileViewModel(val model: MyModel, val auth: GoogleAuthentication) : V
     val users = model.users /*TODO questo dovrebbe richiamare il metodo getUser*/
 
     fun getUser(userId: String) = model.getUser(userId)
+
     fun getUserKpi(userId: String) = model.getUserKpi(userId)
 
     var optionsOpened by mutableStateOf(false)

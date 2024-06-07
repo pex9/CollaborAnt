@@ -12,9 +12,10 @@ import it.polito.lab5.model.Team
 
 class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     fun getTeam(teamId: String) = model.getTeam(teamId)
-    fun getUser(userId: String) = model.getUser(userId)
-    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 
+    fun getUser(userId: String) = model.getUser(userId)
+
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 
     val teams = model.teams
     val tasks = model.tasks
@@ -24,8 +25,6 @@ class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuth
     var priorityFilter: MutableState<Tag?> = mutableStateOf(null)
     var prioritySort: MutableState<String> = mutableStateOf("None")
     var dateSort: MutableState<String> = mutableStateOf("None")
-
-    //fun getTeamsByUserId(userId: String) = model.getTeamsByUserId(userId)
 
     fun nextPriority(currentPriority: Tag?){
         when(currentPriority){

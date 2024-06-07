@@ -16,11 +16,16 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel,
     val users = model.users
 
     fun getTeam(teamId: String) = model.getTeam(teamId)
+
     fun getUser(userId: String) = model.getUser(userId)
+
     fun getUserKpi(userId: String) = model.getUserKpi(userId)
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun getTeamChat(teamId: String) = model.getTeamChat(teamId)
+
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
     suspend fun addMessageToTeam(team: Team, message: Message) = model.addMessageToTeam(team, message)
 
     var newMessage by mutableStateOf("")
