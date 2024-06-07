@@ -35,7 +35,6 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
@@ -104,7 +103,7 @@ fun TeamChatTopAppBar(team: Team, navController: NavController) {
 }
 
 @Composable
-fun TeamChatPage (team: Team, users: List<User>, paddingValues: PaddingValues) {
+fun TeamChatPage (team: Team, users: List<User>, loggedInUserId: String, paddingValues: PaddingValues) {
     Column(
         modifier = Modifier
             .padding(paddingValues)
@@ -116,13 +115,13 @@ fun TeamChatPage (team: Team, users: List<User>, paddingValues: PaddingValues) {
             var previousDate = sortedTeamChat.first().date.minusDays(1).toLocalDate()
 
             sortedTeamChat.forEach { message ->
-                if(message.receiverId == DataBase.LOGGED_IN_USER_ID || message.senderId == DataBase.LOGGED_IN_USER_ID || message.receiverId == null) {
+                if(message.receiverId == loggedInUserId || message.senderId == loggedInUserId || message.receiverId == null) {
                     if(message.date.toLocalDate() != previousDate) {
                         DateCanvas(date = message.date.toLocalDate())
                         previousDate = message.date.toLocalDate()
                     }
 
-                    if(message.senderId == DataBase.LOGGED_IN_USER_ID) {
+                    if(message.senderId == loggedInUserId) {
                         MessageTo(message = message, users = users)
                     } else {
                         MessageFrom(message = message, users = users)

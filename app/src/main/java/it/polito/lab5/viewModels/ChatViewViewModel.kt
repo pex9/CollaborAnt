@@ -1,5 +1,7 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -15,11 +17,10 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel,
 
     fun getTeam(teamId: String) = model.getTeam(teamId)
     fun getUser(userId: String) = model.getUser(userId)
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getTeamChat(teamId: String) = model.getTeamChat(teamId)
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
     suspend fun addMessageToTeam(team: Team, message: Message) = model.addMessageToTeam(team, message)
-
-    fun addMessage(teamId: String, message: Message) = model.addMessage(teamId, message)
 
     var newMessage by mutableStateOf("")
         private set

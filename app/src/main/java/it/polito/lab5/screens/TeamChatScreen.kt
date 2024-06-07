@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Scaffold
@@ -12,6 +14,7 @@ import it.polito.lab5.gui.teamChat.TeamChatPage
 import it.polito.lab5.gui.teamChat.TeamChatTopAppBar
 import it.polito.lab5.viewModels.ChatViewViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamChatScreen (
     vm: ChatViewViewModel,
@@ -28,11 +31,12 @@ fun TeamChatScreen (
             if (team != null) { TeamChatTopAppBar(team = team, navController = navController) }
         }, // Top app bar for task list
         bottomBar = {
-            if (team != null && users != null) {
+            if (team != null && users != null && loggedInUserId != null) {
                 Column {
                     ReceiverSelector(
                         team = team,
                         users = users,
+                        loggedInUserId = loggedInUserId,
                         optionsOpened = vm.optionsOpened,
                         setOptionsOpenedValue = vm::setOptionsOpenedValue,
                         targetReceiver = vm.targetReceiver,
@@ -40,27 +44,26 @@ fun TeamChatScreen (
                     )
 
                     BoxWithConstraints {
-                        if (loggedInUserId != null) {
-                            MessageTextField(
-                                team = team,
-                                loggedInUserId = loggedInUserId,
-                                isHorizontal = this.maxWidth > this.maxHeight,
-                                value = vm.newMessage,
-                                updateValue = vm::setNewMessageValue,
-                                addMessageToTeam = vm::addMessageToTeam,
-                                newMessageReceiver = vm.targetReceiver,
-                            )
-                        }
+                        MessageTextField(
+                            team = team,
+                            loggedInUserId = loggedInUserId,
+                            isHorizontal = this.maxWidth > this.maxHeight,
+                            value = vm.newMessage,
+                            updateValue = vm::setNewMessageValue,
+                            addMessageToTeam = vm::addMessageToTeam,
+                            newMessageReceiver = vm.targetReceiver,
+                        )
                     }
                 }
             }
         }
     ) { paddingValues ->
         // Content area
-        if (team != null && users != null ) {
+        if (team != null && users != null && loggedInUserId != null) {
             TeamChatPage(
                 team = team,
                 users = users,
+                loggedInUserId = loggedInUserId,
                 paddingValues = paddingValues
             )
         }

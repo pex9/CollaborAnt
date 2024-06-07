@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.sp
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.taskView.getTimeAgo
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Message
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
@@ -385,13 +384,14 @@ fun MessageFrom(message: Message, users: List<User>){
 fun ReceiverSelector(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
     targetReceiver: String?,
     setReceiverTargetValue: (String?) -> Unit
 ) {
     val members = team.members.map { it.key }.toSet()
-    val receiverList = users.filter { members.contains(it.id) && it.id != DataBase.LOGGED_IN_USER_ID }
+    val receiverList = users.filter { members.contains(it.id) && it.id != loggedInUserId }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
