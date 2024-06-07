@@ -1,6 +1,5 @@
 package it.polito.lab5.gui.teamInfo
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -265,33 +263,22 @@ fun TeamInfoPage(
             onConfirm = {
                 setShowLeaveDialogValue(false)
 
-                if(team.members.size > 1) {
-                    users.find { it.id == loggedInUserId }?.let { user ->
-                        scope.launch {
-                            try {
-                                removeUserFromTeam(user, team, chosenMember)
-                            } catch (e: Exception) {
-                                Log.e("Server Error", e.message.toString())
-                            }
+                /*  TODO: check this */
 
-                        }.invokeOnCompletion {
-                            navController.popBackStack(
-                                route = "myTeams",
-                                inclusive = false
-                            )
-                        }
-                    }
-                }
-//                    else {
-//                        scope.launch {
-//                            deleteTeam(team, users) //  TODO: fix this
-//                        }.invokeOnCompletion {
-//                            navController.popBackStack(
-//                                route = "myTeams",
-//                                inclusive = false
-//                            )
+//                scope.launch {
+//                    if(team.members.size > 1) {
+//                        users.find { it.id == loggedInUserId }?.let { user ->
+//                            removeUserFromTeam(user, team, chosenMember)
 //                        }
+//                    } else {
+//                        deleteTeam(team, users)
 //                    }
+//                }.invokeOnCompletion {
+//                    navController.popBackStack(
+//                        route = "myTeams",
+//                        inclusive = false
+//                    )
+//                }
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )
