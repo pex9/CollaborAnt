@@ -10,7 +10,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -947,25 +945,6 @@ class MyModel(val context: Context) {
     //  Teams
     private val _teams = MutableStateFlow(DataBase.teams)
     val teams: StateFlow<List<Team>> = _teams
-
-    fun updateT(teamId: String, team: Team) {
-        val updatedTeams = _teams.value.toMutableList()
-        val index = updatedTeams.indexOfFirst { it.id == teamId }
-
-        if (index != -1) {
-            updatedTeams[index] = team
-            _teams.value = updatedTeams
-        }
-    }
-
-    fun addMessage(teamId: String, message: Message) {
-        _teams.value.find { it.id == teamId }?.let { team ->
-            val chat = team.chat.toMutableList()
-
-            chat.add(message)
-            updateT(teamId, team.copy(chat = chat))
-        }
-    }
 
     //  Tasks
     private val _tasks = MutableStateFlow(DataBase.tasks)
