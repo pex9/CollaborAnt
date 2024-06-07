@@ -347,9 +347,35 @@ class MyModel(val context: Context) {
         return result.id
     }
 
+    fun getTeamChat(teamId: String): Flow<List<Message>> = callbackFlow {
+        val ref = db.collection("Teams").document(teamId).collection("chat")
+
+        val chatsSnapshotListener = ref.addSnapshotListener { chatSnapshot, err ->
+            if (chatSnapshot != null) {
+                val chat = chatSnapshot.documents.map { messageDocument ->
+                    val timestamp = messageDocument.get("date") as Timestamp
+
+                    Message(
+                        id = messageDocument.id,
+                        senderId = messageDocument.get("senderId").toString(),
+                        receiverId = messageDocument.get("receiverId").toString(),
+                        content = messageDocument.get("content").toString(),
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
+                    )
+                }
+                trySend(chat)
+            } else {
+                if (err != null) {
+                    Log.e("Server Error", err.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose{ chatsSnapshotListener.remove() }
+    }
+
     @Suppress("unchecked_cast")
     fun getTeam(teamId: String): Flow<Team?> = callbackFlow {
-        var chatsSnapshotListener: ListenerRegistration? = null
         val documentReference = db.collection("Teams").document(teamId)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
@@ -367,27 +393,6 @@ class MyModel(val context: Context) {
                 val unreadMessage = (snapshot.get("members") as List<String>)
                     .zip((snapshot.get("unreadMessage") as List<Boolean>)).toMap()
 
-                val chatTeam = emptyList<Message>().toMutableList()
-                val chatReference = db.collection("Teams").document(snapshot.id).collection("chat")
-
-                chatsSnapshotListener = chatReference.addSnapshotListener { chatSnapshot, err ->
-                    if (chatSnapshot != null) {
-                        chatSnapshot.documents.map { messageDocument ->
-                            chatTeam.add(
-                                Message(
-                                    id = messageDocument.id,
-                                    senderId = messageDocument.get("senderId").toString(),
-                                    receiverId = messageDocument.get("receiverId").toString(),
-                                    content = messageDocument.get("content").toString(),
-                                    date = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDocument.get("date") as Long), ZoneOffset.UTC)
-                                )
-                            )
-                        }
-                    } else {
-                        if (err != null) { Log.e("Server Error", err.message.toString()) }
-                    }
-                }
-
                 trySend(
                     Team(
                         id = teamId,
@@ -400,7 +405,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = chatTeam,
+                        chat = emptyList(),
                         unreadMessage = unreadMessage
                     )
                 )
@@ -411,7 +416,7 @@ class MyModel(val context: Context) {
                 trySend(null)
             }
         }
-        awaitClose { chatsSnapshotListener?.remove() ; snapshotListener.remove() }
+        awaitClose { /*chatsSnapshotListener?.remove()*/ ; snapshotListener.remove() }
     }
 
     @Suppress("unchecked_cast")
@@ -442,13 +447,15 @@ class MyModel(val context: Context) {
                     chatsSnapshotListener = chatReference.addSnapshotListener { chatSnapshot, e ->
                             if (chatSnapshot != null) {
                                 chatSnapshot.documents.map { messageDocument ->
+                                    val timestamp = messageDocument.get("date") as Timestamp
+
                                     chatTeam.add(
                                         Message(
                                             id = messageDocument.id,
                                             senderId = messageDocument.get("senderId").toString(),
                                             receiverId = messageDocument.get("receiverId").toString(),
                                             content = messageDocument.get("content").toString(),
-                                            date = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDocument.get("date") as Long), ZoneOffset.UTC)
+                                            date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
                                         )
                                     )
                                 }
@@ -480,7 +487,7 @@ class MyModel(val context: Context) {
                 trySend(emptyList())
             }
         }
-        awaitClose { chatsSnapshotListener?.remove() ; snapshotListener.remove() }
+        awaitClose { /*chatsSnapshotListener?.remove()*/ ; snapshotListener.remove() }
     }
 
     suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) {

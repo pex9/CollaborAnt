@@ -33,7 +33,7 @@ fun BottomNavigationBarComp(navController: NavController, isReadState: List<Pair
     // Get the current back stack entry
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val myChatsNotificationsCount = isReadState.count{ !it.second }
+    val myChatsNotificationsCount = isReadState.count{ it.second }
 
     // Bottom navigation bar
     NavigationBar(

@@ -15,7 +15,10 @@ fun MyChatsScreen(
     navController: NavController
 ) {
     val loggedInUserId = vm.auth.getSignedInUserId()
-    val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }
+    val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }?.map {
+            val chat = vm.getTeamChat(it.id).collectAsState(initial = emptyList()).value
+            it.copy(chat = chat)
+        }
     val chatsReadState = teams?.let { team -> team.map { it.id to (it.unreadMessage[loggedInUserId] ?: false) } }
 
     Scaffold(

@@ -17,7 +17,8 @@ fun TeamChatScreen (
     vm: ChatViewViewModel,
     navController: NavController, // NavController for navigation
 ) {
-    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val chat = vm.getTeamChat(vm.teamId).collectAsState(initial = emptyList()).value
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value?.copy(chat = chat)
     val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
 
     // Scaffold for layout structure

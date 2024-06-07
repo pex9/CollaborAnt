@@ -14,6 +14,7 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel)
 
     fun getTeam(teamId: String) = model.getTeam(teamId)
     fun getUser(userId: String) = model.getUser(userId)
+    fun getTeamChat(teamId: String) = model.getTeamChat(teamId)
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
     suspend fun addMessageToTeam(team: Team, message: Message) = model.addMessageToTeam(team, message)
 
