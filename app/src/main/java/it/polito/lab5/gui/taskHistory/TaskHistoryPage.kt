@@ -11,17 +11,21 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.Action
 import it.polito.lab5.model.User
@@ -31,10 +35,12 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun HistoryTopBar(navController: NavController) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
+            containerColor = containerColor,
+            titleContentColor = colors.onBackground,
         ),
         title = {
             Text(
@@ -49,7 +55,7 @@ fun HistoryTopBar(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
@@ -71,13 +77,15 @@ fun HistoryTopBar(navController: NavController) {
 
 @Composable
 fun TaskHistoryPage(history: List<Action>, users: List<User>, paddingValues: PaddingValues) {
+    val colors = MaterialTheme.colorScheme
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .background(CollaborantColors.PageBackGroundGray)
+            .padding(top=10.dp)
+            .background(colors.background)
     ) {
         itemsIndexed(history) { index, action ->
             // Display each history row

@@ -58,6 +58,7 @@ import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlin.math.min
 import coil.compose.AsyncImage
+import it.polito.lab5.LocalTheme
 
 @Composable
 fun MonogramPresentationComp(
@@ -133,14 +134,16 @@ fun TaskStateComp(
     onClick: (() -> Unit)? = null, // Click listener for the task state card
     trailingIcon: @Composable (() -> Unit?)? = null // Trailing icon for the task state card
 ) {
+
     val colors = MaterialTheme.colorScheme
+    val customStateColor = if(LocalTheme.current.isDark) colors.primaryContainer else colors.onBackground
     val (literalState, color) = when (state) {
-        TaskState.NOT_ASSIGNED -> "Not assigned" to colors.secondary
-        TaskState.PENDING -> "Pending" to colors.secondary
-        TaskState.IN_PROGRESS -> "In progress" to colors.primary
-        TaskState.ON_HOLD -> "On-hold" to colors.primary
+        TaskState.NOT_ASSIGNED -> "Not assigned" to colors.secondaryContainer
+        TaskState.PENDING -> "Pending" to colors.secondaryContainer
+        TaskState.IN_PROGRESS -> "In progress" to customStateColor
+        TaskState.ON_HOLD -> "On-hold" to customStateColor
         TaskState.COMPLETED -> "Completed" to colors.onBackground
-        TaskState.OVERDUE -> "Overdue" to colors.primary
+        TaskState.OVERDUE -> "Overdue" to customStateColor
     }
     val modifier = if (onClick != null) Modifier.clickable { onClick() }
     else Modifier

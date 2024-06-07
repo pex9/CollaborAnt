@@ -210,6 +210,7 @@ fun TaskStateSelComp(
 ) {
     val check = state != TaskState.COMPLETED && state != TaskState.NOT_ASSIGNED && state != TaskState.OVERDUE
             && (loggedInUserRole == Role.TEAM_MANAGER || isDelegatedMember)
+    val colors = MaterialTheme.colorScheme
 
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.CenterEnd) {
@@ -222,14 +223,14 @@ fun TaskStateSelComp(
                     {
                         if (stateSelOpened) {
                             Icon(
-                                painter = painterResource(id = R.drawable.arrow_up),
-                                contentDescription = "Arrow Up Icon",
+                                painter = painterResource(id = R.drawable.arrow_down),
+                                contentDescription = "Arrow down Icon",
                                 modifier = Modifier.padding(end = 10.dp)
                             )
                         } else {
                             Icon(
-                                painter = painterResource(id = R.drawable.arrow_down),
-                                contentDescription = "Arrow down Icon",
+                                painter = painterResource(id = R.drawable.arrow_left_2),
+                                contentDescription = "Arrow left Icon",
                                 modifier = Modifier.padding(end = 10.dp)
                             )
                         }
@@ -243,9 +244,9 @@ fun TaskStateSelComp(
                 expanded = stateSelOpened,
                 onDismissRequest = { setStateSelOpenedValue(false) },
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(colors.surfaceColorAtElevation(10.dp))
                     .width(150.dp),
-                offset = DpOffset(x = 8.dp, y = 0.dp)
+                offset = DpOffset(x = 8.dp, y = 12.dp)
             ) {
                 val excludedStates = setOf(TaskState.NOT_ASSIGNED, TaskState.PENDING, TaskState.OVERDUE)
                 val states = TaskState.entries.filter { it !in excludedStates }
@@ -273,7 +274,8 @@ fun TaskStateSelComp(
                                 text = literalState,
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp
+                                fontSize = 16.sp,
+                                color = colors.onBackground
                             )
                         },
                             trailingIcon = if(state == taskState) {
@@ -293,7 +295,7 @@ fun TaskStateSelComp(
                     if (idx < states.size - 1) {
                         Divider(
                             thickness = 1.dp,
-                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            color = colors.outline.copy(0.4f),
                             modifier = Modifier.padding(horizontal = 15.dp)
                         )
                     }

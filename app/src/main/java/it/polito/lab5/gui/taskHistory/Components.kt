@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.taskHistory
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,12 +40,12 @@ import kotlin.math.min
 
 @Composable
 fun HistoryCanvas(isFirst: Boolean, isLast: Boolean) {
-    val color = CollaborantColors.DarkBlue
+    val colors = MaterialTheme.colorScheme
 
     // Draw a line at the top of the canvas if it's not the first item
     Canvas(modifier = Modifier.height(53.dp)) {
         drawLine(
-            color = if (isFirst) Color.Transparent else color,
+            color = if (isFirst) Color.Transparent else colors.secondaryContainer,
             start = Offset(size.width / 2, 0f),
             end = Offset(size.width / 2, size.height),
             strokeWidth = 5f
@@ -54,14 +57,14 @@ fun HistoryCanvas(isFirst: Boolean, isLast: Boolean) {
     Canvas(modifier = Modifier.size(8.dp)) {
         val (w, h) = size
         val r = 1f * min(w, h)
-        drawCircle(color = color, radius = r, center = center)
+        drawCircle(color = colors.secondaryContainer, radius = r, center = center)
     }
     // Add spacing
     Spacer(modifier = Modifier.height(8.dp))
     // Draw a line at the bottom of the canvas if it's not the last item
     Canvas(modifier = Modifier.height(53.dp)) {
         drawLine(
-            color = if (isLast) Color.Transparent else color,
+            color = if (isLast) Color.Transparent else colors.secondaryContainer,
             start = Offset(size.width / 2, 0f),
             end = Offset(size.width / 2, size.height),
             strokeWidth = 5f
@@ -71,17 +74,19 @@ fun HistoryCanvas(isFirst: Boolean, isLast: Boolean) {
 
 @Composable
 fun HistoryItem(action: Action, users: List<User>) {
+    val colors = MaterialTheme.colorScheme
     Card(
         shape = CardDefaults.elevatedShape,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
-            contentColor = Color.Black
+            containerColor = colors.surface,
+            contentColor = colors.onBackground
         ),
         modifier = Modifier
             .fillMaxSize()
             .height(130.dp)
-            .padding(top = 15.dp, bottom = 15.dp, end = 20.dp)
+            .padding(top = 15.dp, bottom = 15.dp, end = 20.dp),
+        border = BorderStroke(width = 1.dp, color = colors.outline),
     ) {
         Row(modifier = Modifier.weight(2f)) {
             Column(
@@ -115,9 +120,9 @@ fun HistoryItem(action: Action, users: List<User>) {
         Row(modifier = Modifier.weight(1f)) {
             val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
             val text = when(action.taskState) {
-                TaskState.NOT_ASSIGNED -> "Created by:"
+                TaskState.NOT_ASSIGNED -> "Created by"
                 TaskState.PENDING -> "Delegated by"
-                else -> "Updated by:"
+                else -> "Updated by"
             }
 
             Column(

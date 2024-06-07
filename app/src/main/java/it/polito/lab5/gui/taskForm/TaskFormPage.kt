@@ -70,7 +70,7 @@ fun TaskFormTopBar(
                 text = if (taskId == null) { "New Task" } else { "Edit Task" },
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 23.sp,
+                fontSize = 18.sp,
                 color = colors.onBackground
             )
         },

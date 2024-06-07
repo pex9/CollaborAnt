@@ -378,12 +378,16 @@ fun MembersPickerBottomSheet(
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+    val checkedColor = if(LocalTheme.current.isDark) colors.primary else colors.secondary
+    val uncheckedColor = if(LocalTheme.current.isDark) colors.primary else colors.secondaryContainer
+    val checkMarkColor = if(LocalTheme.current.isDark) colors.onSecondary else colors.secondaryContainer
+
 
     // Modal bottom sheet for selecting members
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = { setShowBottomSheetValue(false) }, // Dismiss the bottom sheet when requested
-        containerColor = CollaborantColors.PageBackGroundGray, // Background color of the bottom sheet
+        containerColor = colors.surfaceColorAtElevation(10.dp), // Background color of the bottom sheet
         dragHandle = {
             // Drag handle for the bottom sheet
             Column(
@@ -408,10 +412,11 @@ fun MembersPickerBottomSheet(
                         modifier = Modifier.align(Alignment.TopStart)
                     ) {
                         Text(
-                            text = "All:",
+                            text = "All",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
+                            color = colors.onBackground
                         )
 
                         TriStateCheckbox(
@@ -424,10 +429,10 @@ fun MembersPickerBottomSheet(
                                 toggleTriState()
                             },
                             colors = CheckboxDefaults.colors(
-                                checkedColor = CollaborantColors.MediumBlue40,
-                                uncheckedColor = CollaborantColors.DarkBlue,
-                                checkmarkColor = CollaborantColors.DarkBlue,
-                                disabledIndeterminateColor = CollaborantColors.DarkBlue
+                                checkedColor = checkedColor,
+                                uncheckedColor = uncheckedColor,
+                                checkmarkColor = checkMarkColor,
+                                disabledIndeterminateColor = colors.secondaryContainer
                             )
                         )
                     }
@@ -443,7 +448,7 @@ fun MembersPickerBottomSheet(
                             fontFamily = interFamily,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 18.sp,
-                            color = CollaborantColors.DarkBlue // Text color
+                            color = colors.onBackground // Text color
                         )
 
                         // Display the count of selected members
@@ -451,7 +456,8 @@ fun MembersPickerBottomSheet(
                             text = "${members.size}/${team.members.size}", // Member count
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Normal,
-                            fontSize = 13.sp
+                            fontSize = 13.sp,
+                            color = colors.onBackground
                         )
                     }
 
@@ -468,7 +474,8 @@ fun MembersPickerBottomSheet(
                         Icon(
                             painter = painterResource(id = R.drawable.cross),
                             contentDescription = "Close Icon",
-                            modifier = Modifier.size(26.dp)
+                            modifier = Modifier.size(26.dp),
+                            tint = colors.onBackground
                         )
                     }
                 }
@@ -496,10 +503,9 @@ fun MembersPickerBottomSheet(
                                 checked = members.contains((user.id)),
                                 onCheckedChange = null,
                                 colors = CheckboxDefaults.colors(
-                                    checkedColor = CollaborantColors.MediumBlue40,
-                                    uncheckedColor = CollaborantColors.DarkBlue,
-                                    checkmarkColor = CollaborantColors.DarkBlue
-
+                                    checkedColor = checkedColor,
+                                    uncheckedColor = uncheckedColor,
+                                    checkmarkColor = checkMarkColor
                                 )
                             )
                         },
