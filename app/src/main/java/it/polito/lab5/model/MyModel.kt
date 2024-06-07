@@ -88,17 +88,6 @@ class MyModel(val context: Context) {
     fun getUser(userId: String): Flow<User?> = callbackFlow {
         val documentReference = db.collection("Users").document(userId)
 
-        val kpiValues: MutableMap<String, KPI> = emptyMap<String, KPI>().toMutableMap()
-        val result = documentReference.collection("kpiValues").get().await()
-
-        for (d in result.documents) {
-            kpiValues[d.id] = KPI(
-                assignedTasks = d.get("assignedTasks") as Long,
-                completedTasks = d.get("completedTasks") as Long,
-                score = d.get("score") as Long
-            )
-        }
-
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
                 val image = snapshot.get("image") as Map<String, String?>
@@ -120,7 +109,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         joinedTeams = snapshot.get("joinedTeams") as Long,
-                        kpiValues = kpiValues,
+                        kpiValues = emptyMap(),
                         categories = snapshot.get("categories") as List<String>
                     )
                 )
@@ -134,21 +123,31 @@ class MyModel(val context: Context) {
         awaitClose { snapshotListener.remove() }
     }
 
-    @Suppress("unchecked_cast")
-    fun getUsersTeam(members: List<String>): Flow<List<User>> = callbackFlow {
-        val kpiList = members.associateWith { memberId ->
-            val result =
-                db.collection("Users").document(memberId).collection("kpiValues").get().await()
+    fun getUserKpi(userId: String): Flow<List<Pair<String, KPI>>> = callbackFlow {
+        val ref = db.collection("Users").document(userId).collection("kpiValues")
 
-            result.documents.associate {
-                it.id to KPI(
-                    assignedTasks = it.get("assignedTasks") as Long,
-                    completedTasks = it.get("completedTasks") as Long,
-                    score = it.get("score") as Long
-                )
+        val snapshotListener = ref.addSnapshotListener { snapshot, err ->
+            if (snapshot != null) {
+                val kpiValues = snapshot.documents.map { document ->
+                    document.id to KPI(
+                        assignedTasks = document.get("assignedTasks") as Long,
+                        completedTasks = document.get("completedTasks") as Long,
+                        score = document.get("score") as Long
+                    )
+                }
+                trySend(kpiValues)
+            } else {
+                if (err != null) {
+                    Log.e("Server Error", err.message.toString())
+                }
+                trySend(emptyList())
             }
         }
+        awaitClose{ snapshotListener.remove() }
+    }
 
+    @Suppress("unchecked_cast")
+    fun getUsersTeam(members: List<String>): Flow<List<User>> = callbackFlow {
         val usersDocumentReference = db.collection("Users").whereIn(FieldPath.documentId(), members)
 
         val usersSnapshotListener = usersDocumentReference.addSnapshotListener { usersSnapshot, e ->
@@ -171,7 +170,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         joinedTeams = userDocument.getLong("joinedTeams") ?: 0L,
-                        kpiValues = kpiList[userDocument.id] ?: emptyMap(),
+                        kpiValues = emptyMap(),
                         categories = userDocument.get("categories") as? List<String> ?: emptyList()
                     )
                 }

@@ -27,7 +27,10 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
             modifier = Modifier.padding(paddingValues)
         ) {
             val team = vm.teamId?.let { vm.getTeam(teamId = it).collectAsState(initial = null).value }
-            val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
+            val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+                val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+                user.copy(kpiValues = kpi.toMap())
+            }
 
             if (team != null && users !=null) {
                 TaskFormPage(

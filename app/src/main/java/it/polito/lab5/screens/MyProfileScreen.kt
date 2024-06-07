@@ -23,7 +23,11 @@ fun MyProfileScreen (
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val user = vm.auth.getSignedInUserId()?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value
+    val loggedInUserId = vm.auth.getSignedInUserId()
+    val kpiValues = loggedInUserId?.let { vm.getUserKpi(it) }?.collectAsState(initial = emptyList())?.value
+    val user = loggedInUserId?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value?.copy(
+        kpiValues = kpiValues?.toMap() ?: emptyMap()
+    )
 
     Scaffold(
         bottomBar = { BottomNavigationBarComp(navController) },

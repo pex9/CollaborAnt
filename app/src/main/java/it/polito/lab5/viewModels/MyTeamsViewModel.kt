@@ -1,6 +1,8 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,7 +20,10 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
     private var invitationTeam: Team? = null
 
     fun getUser(userId: String) = model.getUser(userId)
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
     fun getTeam(teamId: String) = model.getTeam(teamId)
+
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getUserTeams(userId: String) = model.getUserTeams(userId)
 
     suspend fun addUserToTeam(team: Team, user: User): Boolean {

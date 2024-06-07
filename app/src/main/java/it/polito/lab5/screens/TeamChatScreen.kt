@@ -28,7 +28,10 @@ fun TeamChatScreen (
     val loggedInUserId = vm.auth.getSignedInUserId()
     val chat = vm.getTeamChat(vm.teamId).collectAsState(initial = emptyList()).value
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value?.copy(chat = chat)
-    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+        val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+        user.copy(kpiValues = kpi.toMap())
+    }
 
     // Scaffold for layout structure
     Scaffold(

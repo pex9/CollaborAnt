@@ -16,7 +16,8 @@ fun UserProfileScreen (
     vm: UserProfileViewModel,
     navController: NavController,
 ) {
-    val user = vm.getUser(vm.userId).collectAsState(initial = null).value
+    val kpiValues = vm.getUserKpi(vm.userId).collectAsState(initial = emptyList()).value
+    val user = vm.getUser(vm.userId).collectAsState(initial = null).value?.copy(kpiValues = kpiValues.toMap())
 
     Scaffold(
         topBar = { UserProfileTopBar(navController) },

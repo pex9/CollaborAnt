@@ -16,7 +16,10 @@ fun TeamStatsScreen(
     navController: NavController
 ) {
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+        val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+        user.copy(kpiValues = kpi.toMap())
+    }
     //  TODO: fix this page with database team tasks
     Scaffold(
         topBar = {

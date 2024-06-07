@@ -19,7 +19,7 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
 
     val loggedInUserId = auth.getSignedInUserId()
     fun getTeam(teamId: String) = model.getTeam(teamId)
-
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
     //TODO FIX DELETE TEAM

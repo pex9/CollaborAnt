@@ -29,7 +29,10 @@ fun MyTeamsScreen (
     navController: NavController
 ) {
     val loggedInUserId = vm.auth.getSignedInUserId()
-    val loggedInUser = loggedInUserId?.let { vm.getUser(it).collectAsState(initial = null).value }
+    val kpiValues = loggedInUserId?.let {vm.getUserKpi(it) }?.collectAsState(initial = emptyList())?.value
+    val loggedInUser = loggedInUserId?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value?.copy(
+        kpiValues = kpiValues?.toMap() ?: emptyMap()
+    )
     val invitationTeam = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
     val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }
 

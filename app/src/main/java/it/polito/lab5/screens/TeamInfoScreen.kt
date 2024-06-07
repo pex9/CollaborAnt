@@ -6,14 +6,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import it.polito.lab5.gui.teamInfo.TeamInfoPage
 import it.polito.lab5.gui.teamInfo.TeamInfoTopBar
-import it.polito.lab5.model.Role
 import it.polito.lab5.viewModels.TeamInfoViewModel
 
 @Composable
 fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
 
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+        val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+        user.copy(kpiValues = kpi.toMap())
+    }
     val loggedInUserRole =  team?.members?.get(vm.loggedInUserId)
 
     Scaffold(
