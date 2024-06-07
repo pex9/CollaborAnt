@@ -13,13 +13,11 @@ import it.polito.lab5.viewModels.TeamStatsViewModel
 @Composable
 fun TeamStatsScreen(
     vm: TeamStatsViewModel,
-    navController: NavController,
-    teamId: String,
+    navController: NavController
 ) {
-
-
-    val team = vm.getTeam(teamId).collectAsState(initial = null).value
-    val membersList = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    //  TODO: fix this page with database team tasks
     Scaffold(
         topBar = {
             if (team != null) {

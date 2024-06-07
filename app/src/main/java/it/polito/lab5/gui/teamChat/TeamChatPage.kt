@@ -110,7 +110,7 @@ fun TeamChatPage (team: Team, users: List<User>, paddingValues: PaddingValues) {
             .padding(paddingValues)
             .verticalScroll(rememberScrollState(), reverseScrolling = true)
     ) {
-        val sortedTeamChat = team.chat.values.toList().sortedBy { it.date }
+        val sortedTeamChat = team.chat.sortedBy { it.date }
         var previousDate = sortedTeamChat.first().date.minusDays(1).toLocalDate()
 
         sortedTeamChat.forEach { message ->

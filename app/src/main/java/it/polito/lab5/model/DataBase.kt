@@ -146,6 +146,7 @@ object DataBase {
         // Day 1, August 1st:
 
         Message(
+            id = "1",
             senderId = 1.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(30),
@@ -153,6 +154,7 @@ object DataBase {
         ),
 
         Message(
+            id = "2",
             senderId = 2.toString(),
             receiverId = 1.toString(),
             date = LocalDateTime.now().minusDays(29), // 30 minutes later
@@ -160,6 +162,7 @@ object DataBase {
         ),
 
         Message(
+            id = "3",
             senderId = 3.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(28), // 1 hour later
@@ -169,6 +172,7 @@ object DataBase {
         // Day 5, August 5th:
 
         Message(
+            id = "4",
             senderId = 4.toString(),
             receiverId = 2.toString(),
             date = LocalDateTime.now().minusDays(26), // 4 days later
@@ -176,6 +180,7 @@ object DataBase {
         ),
 
         Message(
+            id = "5",
             senderId = 5.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(24), // 4 days and 30 minutes later
@@ -183,6 +188,7 @@ object DataBase {
         ),
 
         Message(
+            id = "6",
             senderId = 6.toString(),
             receiverId = 3.toString(),
             date = LocalDateTime.now().minusDays(23), // 4 days and 1 hour later
@@ -192,6 +198,7 @@ object DataBase {
         // Day 10, September 10th:
 
         Message(
+            id = "7",
             senderId = 1.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(22), // 9 days later
@@ -199,6 +206,7 @@ object DataBase {
         ),
 
         Message(
+            id = "8",
             senderId = 1.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(21), // 9 days and 30 minutes later
@@ -206,6 +214,7 @@ object DataBase {
         ),
 
         Message(
+            id = "9",
             senderId = 2.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(20), // 9 days and 1 hour later
@@ -215,6 +224,7 @@ object DataBase {
         // Day 15, October 15th:
 
         Message(
+            id = "10",
             senderId = 3.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(19), // 14 days later
@@ -222,6 +232,7 @@ object DataBase {
         ),
 
         Message(
+            id = "11",
             senderId = 4.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(19).plusMinutes(30), // 14 days and 30 minutes later
@@ -229,6 +240,7 @@ object DataBase {
         ),
 
         Message(
+            id = "12",
             senderId = 5.toString(),
             receiverId = null,
             date = LocalDateTime.now().minusDays(19).plusHours(1), // 14 days and 1 hour later
@@ -243,7 +255,7 @@ object DataBase {
             description = "Description of Team A",
             image = Empty(CollaborantColors.LightBlue),
             members = teamMembers.toMap(),
-            chat = mapOf( "1" to  chats[0], "2" to  chats[1], "3" to  chats[2], "4" to  chats[3], "5" to  chats[4], "6" to  chats[5], "7" to  chats[6], "8" to  chats[7], "9" to  chats[8], "10" to  chats[9], "11" to  chats[10], "12" to  chats[11])
+            chat = listOf(chats[0], chats[1], chats[2], chats[3], chats[4], chats[5], chats[6], chats[7], chats[8], chats[9], chats[10], chats[11])
         ),
         Team(
             id = 101.toString(),
@@ -258,7 +270,7 @@ object DataBase {
                 Pair(users[0].id, Role.SENIOR_MEMBER),
                 Pair(users[5].id, Role.JUNIOR_MEMBER)
             ).toMap(),
-            chat = mapOf("1" to chats[3], "2" to chats[4], "3" to chats[5])
+            chat = listOf(chats[3], chats[4], chats[5])
         ),
         Team(
             id = 102.toString(),
@@ -273,7 +285,7 @@ object DataBase {
                 Pair(users[5].id, Role.JUNIOR_MEMBER),
                 Pair(users[0].id, Role.TEAM_MANAGER)
             ).toMap(),
-            chat = mapOf("1" to chats[6], "2" to  chats[7], "3" to  chats[8], "4" to  chats[9])
+            chat = listOf(chats[6], chats[7], chats[8], chats[9])
         )
     )
 
@@ -288,15 +300,14 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = teamMembers.drop(2).map { it.first },
             state = TaskState.PENDING,
-            comments = mapOf(
-                "1" to Comment("Questo è il primo commento", 1.toString(), LocalDateTime.of(2024, 5, 11, 10, 23, 30, 0)),
-                "2" to Comment("Secondo commento molto interessante", 2.toString(), LocalDateTime.of(2024, 5, 6, 20, 50, 51, 0)),
-                "3" to Comment("Un altro commento per completare la lista", 3.toString(), LocalDateTime.of(2024, 5, 11, 6, 15, 10, 0))
+            comments = listOf(
+                Comment("1", "Questo è il primo commento", 1.toString(), LocalDateTime.of(2024, 5, 11, 10, 23, 30, 0)),
+                Comment("2","Secondo commento molto interessante", 2.toString(), LocalDateTime.of(2024, 5, 6, 20, 50, 51, 0)),
+                Comment("3","Un altro commento per completare la lista", 3.toString(), LocalDateTime.of(2024, 5, 11, 6, 15, 10, 0))
             ),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to
+            attachments = emptyList(),
+            history = listOf(
                 Action(
                     id = 0.toString(),
                     memberId = LOGGED_IN_USER_ID,
@@ -304,7 +315,6 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 1),
                     description = "Task created"
                 ),
-                "2" to
                 Action(
                     id = 1.toString(),
                     memberId = LOGGED_IN_USER_ID,
@@ -324,18 +334,18 @@ object DataBase {
             tag = Tag.LOW,
             teamMembers = teamMembers.take(3).map { it.first },
             state = TaskState.PENDING,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 2.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 3),
                     description = "Task created"
                 ),
-                "3" to Action(
+                Action(
                     id = 3.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
@@ -355,11 +365,11 @@ object DataBase {
             tag = Tag.UNDEFINED,
             teamMembers = emptyList(),
             state = TaskState.NOT_ASSIGNED,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 4.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
@@ -378,11 +388,11 @@ object DataBase {
             tag = Tag.UNDEFINED,
             teamMembers = emptyList(),
             state = TaskState.NOT_ASSIGNED,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 5.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
@@ -401,11 +411,11 @@ object DataBase {
             tag = Tag.LOW,
             teamMembers = emptyList(),
             state = TaskState.NOT_ASSIGNED,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 6.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
@@ -425,28 +435,28 @@ object DataBase {
             tag = Tag.UNDEFINED,
             teamMembers = listOf("2", "3"),
             state = TaskState.IN_PROGRESS,
-            comments = mapOf(
-                "1" to Comment("First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
-                "2" to Comment("Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
+            comments = listOf(
+                Comment("1","First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
+                Comment("2","Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
             ),
             categories = mapOf("1" to "Recently assigned"),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 7.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 8.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 9.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
@@ -465,30 +475,30 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = listOf("1", "2", "3"),
             state = TaskState.IN_PROGRESS,
-            comments = mapOf(
-                "1" to Comment("First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
-                "2" to Comment("Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
+            comments = listOf(
+                Comment("1","First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
+                Comment("2","Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
             ),
             categories = mapOf(
                 "1" to "Recently assigned"
             ),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 10.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 11.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 12.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
@@ -507,34 +517,34 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = listOf("1", "3", "4"),
             state = TaskState.ON_HOLD,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = mapOf(
                 "1" to "To do today"
             ),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 13.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 10),
                     description = "Task assigned"
                 ),
-                "2" to  Action(
+                Action(
                     id = 14.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 11),
                     description = "Task delegated"
                 ),
-                "3" to  Action(
+                Action(
                     id = 15.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
                     date = LocalDate.of(2024, 5, 12),
                     description = "Task status changed"
                 ),
-                "4" to Action(
+                Action(
                     id = 16.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.ON_HOLD,
@@ -553,34 +563,34 @@ object DataBase {
             tag = Tag.HIGH,
             teamMembers = listOf("1", "3", "4"),
             state = TaskState.ON_HOLD,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = mapOf(
                 "1" to "To do today"
             ),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 17.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 10),
                     description = "Task assigned"
                 ),
-                "2" to Action(
+                Action(
                     id = 18.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 11),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 19.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
                     date = LocalDate.of(2024, 5, 12),
                     description = "Task status changed"
                 ),
-                "4" to Action(
+                Action(
                     id = 20.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.ON_HOLD,
@@ -599,32 +609,32 @@ object DataBase {
             tag = Tag.LOW,
             teamMembers = teamMembers.take(3).map { it.first },
             state = TaskState.COMPLETED,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 21.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 17),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 22.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 18),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 23.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
                     date = LocalDate.of(2024, 5, 19),
                     description = "Task status changed"
                 ),
-                "4" to Action(
+                Action(
                     id = 24.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.COMPLETED,
@@ -643,32 +653,32 @@ object DataBase {
             tag = Tag.HIGH,
             teamMembers = teamMembers.drop(2).map { it.first },
             state = TaskState.OVERDUE,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 25.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 17),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 26.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 18),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 27.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
                     date = LocalDate.of(2024, 5, 19),
                     description = "Task status changed"
                 ),
-                "4" to Action(
+                Action(
                     id = 28.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.OVERDUE,
@@ -687,34 +697,34 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = listOf("1", "2", "5"),
             state = TaskState.OVERDUE,
-            comments = emptyMap(),
+            comments = emptyList(),
             categories = mapOf(
                 "1" to "To do next week"
             ),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 29.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 17),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 30.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 18),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 31.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
                     date = LocalDate.of(2024, 5, 19),
                     description = "Task status changed"
                 ),
-                "4" to Action(
+                Action(
                     id = 32.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.OVERDUE,
@@ -733,30 +743,30 @@ object DataBase {
             tag = Tag.HIGH,
             teamMembers = listOf("1", "2", "3"),
             state = TaskState.IN_PROGRESS,
-            comments = mapOf(
-                "1" to Comment("First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
-                "2" to Comment("Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
+            comments = listOf(
+                Comment("1","First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
+                Comment("2","Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
             ),
             categories = mapOf(
                 "1" to "Recently assigned"
             ),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 10.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-                "2" to Action(
+                Action(
                     id = 11.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.PENDING,
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task delegated"
                 ),
-                "3" to Action(
+                Action(
                     id = 12.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.IN_PROGRESS,
@@ -775,14 +785,14 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = emptyList(),
             state = TaskState.NOT_ASSIGNED,
-            comments = mapOf(
-                "1" to Comment("First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
-                "2" to Comment("Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
+            comments = listOf(
+                Comment("1","First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
+                Comment("2","Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
             ),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 13.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,
@@ -801,14 +811,14 @@ object DataBase {
             tag = Tag.MEDIUM,
             teamMembers = emptyList(),
             state = TaskState.NOT_ASSIGNED,
-            comments = mapOf(
-                "1" to Comment("First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
-                "2" to Comment("Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
+            comments = listOf(
+                Comment("1","First comment on Task 3", 4.toString(), LocalDateTime.of(2024, 5, 13, 8, 30, 15, 0)),
+                Comment("2","Another comment for Task 3", 5.toString(), LocalDateTime.of(2024, 5, 14, 12, 45, 30, 0))
             ),
             categories = emptyMap(),
-            attachments = emptyMap(),
-            history = mapOf(
-                "1" to Action(
+            attachments = emptyList(),
+            history = listOf(
+                Action(
                     id = 14.toString(),
                     memberId = LOGGED_IN_USER_ID,
                     taskState = TaskState.NOT_ASSIGNED,

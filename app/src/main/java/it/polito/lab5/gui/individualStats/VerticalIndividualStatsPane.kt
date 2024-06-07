@@ -49,7 +49,8 @@ fun VerticalIndividualStatsPane(
     targetMember: User,
     membersList: List<User>
 ) {
-    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, team.id, membersList)
+    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, membersList)
+
     Column(
         modifier = Modifier
             .padding(top = p.calculateTopPadding())
@@ -391,7 +392,7 @@ fun HorizontalIndividualStatsPane(
     targetMember: User,
     membersList: List<User>
 ) {
-    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, team.id, membersList)
+    val targetMemberRanking = computeTargetMemberRanking(targetMember.id, membersList)
     Row(
         modifier = Modifier
             .padding(top = p.calculateTopPadding())

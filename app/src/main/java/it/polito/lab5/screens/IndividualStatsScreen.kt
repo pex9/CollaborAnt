@@ -15,13 +15,14 @@ import it.polito.lab5.viewModels.IndividualStatsViewModel
 @Composable
 fun IndividualStatsScreen(
     vm: IndividualStatsViewModel,
-    userId: String,
     navController: NavController
 ) {
-    // TODO SIAMO SICURI DI USARE VM.userId da qui provo con userId?
-    val targetMember = vm.getUser(userId).collectAsState(initial = null).value
+    val targetMember = vm.getUser(vm.userId).collectAsState(initial = null).value
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    val membersList = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    val membersList = team?.let {
+        vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value
+            .sortedBy { user -> user.kpiValues[team.id]?.score }.reversed()
+    }
 
 
     Scaffold(

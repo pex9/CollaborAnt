@@ -164,9 +164,9 @@ fun MessageTextField(
                     // Check if the text field is not blank
                     if (value.isNotBlank()) {
                         // Add the comment using the provided callback
-                        addMessage(
-                            taskId,
+                        addMessage(taskId,
                             Message(
+                                id = "",
                                 content = value,
                                 senderId = DataBase.LOGGED_IN_USER_ID,
                                 date = LocalDateTime.now(),

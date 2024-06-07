@@ -85,7 +85,7 @@ fun MyChatsPage(
 
             Spacer(modifier = Modifier.height(12.dp))
         }
-        itemsIndexed(userTeams.sortedBy { team -> team.chat.values.toList().maxOf { it.date } }.reversed()){ idx, team ->
+        itemsIndexed(userTeams.sortedBy { team -> team.chat.maxOf { it.date } }.reversed()){ idx, team ->
             ChatItem(
                 team = team,
                 isReadState = isReadState,

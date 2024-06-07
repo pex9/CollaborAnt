@@ -33,7 +33,7 @@ fun ChatItem(
     setIsReadStateValue: (String, Boolean) -> Unit,
     navController: NavController
 ) {
-    val teamChat = team.chat.values.toList().sortedBy { it.date }
+    val teamChat = team.chat.sortedBy { it.date }
     val (first, last) = getMonogramText(team.name)
 
     ListItem(

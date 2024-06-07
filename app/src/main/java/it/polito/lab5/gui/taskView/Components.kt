@@ -682,7 +682,7 @@ fun AttachmentComponent(
     taskId: String,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
-    attachments: Map<String,Attachment>,
+    attachments: List<Attachment>,
     addAttachment: (String, Attachment) -> Unit,
     removeAttachment: (String, String) -> Unit
 ) {
@@ -782,7 +782,7 @@ fun AttachmentComponent(
                 )
             } else {
                 // Looping through attachments and displaying each attachment item
-                attachments.values.toList().forEachIndexed { index, attachment ->
+                attachments.forEachIndexed { index, attachment ->
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -886,7 +886,7 @@ fun CommentItem(comment: Comment, users: List<User>) {
 }
 
 @Composable
-fun CommentsComp(comments: Map<String,Comment>, users: List<User>) {
+fun CommentsComp(comments: List<Comment>, users: List<User>) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -916,7 +916,7 @@ fun CommentsComp(comments: Map<String,Comment>, users: List<User>) {
             shape = RoundedCornerShape(16.dp),
         ) {
             // Looping through comments and displaying each comment item
-            comments.values.toList().sortedBy { it.date }.forEachIndexed { idx, comment ->
+            comments.sortedBy { it.date }.forEachIndexed { idx, comment ->
                 // Displaying the comment item
                 CommentItem(comment = comment, users = users)
 
@@ -1044,6 +1044,7 @@ fun CommentTextField(
                     if (value.isNotBlank()) {
                         // Add the comment using the provided callback
                         addComment(taskId, Comment(
+                            id = "",
                             content = value,
                             authorId = DataBase.LOGGED_IN_USER_ID,
                             date = LocalDateTime.now()

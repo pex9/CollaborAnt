@@ -380,7 +380,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
             )
 
             if (userId != null) {
-                IndividualStatsScreen(vm = individualStatsViewModel,userId = userId, navController = navController)
+                IndividualStatsScreen(vm = individualStatsViewModel, navController = navController)
             }
         }
 
@@ -396,15 +396,10 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 factory = AppFactory(teamId = teamId, context = context)
             )
 
-            val teams = teamStatsViewModel.teams.collectAsState()
-
-            teams.value.find { it.id == teamId }?.let { team ->
-                TeamStatsScreen(
-                    vm = teamStatsViewModel,
-                    navController = navController,
-                    teamId = team.id
-                )
-            }
+            TeamStatsScreen(
+                vm = teamStatsViewModel,
+                navController = navController,
+            )
         }
 
         composable(route = "myProfile")

@@ -39,6 +39,7 @@ enum class Repeat {
 }
 
 data class Comment(
+    val id: String,
     val content: String,
     val authorId: String,
     val date: LocalDateTime
@@ -72,7 +73,7 @@ data class Team(
     val description: String,
     val image: ImageProfile,
     val members: Map<String, Role>,
-    val chat: Map<String,Message>
+    val chat: List<Message>
 )
 
 data class User(
@@ -100,13 +101,14 @@ data class Task(
     val tag: Tag,
     val teamMembers: List<String>,
     val state: TaskState,
-    var comments: Map <String,Comment>,
+    var comments: List<Comment>,
     val categories: Map<String, String>,    //  [userId -> category]
-    var attachments: Map<String, Attachment>,
-    var history: Map<String,Action>
+    var attachments: List<Attachment>,
+    var history: List<Action>
 )
 
 data class Message(
+    val id: String,
     val senderId: String,
     val receiverId: String?,  // if null means everybody
     val date: LocalDateTime,

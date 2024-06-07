@@ -41,8 +41,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank()) {
             if (currentTask == null) {
                 val categories: MutableMap<String, String> = mutableMapOf()
-                val history = mutableMapOf(
-                    "1" to Action(
+                val history = mutableListOf(
+                    Action(
                         id = 0.toString(),
                         memberId = DataBase.LOGGED_IN_USER_ID,
                         taskState = TaskState.NOT_ASSIGNED,
@@ -52,8 +52,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                 )
 
                 if(delegatedMembers.isNotEmpty()) {
-                    history.put(
-                        (history.size+1).toString(),
+                    history.add(
                         Action(
                             id = 1.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,
@@ -80,9 +79,9 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                             tag = tag,
                             teamMembers = delegatedMembers,
                             state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
-                            comments = emptyMap(),
+                            comments = emptyList(),
                             categories = categories,
-                            attachments = emptyMap(),
+                            attachments = emptyList(),
                             history = history,
                         )
                     )
@@ -92,11 +91,10 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                 id = currentTask.id
                 var taskState = currentTask.state
                 val categories: MutableMap<String, String> = currentTask.categories.toMutableMap()
-                val history: MutableMap<String,Action> = currentTask.history.toMutableMap()
+                val history: MutableList<Action> = currentTask.history.toMutableList()
 
                 if(currentTask.teamMembers.isEmpty() && delegatedMembers.isNotEmpty()) {
-                    history.put(
-                        history.size.toString(),
+                    history.add(
                         Action(
                             id = currentTask.history.size.toString(),
                             memberId = DataBase.LOGGED_IN_USER_ID,
