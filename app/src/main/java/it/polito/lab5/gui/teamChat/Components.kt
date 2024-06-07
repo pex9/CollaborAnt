@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -59,6 +60,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -66,21 +68,20 @@ import java.util.Locale
 
 @Composable
 fun MessageTextField(
+    team: Team,
     // Flag to determine if the layout should be horizontal or vertical
     isHorizontal: Boolean,
     // Current value of the text field
     value: String,
     // Callback to update the value of the text field
     updateValue: (String) -> Unit,
-    // Task ID associated with the comment
-    taskId: String,
     // Callback to add a comment
-    addMessage: (String, Message) -> Unit,
+    addMessageToTeam: suspend (Team, Message) -> Unit,
     // Modifier for styling and layout customization
-    newMessageReceiver: String?,
-    setIsReadState: (String, Boolean) -> Unit,
-    teamId: String
+    newMessageReceiver: String?
 ) {
+    val scope = rememberCoroutineScope()
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -164,18 +165,17 @@ fun MessageTextField(
                     // Check if the text field is not blank
                     if (value.isNotBlank()) {
                         // Add the comment using the provided callback
-                        addMessage(taskId,
-                            Message(
-                                id = "",
-                                content = value,
-                                senderId = DataBase.LOGGED_IN_USER_ID,
-                                date = LocalDateTime.now(),
-                                receiverId = newMessageReceiver
+                        scope.launch {
+                            addMessageToTeam(team,
+                                Message(
+                                    id = "",
+                                    content = value,
+                                    senderId = DataBase.LOGGED_IN_USER_ID,
+                                    date = LocalDateTime.now(),
+                                    receiverId = newMessageReceiver
+                                )
                             )
-                        )
-                        // Clear the text field by updating its value
-                        updateValue("")
-                        setIsReadState(teamId, false)
+                        }.invokeOnCompletion { updateValue("") } // Clear the text field by updating its value
                     }
                 },
                 // Customizing the colors of the IconButton

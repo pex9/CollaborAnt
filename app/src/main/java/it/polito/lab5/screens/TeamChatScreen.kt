@@ -15,21 +15,15 @@ import it.polito.lab5.viewModels.ChatViewViewModel
 @Composable
 fun TeamChatScreen (
     vm: ChatViewViewModel,
-    setIsReadState: (String, Boolean) -> Unit,
     navController: NavController, // NavController for navigation
 ) {
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
 
     // Scaffold for layout structure
     Scaffold(
         topBar = {
-            if (team != null) {
-                TeamChatTopAppBar(
-                    team = team,
-                    navController = navController
-                )
-            }
+            if (team != null) { TeamChatTopAppBar(team = team, navController = navController) }
         }, // Top app bar for task list
         bottomBar = {
             if (team != null && users != null) {
@@ -45,14 +39,12 @@ fun TeamChatScreen (
 
                     BoxWithConstraints {
                         MessageTextField(
+                            team = team,
                             isHorizontal = this.maxWidth > this.maxHeight,
                             value = vm.newMessage,
                             updateValue = vm::setNewMessageValue,
-                            taskId = team.id,
-                            addMessage = vm::addMessage,
+                            addMessageToTeam = vm::addMessageToTeam,
                             newMessageReceiver = vm.targetReceiver,
-                            setIsReadState = setIsReadState,
-                            teamId = team.id
                         )
                     }
                 }

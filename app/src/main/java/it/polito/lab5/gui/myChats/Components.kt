@@ -12,6 +12,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,14 +26,17 @@ import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatItem(
     team: Team,
-    isReadState: MutableList<Pair<String, Boolean>>,
-    setIsReadStateValue: (String, Boolean) -> Unit,
+    loggedInUserId: String,
+    isReadState: List<Pair<String, Boolean>>,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
     navController: NavController
 ) {
+    val scope = rememberCoroutineScope()
     val teamChat = team.chat.sortedBy { it.date }
     val (first, last) = getMonogramText(team.name)
 
@@ -61,16 +65,18 @@ fun ChatItem(
                     maxLines = 1
                 )
 
-                Text(
-                    text = teamChat.last().content,
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 12.sp,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    modifier = Modifier.padding(top= 4.dp),
-                    color = CollaborantColors.BorderGray
-                )
+                if(teamChat.isNotEmpty()) {
+                    Text(
+                        text = teamChat.last().content,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        modifier = Modifier.padding(top= 4.dp),
+                        color = CollaborantColors.BorderGray
+                    )
+                }
             }
         },
         trailingContent = {
@@ -78,16 +84,18 @@ fun ChatItem(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Top,
             ) {
-                val formattedDate = dateFormatter(teamChat.last().date)
+                if(teamChat.isNotEmpty()) {
+                    val formattedDate = dateFormatter(teamChat.last().date)
 
-                Text(
-                    text = formattedDate,
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 10.sp,
-                    letterSpacing = 0.sp,
-                    maxLines = 1,
-                )
+                    Text(
+                        text = formattedDate,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.sp,
+                        maxLines = 1,
+                    )
+                }
 
                 Box(modifier = Modifier.padding(top = 14.dp)) {
                     val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
@@ -103,8 +111,9 @@ fun ChatItem(
         modifier = Modifier
             .height(80.dp)
             .clickable {
-                setIsReadStateValue(team.id, true)
-                navController.navigate("viewChat/${team.id}/${null}")
+                scope.launch {
+                    resetUnreadMessage(team, loggedInUserId)
+                }.invokeOnCompletion { navController.navigate("viewChat/${team.id}/${null}") }
             }
     )
 }

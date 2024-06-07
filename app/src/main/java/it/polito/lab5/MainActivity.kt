@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.collectAsState
 import it.polito.lab5.model.MyApplication
 import it.polito.lab5.navigation.AppNavigation
 import it.polito.lab5.ui.theme.Lab4Theme
@@ -23,11 +24,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val auth = (this.applicationContext as MyApplication).auth
-        val startDestination = if(auth.getSignedInUserId() != null) { "myTeams?teamId={teamId}" }
+        val model = (this.applicationContext as MyApplication).model
+        val loggedInUserId = auth.getSignedInUserId()
+        val startDestination = if(loggedInUserId != null) { "myTeams?teamId={teamId}" }
             else { "login" }
 
         setContent {
             Lab4Theme(darkTheme= false) {
+                val teams = loggedInUserId?.let { model.getUserTeams(it).collectAsState(initial = emptyList()).value }
+                val chatsReadState = teams?.let { team -> team.map { it.id to (it.unreadMessage[loggedInUserId] ?: false) } }
+                chatsReadState?.let { appViewModel.setChatsReadStateValue(it) }
+
                 if (isFirstLaunch(this) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     appViewModel.setShowDialogValue(checkIfAppApprovedForDomain(this))
                 }

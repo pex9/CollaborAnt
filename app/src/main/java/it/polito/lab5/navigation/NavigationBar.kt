@@ -29,7 +29,7 @@ import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBarComp(navController: NavController, isReadState: MutableList<Pair<String, Boolean>>) {
+fun BottomNavigationBarComp(navController: NavController, isReadState: List<Pair<String, Boolean>>) {
     // Get the current back stack entry
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route

@@ -8,6 +8,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
@@ -16,8 +17,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.Date
 
 class MyModel(val context: Context) {
     init {
@@ -345,6 +349,7 @@ class MyModel(val context: Context) {
 
     @Suppress("unchecked_cast")
     fun getTeam(teamId: String): Flow<Team?> = callbackFlow {
+        var chatsSnapshotListener: ListenerRegistration? = null
         val documentReference = db.collection("Teams").document(teamId)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
@@ -360,7 +365,28 @@ class MyModel(val context: Context) {
                     }).toMap()
 
                 val unreadMessage = (snapshot.get("members") as List<String>)
-                    .zip((snapshot.get("roles") as List<Boolean>)).toMap()
+                    .zip((snapshot.get("unreadMessage") as List<Boolean>)).toMap()
+
+                val chatTeam = emptyList<Message>().toMutableList()
+                val chatReference = db.collection("Teams").document(snapshot.id).collection("chat")
+
+                chatsSnapshotListener = chatReference.addSnapshotListener { chatSnapshot, err ->
+                    if (chatSnapshot != null) {
+                        chatSnapshot.documents.map { messageDocument ->
+                            chatTeam.add(
+                                Message(
+                                    id = messageDocument.id,
+                                    senderId = messageDocument.get("senderId").toString(),
+                                    receiverId = messageDocument.get("receiverId").toString(),
+                                    content = messageDocument.get("content").toString(),
+                                    date = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDocument.get("date") as Long), ZoneOffset.UTC)
+                                )
+                            )
+                        }
+                    } else {
+                        if (err != null) { Log.e("Server Error", err.message.toString()) }
+                    }
+                }
 
                 trySend(
                     Team(
@@ -374,7 +400,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = emptyList(), //   TODO: manage with sub-collection
+                        chat = chatTeam,
                         unreadMessage = unreadMessage
                     )
                 )
@@ -385,11 +411,12 @@ class MyModel(val context: Context) {
                 trySend(null)
             }
         }
-        awaitClose { snapshotListener.remove() }
+        awaitClose { chatsSnapshotListener?.remove() ; snapshotListener.remove() }
     }
 
     @Suppress("unchecked_cast")
     fun getUserTeams(userId: String): Flow<List<Team>> = callbackFlow {
+        var chatsSnapshotListener: ListenerRegistration? = null
         val documentReference = db.collection("Teams")
         val query = documentReference.whereArrayContains("members", userId)
 
@@ -407,32 +434,28 @@ class MyModel(val context: Context) {
                         }).toMap()
 
                     val unreadMessage = (document.get("members") as List<String>)
-                        .zip((document.get("roles") as List<Boolean>)).toMap()
+                        .zip((document.get("unreadMessage") as List<Boolean>)).toMap()
 
-//                    val chatCollection =
-//                        db.collection("Teams").document(document.id).collection("chat")
-//                    val chatTeam = emptyMap<String, Message>().toMutableMap()
-//                    // Now we retrieve the chat documents for this team
-//                    val chatsSnapshotListener =
-//                        chatCollection.addSnapshotListener { chatSnapshot, e ->
-//                            if (chatSnapshot != null) {
-//                                chatSnapshot.documents.mapIndexed { idx, messageDocument ->
-//
-//                                    val m = Message(
-//                                        senderId = messageDocument.get("senderId").toString(),
-//                                        receiverId = messageDocument.get("receiverId").toString(),
-//                                        content = messageDocument.get("content").toString(),
-//                                        date = messageDocument.get("date")
-//                                            .toString() as LocalDateTime
-//                                    )
-//                                    chatTeam[messageDocument.id] = m
-//                                }
-//                            } else {
-//                                if (e != null) {
-//                                    Log.e("Server Error", e.message.toString())
-//                                }
-//                            }
-//                        }
+                    val chatTeam = emptyList<Message>().toMutableList()
+                    val chatReference = db.collection("Teams").document(document.id).collection("chat")
+
+                    chatsSnapshotListener = chatReference.addSnapshotListener { chatSnapshot, e ->
+                            if (chatSnapshot != null) {
+                                chatSnapshot.documents.map { messageDocument ->
+                                    chatTeam.add(
+                                        Message(
+                                            id = messageDocument.id,
+                                            senderId = messageDocument.get("senderId").toString(),
+                                            receiverId = messageDocument.get("receiverId").toString(),
+                                            content = messageDocument.get("content").toString(),
+                                            date = LocalDateTime.ofInstant(Instant.ofEpochMilli(messageDocument.get("date") as Long), ZoneOffset.UTC)
+                                        )
+                                    )
+                                }
+                            } else {
+                                if (e != null) { Log.e("Server Error", e.message.toString()) }
+                            }
+                        }
 
                     Team(
                         id = document.id,
@@ -445,7 +468,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = emptyList(),
+                        chat = chatTeam,
                         unreadMessage = unreadMessage
                     )
                 }
@@ -457,7 +480,7 @@ class MyModel(val context: Context) {
                 trySend(emptyList())
             }
         }
-        awaitClose { snapshotListener.remove() }
+        awaitClose { chatsSnapshotListener?.remove() ; snapshotListener.remove() }
     }
 
     suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) {
@@ -546,16 +569,23 @@ class MyModel(val context: Context) {
         db.collection("Teams").document(team.id).delete().await()
     }
 
-//    suspend fun addMessageToTeam(teamId: String, message: Message) {
-//        val teamReference = db.collection("Teams").document(teamId).collection("chat").add(
-//            hashMapOf(
-//                "senderId" to message.senderId,
-//                "content" to message.content,
-//                "receiverId" to message.receiverId,
-//                "date" to message.date //TODO CONVERT PROPERLY
-//            )
-//        )
-//    }
+    suspend fun addMessageToTeam(team: Team, message: Message) {
+        db.collection("Teams").document(team.id).collection("chat").add(
+            mapOf(
+                "senderId" to message.senderId,
+                "content" to message.content,
+                "receiverId" to message.receiverId,
+                "date" to Timestamp(Date(message.date.toInstant(ZoneOffset.UTC).toEpochMilli()))
+            )
+        ).await()
+
+        val membersId = when(message.receiverId) {
+            null -> team.members.keys.toList().filter { it != message.senderId }
+            else -> listOf(message.receiverId)
+        }
+
+        updateUnreadMessage(team, membersId, true)
+    }
 
     suspend fun addUserToTeam(team: Team, user: User) {
         val updatedMembers = team.members.toMutableMap()
@@ -589,6 +619,17 @@ class MyModel(val context: Context) {
         updateTeam(
             teamId = team.id, team = team.copy(
                 members = updatedMembers
+            ), false
+        )
+    }
+
+    suspend fun updateUnreadMessage(team: Team, membersId: List<String>, value: Boolean) {
+        val uploadedUnreadMessage = team.unreadMessage.toMutableMap()
+        membersId.forEach { uploadedUnreadMessage[it] = value }
+
+        updateTeam(
+            teamId = team.id, team = team.copy(
+                unreadMessage = uploadedUnreadMessage
             ), false
         )
     }
@@ -925,15 +966,6 @@ class MyModel(val context: Context) {
         if (index != -1) {
             updatedTeams[index] = team
             _teams.value = updatedTeams
-        }
-    }
-
-    fun removeMember(teamId: String, memberId: String) {
-        _teams.value.find { it.id == teamId }?.let { team ->
-            val members: MutableMap<String, Role> = team.members.toMutableMap()
-            members.remove(memberId)
-
-            updateT(teamId, team.copy(members = members))
         }
     }
 

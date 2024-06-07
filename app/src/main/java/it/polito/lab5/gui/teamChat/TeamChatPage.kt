@@ -111,23 +111,26 @@ fun TeamChatPage (team: Team, users: List<User>, paddingValues: PaddingValues) {
             .verticalScroll(rememberScrollState(), reverseScrolling = true)
     ) {
         val sortedTeamChat = team.chat.sortedBy { it.date }
-        var previousDate = sortedTeamChat.first().date.minusDays(1).toLocalDate()
 
-        sortedTeamChat.forEach { message ->
-            if(message.receiverId == DataBase.LOGGED_IN_USER_ID || message.senderId == DataBase.LOGGED_IN_USER_ID || message.receiverId == null) {
-                if(message.date.toLocalDate() != previousDate) {
-                    DateCanvas(date = message.date.toLocalDate())
-                    previousDate = message.date.toLocalDate()
-                }
+        if(team.chat.isNotEmpty()) {
+            var previousDate = sortedTeamChat.first().date.minusDays(1).toLocalDate()
 
-                if(message.senderId == DataBase.LOGGED_IN_USER_ID) {
-                    MessageTo(message = message, users = users)
-                } else {
-                    MessageFrom(message = message, users = users)
+            sortedTeamChat.forEach { message ->
+                if(message.receiverId == DataBase.LOGGED_IN_USER_ID || message.senderId == DataBase.LOGGED_IN_USER_ID || message.receiverId == null) {
+                    if(message.date.toLocalDate() != previousDate) {
+                        DateCanvas(date = message.date.toLocalDate())
+                        previousDate = message.date.toLocalDate()
+                    }
+
+                    if(message.senderId == DataBase.LOGGED_IN_USER_ID) {
+                        MessageTo(message = message, users = users)
+                    } else {
+                        MessageFrom(message = message, users = users)
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+        }
     }
 }

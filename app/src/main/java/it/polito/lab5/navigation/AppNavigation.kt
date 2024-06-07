@@ -64,9 +64,6 @@ import java.io.IOException
 fun AppNavigation(vm: AppViewModel, startDestination: String) {
     val context = LocalContext.current
     val navController = rememberNavController() // Remember the navigation controller
-    val myChatViewModel: MyChatsViewModel = viewModel(
-        factory = AppFactory(context = context)
-    )
 
     // Set up navigation graph
     NavHost(
@@ -105,7 +102,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 showDialog = vm.showDialog,
                 setShowDialogValue = vm::setShowDialogValue,
                 navController = navController,
-                isReadState = myChatViewModel.chatsReadState,
+                isReadState = vm.chatsReadState,
             )
         }
 
@@ -210,7 +207,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
             MyTasksScreen(
                 vm = myTaskViewModel,
                 navController = navController,
-                isReadState = myChatViewModel.chatsReadState
+                isReadState = vm.chatsReadState
             )
         }
 
@@ -326,9 +323,10 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
         }
 
         // My chats screen
-        composable(
-            route = "myChats",
-        ) {
+        composable(route = "myChats",) {
+            val myChatViewModel: MyChatsViewModel = viewModel(
+                factory = AppFactory(context = context)
+            )
 
             MyChatsScreen(
                 vm = myChatViewModel,
@@ -357,10 +355,8 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 )
             )
 
-
             TeamChatScreen (
                 vm = chatViewViewModel,
-                setIsReadState = myChatViewModel::setChatsReadStateValue,
                 navController = navController
             )
         }
@@ -411,7 +407,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
             MyProfileScreen(
                 vm = myProfileViewModel,
                 navController = navController,
-                isReadState = myChatViewModel.chatsReadState
+                isReadState = vm.chatsReadState
             )
         }
 
