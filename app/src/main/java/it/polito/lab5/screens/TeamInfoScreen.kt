@@ -7,9 +7,10 @@ import androidx.navigation.NavController
 import it.polito.lab5.gui.teamInfo.TeamInfoPage
 import it.polito.lab5.gui.teamInfo.TeamInfoTopBar
 import it.polito.lab5.viewModels.TeamInfoViewModel
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
-fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
+fun TeamInfoViewScreen(vm: TeamInfoViewModel, scope: CoroutineScope, navController: NavController) {
 
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
     val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
@@ -39,6 +40,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
         team?.let {
             if (loggedInUserRole != null && vm.loggedInUserId != null && users != null) {
                 TeamInfoPage(
+                    scope = scope,
                     team = it,
                     users = users,
                     loggedInUserId = vm.loggedInUserId,

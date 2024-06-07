@@ -45,6 +45,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -126,6 +127,7 @@ fun TeamInfoTopBar(
 
 @Composable
 fun TeamInfoPage(
+    scope: CoroutineScope,
     team: Team,
     users: List<User>,
     loggedInUserId: String,
@@ -153,7 +155,7 @@ fun TeamInfoPage(
     paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -299,11 +301,13 @@ fun TeamInfoPage(
             text = "Are you sure to delete this team?",
             onConfirmText = "Delete",
             onConfirm = {
-                setShowDeleteDialogValue(false)
+                var deleteSuccess = false
+
                 scope.launch {
-                    Log.e("Server Error", "Ciao")
-                    if (deleteTeam(team, users)) {
-                        Log.e("Server Error", "Eccomi")
+                    deleteSuccess = deleteTeam(team, users)
+                }.invokeOnCompletion {
+                    if(deleteSuccess) {
+                        setShowDeleteDialogValue(false)
                         navController.popBackStack(
                             route = "myTeams",
                             inclusive = false

@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -240,7 +241,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 )
             )
 
-            TeamInfoViewScreen(vm = teamInfoViewModel, navController = navController)
+            TeamInfoViewScreen(vm = teamInfoViewModel, scope = rememberCoroutineScope(), navController = navController)
         }
 
         composable(

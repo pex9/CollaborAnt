@@ -382,8 +382,13 @@ class MyModel(val context: Context) {
         val documentReference = db.collection("Teams").document(teamId)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
-            if (snapshot != null) {
-                val image = snapshot.get("image") as Map<String, String?>
+            if (snapshot != null && snapshot.exists()) {
+                var image: Map<String, String?> = emptyMap()
+
+                if(snapshot.get("image") is Map<*, *>) {
+                    image = snapshot.get("image") as Map<String, String?>
+                }
+
                 val members = (snapshot.get("members") as List<String>)
                     .zip((snapshot.get("roles") as List<String>).map {
                         when (it) {
@@ -544,6 +549,7 @@ class MyModel(val context: Context) {
             deleteImage(team.id)
         }
 
+        //  TODO: probably useless filter
         //  Update kpi values for all team members
         members.filter { team.members.containsKey(it.id) }.forEach { member ->
             member.kpiValues[team.id]?.let { kpi ->
@@ -551,8 +557,13 @@ class MyModel(val context: Context) {
             }
         }
 
+        //  TODO: might be a better way to delete a sub collection
+        val teamReference = db.collection("Teams").document(team.id)
+        val r = teamReference.collection("chat").get().await()
+        r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
+
         //  Delete Team document
-        db.collection("Teams").document(team.id).delete().await()
+        teamReference.delete().await()
     }
 
     suspend fun addMessageToTeam(team: Team, message: Message) {
