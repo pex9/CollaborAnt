@@ -17,6 +17,7 @@ fun TeamChatScreen (
     vm: ChatViewViewModel,
     navController: NavController, // NavController for navigation
 ) {
+    val loggedInUserId = vm.auth.getSignedInUserId()
     val chat = vm.getTeamChat(vm.teamId).collectAsState(initial = emptyList()).value
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value?.copy(chat = chat)
     val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
@@ -39,14 +40,17 @@ fun TeamChatScreen (
                     )
 
                     BoxWithConstraints {
-                        MessageTextField(
-                            team = team,
-                            isHorizontal = this.maxWidth > this.maxHeight,
-                            value = vm.newMessage,
-                            updateValue = vm::setNewMessageValue,
-                            addMessageToTeam = vm::addMessageToTeam,
-                            newMessageReceiver = vm.targetReceiver,
-                        )
+                        if (loggedInUserId != null) {
+                            MessageTextField(
+                                team = team,
+                                loggedInUserId = loggedInUserId,
+                                isHorizontal = this.maxWidth > this.maxHeight,
+                                value = vm.newMessage,
+                                updateValue = vm::setNewMessageValue,
+                                addMessageToTeam = vm::addMessageToTeam,
+                                newMessageReceiver = vm.targetReceiver,
+                            )
+                        }
                     }
                 }
             }

@@ -1,7 +1,9 @@
 package it.polito.lab5.model
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import com.google.firebase.Firebase
@@ -347,6 +349,7 @@ class MyModel(val context: Context) {
         return result.id
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getTeamChat(teamId: String): Flow<List<Message>> = callbackFlow {
         val ref = db.collection("Teams").document(teamId).collection("chat")
 
@@ -416,10 +419,11 @@ class MyModel(val context: Context) {
                 trySend(null)
             }
         }
-        awaitClose { /*chatsSnapshotListener?.remove()*/ ; snapshotListener.remove() }
+        awaitClose { snapshotListener.remove() }
     }
 
     @Suppress("unchecked_cast")
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getUserTeams(userId: String): Flow<List<Team>> = callbackFlow {
         var chatsSnapshotListener: ListenerRegistration? = null
         val documentReference = db.collection("Teams")

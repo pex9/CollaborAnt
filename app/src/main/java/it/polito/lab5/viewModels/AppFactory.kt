@@ -45,7 +45,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 MyChatsViewModel(model,auth) as T
             }
             modelClass.isAssignableFrom(ChatViewViewModel::class.java) -> {
-                teamId?.let { ChatViewViewModel(teamId, userId, model) } as T
+                teamId?.let { ChatViewViewModel(teamId, userId, model, auth) } as T
             }
             modelClass.isAssignableFrom(IndividualStatsViewModel::class.java) -> {
                 teamId?.let {

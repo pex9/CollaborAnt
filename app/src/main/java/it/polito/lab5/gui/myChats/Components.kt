@@ -99,7 +99,7 @@ fun ChatItem(
 
                 Box(modifier = Modifier.padding(top = 14.dp)) {
                     val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
-                    if(!isReadFlag){
+                    if(isReadFlag){
                         UnreadMessageComp()
                     }
                 }

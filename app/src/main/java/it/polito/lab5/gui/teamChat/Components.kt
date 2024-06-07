@@ -69,6 +69,7 @@ import java.util.Locale
 @Composable
 fun MessageTextField(
     team: Team,
+    loggedInUserId: String,
     // Flag to determine if the layout should be horizontal or vertical
     isHorizontal: Boolean,
     // Current value of the text field
@@ -170,7 +171,7 @@ fun MessageTextField(
                                 Message(
                                     id = "",
                                     content = value,
-                                    senderId = DataBase.LOGGED_IN_USER_ID,
+                                    senderId = loggedInUserId,
                                     date = LocalDateTime.now(),
                                     receiverId = newMessageReceiver
                                 )
