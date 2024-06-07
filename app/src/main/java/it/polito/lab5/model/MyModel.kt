@@ -279,20 +279,21 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Map<String, KPI>) {
+    suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Pair<String, KPI>, delete: Boolean = false) {
         val documentReference = db.collection("Users").document(userId)
 
-        if (kpiValues.isNotEmpty()) {
-            kpiValues.forEach { (teamId, kpi) ->
-                documentReference.collection("kpiValues").document(teamId)
-                    .set(
-                        mapOf(
-                            "assignedTasks" to kpi.assignedTasks,
-                            "completedTasks" to kpi.completedTasks,
-                            "score" to kpi.score
-                        )
-                    ).await()
-            }
+        val kpiValuesReference = documentReference.collection("kpiValues").document(kpiValues.first)
+
+        if(delete) {
+            kpiValuesReference.delete().await()
+        } else {
+            kpiValuesReference.set(
+                mapOf(
+                    "assignedTasks" to kpiValues.second.assignedTasks,
+                    "completedTasks" to kpiValues.second.completedTasks,
+                    "score" to kpiValues.second.score
+                )
+            ).await()
         }
 
         documentReference.update("joinedTeams", joinedTeams).await()
@@ -546,10 +547,9 @@ class MyModel(val context: Context) {
 
         //  Update kpi values for all team members
         members.filter { team.members.containsKey(it.id) }.forEach { member ->
-            val updatedKpiValues = member.kpiValues.toMutableMap()
-            updatedKpiValues.remove(team.id)
-
-            updateUserKpi(member.id, member.joinedTeams - 1, updatedKpiValues)
+            member.kpiValues[team.id]?.let { kpi ->
+                updateUserKpi(member.id, member.joinedTeams - 1, team.id to kpi, true)
+            }
         }
 
         //  Delete Team document
@@ -588,15 +588,12 @@ class MyModel(val context: Context) {
             ), false
         )
 
-        //  User kpi
-        val updatedKpiValues = user.kpiValues.toMutableMap()
-        updatedKpiValues[team.id] = KPI(
+        //  Update User kpi
+        updateUserKpi(user.id, user.joinedTeams + 1, team.id to KPI(
             assignedTasks = 0,
             completedTasks = 0,
             score = calculateScore(0, 0)
-        )
-
-        updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues)
+        ))
     }
 
     suspend fun updateUserRole(userId: String, newRole: Role, team: Team) {
@@ -622,8 +619,17 @@ class MyModel(val context: Context) {
     }
 
     suspend fun removeUserFromTeam(user: User, team: Team, chosenMember: String? = null) {
+        //  Update User kpi
+        user.kpiValues[team.id]?.let { kpi ->
+            updateUserKpi(user.id, user.joinedTeams - 1, team.id to kpi, true)
+        }
+
+        //  Update Team
         val updatedMembers = team.members.toMutableMap()
         updatedMembers.remove(user.id)
+
+        val uploadedUnreadMessage = team.unreadMessage.toMutableMap()
+        uploadedUnreadMessage.remove(user.id)
 
         if (chosenMember != null) {
             updatedMembers[chosenMember] = Role.TEAM_MANAGER
@@ -631,15 +637,10 @@ class MyModel(val context: Context) {
 
         updateTeam(
             teamId = team.id, team = team.copy(
-                members = updatedMembers
+                members = updatedMembers,
+                unreadMessage = uploadedUnreadMessage
             ), false
         )
-
-        //  Update User kpi
-        val updatedKpiValues = user.kpiValues.toMutableMap()
-        updatedKpiValues.remove(team.id)
-
-        updateUserKpi(user.id, user.joinedTeams - 1, updatedKpiValues)
     }
 
     // TASKS

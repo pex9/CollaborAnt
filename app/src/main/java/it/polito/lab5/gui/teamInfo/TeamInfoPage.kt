@@ -266,7 +266,12 @@ fun TeamInfoPage(
                 if(team.members.size > 1) {
                     users.find { it.id == loggedInUserId }?.let { user ->
                         scope.launch {
-                            removeUserFromTeam(user, team, chosenMember)
+                            try {
+                                removeUserFromTeam(user, team, chosenMember)
+                            } catch (e: Exception) {
+                                Log.e("Server Error", e.message.toString())
+                            }
+
                         }.invokeOnCompletion {
                             navController.popBackStack(
                                 route = "myTeams",

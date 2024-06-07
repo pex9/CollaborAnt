@@ -26,7 +26,7 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
     private fun getTeam(teamId: String) = model.getTeam(teamId)
     private suspend fun createTeam(team: Team) = model.createTeam(team)
     private suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) = model.updateTeam(teamId, team, deletePrevious)
-    private suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Map<String, KPI>) = model.updateUserKpi(userId, joinedTeams, kpiValues)
+    private suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Pair<String, KPI>) = model.updateUserKpi(userId, joinedTeams, kpiValues)
 
     suspend fun validate(): String {
         var id = ""
@@ -53,14 +53,11 @@ class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth
                                 )
                             )
 
-                            val updatedKpiValues = user.kpiValues.toMutableMap()
-                            updatedKpiValues[id] = KPI(
+                            updateUserKpi(user.id, user.joinedTeams + 1, id to KPI(
                                 assignedTasks = 0,
                                 completedTasks = 0,
                                 score = calculateScore(0, 0)
-                            )
-
-                            updateUserKpi(user.id, user.joinedTeams + 1, updatedKpiValues)
+                            ))
                         }
                     } else {
                         currentTeamId?.let {
