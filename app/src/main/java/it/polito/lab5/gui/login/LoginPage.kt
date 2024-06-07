@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,7 +39,7 @@ fun LoginPage(showLoading: Boolean, onSignInClick: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
-            //.padding(top= 60.dp,start=32.dp,end=32.dp,bottom=16.dp),
+            .verticalScroll(rememberScrollState())
     ) {
         val descriptionText = "Streamline tasks, track progress, " +
                 "and collaborate seamlessly with our intuitive team management app. \n" +
