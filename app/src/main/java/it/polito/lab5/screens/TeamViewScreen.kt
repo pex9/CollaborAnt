@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,23 +31,22 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.teamView.TeamViewPage
 import it.polito.lab5.gui.teamView.TeamViewTopBar
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import it.polito.lab5.viewModels.TeamViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun TeamViewScreen(
     vm: TeamViewModel, // ViewModel for team data
     navController: NavController, // NavController for navigation
 ) {
-
+    val scope = rememberCoroutineScope()
+    val loggedInUserId = vm.auth.getSignedInUserId()
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
-    //val user = vm.getUser(vm.userId).collectAsState(initial = null).value
-    //val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
-    val loggedInUserRole =  team?.members?.get(vm.auth.getSignedInUserId())
+    val loggedInUserRole =  team?.members?.get(loggedInUserId)
     val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(key1 = vm.showInfoText) {
@@ -142,8 +142,14 @@ fun TeamViewScreen(
                                 }
                             },
                             onClick = {
-                                vm.setOptionsOpenedValue(false)
-                                navController.navigate("viewChat/${vm.teamId}/${null}")
+                                scope.launch {
+                                    if (team != null && loggedInUserId != null) {
+                                        vm.resetUnreadMessage(team, loggedInUserId)
+                                    }
+                                }.invokeOnCompletion {
+                                    vm.setOptionsOpenedValue(false)
+                                    navController.navigate("viewChat/${vm.teamId}/${null}")
+                                }
                             },
                             colors = MenuDefaults.itemColors(textColor = CollaborantColors.BorderGray)
                         )

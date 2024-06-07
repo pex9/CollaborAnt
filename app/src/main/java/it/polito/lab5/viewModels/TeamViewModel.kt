@@ -8,10 +8,12 @@ import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
+import it.polito.lab5.model.Team
 
 class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     fun getTeam(teamId: String) = model.getTeam(teamId)
     fun getUser(userId: String) = model.getUser(userId)
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 
 
     val teams = model.teams
