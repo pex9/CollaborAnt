@@ -11,6 +11,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
@@ -351,17 +352,18 @@ class MyModel(val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getTeamChat(teamId: String): Flow<List<Message>> = callbackFlow {
-        val ref = db.collection("Teams").document(teamId).collection("chat")
+        val ref = db.collection("Teams").document(teamId).collection("chat").orderBy("date", Query.Direction.ASCENDING)
 
         val chatsSnapshotListener = ref.addSnapshotListener { chatSnapshot, err ->
             if (chatSnapshot != null) {
                 val chat = chatSnapshot.documents.map { messageDocument ->
                     val timestamp = messageDocument.get("date") as Timestamp
+                    val literalReceiver = messageDocument.get("receiverId").toString()
 
                     Message(
                         id = messageDocument.id,
                         senderId = messageDocument.get("senderId").toString(),
-                        receiverId = messageDocument.get("receiverId").toString(),
+                        receiverId = if(literalReceiver == "null") { null } else { literalReceiver },
                         content = messageDocument.get("content").toString(),
                         date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
                     )
@@ -425,7 +427,6 @@ class MyModel(val context: Context) {
     @Suppress("unchecked_cast")
     @RequiresApi(Build.VERSION_CODES.O)
     fun getUserTeams(userId: String): Flow<List<Team>> = callbackFlow {
-        var chatsSnapshotListener: ListenerRegistration? = null
         val documentReference = db.collection("Teams")
         val query = documentReference.whereArrayContains("members", userId)
 
@@ -445,29 +446,6 @@ class MyModel(val context: Context) {
                     val unreadMessage = (document.get("members") as List<String>)
                         .zip((document.get("unreadMessage") as List<Boolean>)).toMap()
 
-                    val chatTeam = emptyList<Message>().toMutableList()
-                    val chatReference = db.collection("Teams").document(document.id).collection("chat")
-
-                    chatsSnapshotListener = chatReference.addSnapshotListener { chatSnapshot, e ->
-                            if (chatSnapshot != null) {
-                                chatSnapshot.documents.map { messageDocument ->
-                                    val timestamp = messageDocument.get("date") as Timestamp
-
-                                    chatTeam.add(
-                                        Message(
-                                            id = messageDocument.id,
-                                            senderId = messageDocument.get("senderId").toString(),
-                                            receiverId = messageDocument.get("receiverId").toString(),
-                                            content = messageDocument.get("content").toString(),
-                                            date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
-                                        )
-                                    )
-                                }
-                            } else {
-                                if (e != null) { Log.e("Server Error", e.message.toString()) }
-                            }
-                        }
-
                     Team(
                         id = document.id,
                         name = document.get("name").toString(),
@@ -479,7 +457,7 @@ class MyModel(val context: Context) {
                         )
                         else Uploaded(image["url"]?.toUri() ?: "".toUri()),
                         members = members,
-                        chat = chatTeam,
+                        chat = emptyList(),
                         unreadMessage = unreadMessage
                     )
                 }
@@ -491,7 +469,7 @@ class MyModel(val context: Context) {
                 trySend(emptyList())
             }
         }
-        awaitClose { /*chatsSnapshotListener?.remove()*/ ; snapshotListener.remove() }
+        awaitClose { snapshotListener.remove() }
     }
 
     suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) {

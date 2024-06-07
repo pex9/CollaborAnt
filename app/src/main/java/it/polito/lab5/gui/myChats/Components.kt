@@ -37,7 +37,6 @@ fun ChatItem(
     navController: NavController
 ) {
     val scope = rememberCoroutineScope()
-    val teamChat = team.chat.sortedBy { it.date }
     val (first, last) = getMonogramText(team.name)
 
     ListItem(
@@ -56,6 +55,8 @@ fun ChatItem(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start,
             ) {
+                val lastMessage = team.chat.lastOrNull()?.content
+
                 Text(
                     text = team.name,
                     fontFamily = interFamily,
@@ -65,9 +66,9 @@ fun ChatItem(
                     maxLines = 1
                 )
 
-                if(teamChat.isNotEmpty()) {
+                if (lastMessage != null) {
                     Text(
-                        text = teamChat.last().content,
+                        text = lastMessage,
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 12.sp,
@@ -84,18 +85,16 @@ fun ChatItem(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Top,
             ) {
-                if(teamChat.isNotEmpty()) {
-                    val formattedDate = dateFormatter(teamChat.last().date)
+                val formattedDate = dateFormatter(team.chat.lastOrNull()?.date)
 
-                    Text(
-                        text = formattedDate,
-                        fontFamily = interFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.sp,
-                        maxLines = 1,
-                    )
-                }
+                Text(
+                    text = formattedDate ?: "",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 10.sp,
+                    letterSpacing = 0.sp,
+                    maxLines = 1,
+                )
 
                 Box(modifier = Modifier.padding(top = 14.dp)) {
                     val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false

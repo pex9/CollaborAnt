@@ -7,7 +7,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
-fun dateFormatter(messageLocalDateTime: LocalDateTime): String {
+fun dateFormatter(messageLocalDateTime: LocalDateTime?): String? {
+    if (messageLocalDateTime == null) { return null }
     val currentDate = LocalDate.now()
     val messageLocalDate = messageLocalDateTime.toLocalDate()
 
