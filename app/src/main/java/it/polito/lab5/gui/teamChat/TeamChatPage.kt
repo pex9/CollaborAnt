@@ -107,12 +107,11 @@ fun TeamChatPage (team: Team, users: List<User>, loggedInUserId: String) {
         modifier = Modifier
             .verticalScroll(rememberScrollState(), reverseScrolling = true)
     ) {
-        val sortedTeamChat = team.chat.sortedBy { it.date }
 
         if(team.chat.isNotEmpty()) {
-            var previousDate = sortedTeamChat.first().date.minusDays(1).toLocalDate()
+            var previousDate = team.chat.first().date.minusDays(1).toLocalDate()
 
-            sortedTeamChat.forEach { message ->
+            team.chat.forEach { message ->
                 if(message.receiverId == loggedInUserId || message.senderId == loggedInUserId || message.receiverId == null) {
                     if(message.date.toLocalDate() != previousDate) {
                         DateCanvas(date = message.date.toLocalDate())
