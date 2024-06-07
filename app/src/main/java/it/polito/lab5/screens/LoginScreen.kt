@@ -40,6 +40,7 @@ fun LoginScreen(vm : LogInViewModel, navController: NavController) {
     LaunchedEffect(key1 = state) {
         if (state.isSignInSuccessful) {
             Toast.makeText(context, "Login successful", Toast.LENGTH_LONG).show()
+            navController.popBackStack()
             navController.navigate("myTeams?teamId={teamId}")
             vm.resetState()
         } else if(state.signInError != null) {

@@ -1,5 +1,7 @@
 package it.polito.lab5.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Badge
@@ -12,9 +14,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,18 +26,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import it.polito.lab5.model.MyApplication
 //import it.polito.lab4.R
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBarComp(navController: NavController, isReadState: List<Pair<String, Boolean>>) {
+fun BottomNavigationBarComp(navController: NavController) {
     // Get the current back stack entry
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val myChatsNotificationsCount = isReadState.count{ it.second }
+    val context = LocalContext.current
+    val auth = (context.applicationContext as MyApplication).auth
+    val model = (context.applicationContext as MyApplication).model
+    val loggedInUserId = auth.getSignedInUserId()
+    val teams = loggedInUserId?.let {
+        model.getUserTeams(it).collectAsState(initial = emptyList()).value
+    }
+    val isReadState = teams?.let { team ->
+        team.map {
+            it.id to (it.unreadMessage[loggedInUserId] ?: false)
+        }
+    }
+    val myChatsNotificationsCount = isReadState?.count{ it.second } ?: 0
 
     // Bottom navigation bar
     NavigationBar(

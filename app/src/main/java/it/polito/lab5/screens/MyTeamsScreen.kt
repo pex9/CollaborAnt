@@ -26,8 +26,7 @@ fun MyTeamsScreen (
     vm: MyTeamsViewModel,
     showDialog: Boolean,
     setShowDialogValue: (Boolean) -> Unit,
-    navController: NavController,
-    isReadState: MutableList<Pair<String, Boolean>>,
+    navController: NavController
 ) {
     val loggedInUserId = vm.auth.getSignedInUserId()
     val loggedInUser = loggedInUserId?.let { vm.getUser(it).collectAsState(initial = null).value }
@@ -35,7 +34,7 @@ fun MyTeamsScreen (
     val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }
 
     Scaffold(
-        bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
+        bottomBar = {  BottomNavigationBarComp(navController) },
         topBar = { MyTeamsTopBar() },
         floatingActionButton = {
             // Floating action button for adding a new team

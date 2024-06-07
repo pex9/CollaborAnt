@@ -9,7 +9,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -101,8 +100,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
                 vm = myTeamsViewModel,
                 showDialog = vm.showDialog,
                 setShowDialogValue = vm::setShowDialogValue,
-                navController = navController,
-                isReadState = vm.chatsReadState,
+                navController = navController
             )
         }
 
@@ -206,8 +204,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
             )
             MyTasksScreen(
                 vm = myTaskViewModel,
-                navController = navController,
-                isReadState = vm.chatsReadState
+                navController = navController
             )
         }
 
@@ -323,7 +320,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
         }
 
         // My chats screen
-        composable(route = "myChats",) {
+        composable(route = "myChats") {
             val myChatViewModel: MyChatsViewModel = viewModel(
                 factory = AppFactory(context = context)
             )
@@ -406,8 +403,7 @@ fun AppNavigation(vm: AppViewModel, startDestination: String) {
 
             MyProfileScreen(
                 vm = myProfileViewModel,
-                navController = navController,
-                isReadState = vm.chatsReadState
+                navController = navController
             )
         }
 

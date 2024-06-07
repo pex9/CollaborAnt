@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -20,10 +22,11 @@ import it.polito.lab5.model.TaskState
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyTasksViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadState: MutableList<Pair<String, Boolean>>,) {
+fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
     Scaffold(
-        bottomBar = { BottomNavigationBarComp(navController, isReadState) },
+        bottomBar = { BottomNavigationBarComp(navController) },
         topBar = { MyTasksTopBar() },
         floatingActionButton = {
             if(vm.isVisible) {

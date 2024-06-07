@@ -1,6 +1,5 @@
 package it.polito.lab5.gui.teamInfo
 
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -56,7 +55,6 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @Composable
@@ -281,7 +279,7 @@ fun MemberRow(
                     )
                 }
 
-                if (loggedInUserRole == Role.TEAM_MANAGER) {
+                if (loggedInUserRole == Role.TEAM_MANAGER && role != Role.TEAM_MANAGER) {
                     RoleOptionsComp(
                         memberId = memberId,
                         role = role,

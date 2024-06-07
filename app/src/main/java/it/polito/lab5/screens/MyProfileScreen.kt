@@ -19,15 +19,14 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.S)
 fun MyProfileScreen (
     vm: MyProfileViewModel,
-    navController: NavController,
-    isReadState: MutableList<Pair<String, Boolean>>,
+    navController: NavController
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val user = vm.auth.getSignedInUserId()?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value
 
     Scaffold(
-        bottomBar = { BottomNavigationBarComp(navController, isReadState) },
+        bottomBar = { BottomNavigationBarComp(navController) },
         topBar = {
             MyProfileTopBar(
                 onSignOut = {
