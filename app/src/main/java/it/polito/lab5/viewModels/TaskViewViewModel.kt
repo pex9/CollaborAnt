@@ -6,13 +6,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.TaskState
 
-class TaskViewViewModel(val taskId: String, val model: MyModel): ViewModel() {
+class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleAuthentication): ViewModel() {
     val teams = model.teams
     val users = model.users
     val tasks = model.tasks
+
+    val loggedInUserId = auth.getSignedInUserId()
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+    fun getUser(userId: String) = model.getUser(userId)
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
     fun deleteTask(taskId: String) = model.deleteTask(taskId)
 

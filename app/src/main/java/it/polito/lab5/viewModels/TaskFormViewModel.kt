@@ -38,8 +38,9 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         checkDescription()
         checkDueDate()
         checkDelegateMembers()
+        checkendRepeatDate()
 
-        if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank()) {
+        if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank() && endRepeatDateError.isBlank()) {
             if (currentTask == null) {
                 val categories: MutableMap<String, String> = mutableMapOf()
                 val history = mutableListOf(
@@ -84,6 +85,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                             categories = categories,
                             attachments = emptyList(),
                             history = history,
+                            parentId=parentId,
+                            endDateRepeat = endRepeatDate
                         )
                     )
                 }
@@ -193,6 +196,23 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
             else ""
     }
 
+    var endRepeatDate: LocalDate? by mutableStateOf(currentTask?.endDateRepeat)
+        private set
+    var endRepeatDateError by mutableStateOf("")
+    fun setEndRepeatDateValue(d: LocalDate?) {
+        endRepeatDate = d
+    }
+    private fun checkendRepeatDate() {
+        if(repeat != Repeat.NEVER && endRepeatDate == null){
+            endRepeatDateError = "End repeat date must be set"
+        }
+    }
+
+    var parentId: String? by mutableStateOf(currentTask?.parentId)
+        private set
+    fun setparentIdValue(d: String?) {
+        parentId = d
+    }
     var delegatedMembers: MutableList<String> = mutableStateListOf<String>().apply {
         currentTask?.teamMembers?.let { addAll(it) }
     }
@@ -218,7 +238,20 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         private set
     fun setRepeatValue(r: Repeat) {
         repeat = r
+        if(r != Repeat.NEVER){
+            setShowEndRepeatFieldValue(true)
+        }
+        else{
+            setEndRepeatDateValue(null)
+            setShowEndRepeatFieldValue(false)
+        }
     }
+    var showEndRepeatField by mutableStateOf(false)
+        private set
+    fun setShowEndRepeatFieldValue(b: Boolean) {
+        showEndRepeatField = b
+    }
+
 
     fun resetErrorMsg(all: Boolean = false) {
         if(all) {
@@ -227,6 +260,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         } else {
             dueDateError = ""
             delegatedMembersError = ""
+            endRepeatDateError = ""
         }
     }
 
@@ -240,6 +274,12 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         private set
     fun setShowDueDateDialogValue(b: Boolean) {
         showDueDateDialog = b
+    }
+
+    var showEndRepeatDateDialog by mutableStateOf(false)
+        private set
+    fun setShowEndRepeatDateDialogValue(b: Boolean) {
+        showEndRepeatDateDialog = b
     }
 
     var showRepeatMenu by mutableStateOf(false)

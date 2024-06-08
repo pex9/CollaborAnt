@@ -434,6 +434,70 @@ fun DueDateComp(
         }
     }
 }
+@Composable
+fun EndRepeatDateComp(
+    date: LocalDate?, // The due date
+    isEdit: Boolean = false, // Flag indicating if the component is in edit mode
+    updateVisible: (() -> Unit)? = null // Function to update visibility (optional)
+) {
+    // Row containing the due date component
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(enabled = isEdit, onClick = { updateVisible?.let { updateVisible() } }) // Enable click handling if in edit mode
+    ) {
+        // Column for the calendar icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(start = 8.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.calendar), // Calendar icon
+                contentDescription = "Calendar Icon",
+                tint = CollaborantColors.DarkBlue
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "End date:",
+                fontFamily = interFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 19.sp,
+            )
+        }
+
+        // Column for displaying the date text
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(end = 12.dp)
+        ) {
+            // Format the date text
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
+            val text = if (date != null) { date.format(formatter) }
+            else if (isEdit) { "Add end date" } // Display "Add due date" if in edit mode and no date is set
+            else { "No date" } // Display "No date" if no date is set
+
+            // Display the formatted date text
+            Text(
+                text = text,
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
 
 @Composable
 fun DelegatedMemberComp(

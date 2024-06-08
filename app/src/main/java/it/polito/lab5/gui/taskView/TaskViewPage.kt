@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.model.Attachment
+import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
@@ -212,6 +213,23 @@ fun TaskPage(
 
                 // Repeat component
                 RepeatComponent(repeat = task.repeat)
+                if(task.repeat!=Repeat.NEVER) {
+                    Divider(
+                        thickness = 1.dp,
+                        color = CollaborantColors.BorderGray.copy(0.4f),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        // end date component
+                        EndRepeatDateComp(date = task.endDateRepeat)
+                    }
+                }
             }
         }
 

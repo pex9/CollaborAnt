@@ -13,17 +13,17 @@ import it.polito.lab5.gui.taskView.CommentTextField
 import it.polito.lab5.gui.taskView.MembersBottomSheet
 import it.polito.lab5.gui.taskView.TaskPage
 import it.polito.lab5.gui.taskView.TaskTopBar
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.viewModels.TaskViewViewModel
 
 @Composable
 fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
     val task = vm.tasks.collectAsState().value.find { it.id == vm.taskId }
-    val team = vm.teams.collectAsState().value.find { it.id == task?.teamId }
-    val users = vm.users.collectAsState().value
-    val isDelegatedMember = task?.teamMembers?.contains(DataBase.LOGGED_IN_USER_ID)
-    val loggedInUserRole = team?.members?.get(DataBase.LOGGED_IN_USER_ID)
+    val team= task?.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
+    val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
+
+    val isDelegatedMember = task?.teamMembers?.contains(vm.loggedInUserId)
+    val loggedInUserRole = team?.members?.get(vm.loggedInUserId)
 
     // Scaffold for layout structure
     Scaffold(
@@ -53,7 +53,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
             modifier = Modifier.padding(paddingValues)
         ) {
             task?.let { task ->
-                if (isDelegatedMember != null && loggedInUserRole != null) {
+                if (isDelegatedMember != null && loggedInUserRole != null && users != null) {
                     // TaskPage composable for displaying task details
                     TaskPage(
                         task = task,
@@ -79,7 +79,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                 }
 
                 // Bottom sheet for displaying task members
-                if (vm.showBottomSheet && team != null) {
+                if (vm.showBottomSheet && team != null && users != null) {
                         MembersBottomSheet(
                             team = team,
                             users = users,

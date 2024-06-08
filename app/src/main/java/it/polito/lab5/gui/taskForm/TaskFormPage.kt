@@ -1,6 +1,11 @@
 package it.polito.lab5.gui.taskForm
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -130,6 +135,11 @@ fun TaskFormPage(
     dueDate: LocalDate?,
     setDueDateValue: (LocalDate) -> Unit,
     dueDateError: String,
+    parentId: String?,
+    endRepeatDate : (LocalDate?),
+    setEndRepeatDateValue: (LocalDate) -> Unit,
+    endRepeatDateError: String,
+    showEndRepeatField: Boolean,
     delegatedMembers: List<String>,
     addMember: (String) -> Unit,
     removeMember: (String) -> Unit,
@@ -142,6 +152,8 @@ fun TaskFormPage(
     setShowRepeatMenuValue: (Boolean) -> Unit,
     showDueDateDialog: Boolean,
     setShowDueDateDialogValue: (Boolean) -> Unit,
+    showEndRepeatDateDialog: Boolean,
+    setShowEndRepeatDateDialogValue: (Boolean) -> Unit,
     showMemberBottomSheet: Boolean,
     setShowMemberBottomSheetValue: (Boolean) -> Unit,
     resetErrorMsg: () -> Unit,
@@ -252,8 +264,36 @@ fun TaskFormPage(
                     repeat = repeat,
                     setRepeat = setRepeatValue,
                     showRepeatMenu = showRepeatMenu,
-                    setShowRepeatMenuValue = setShowRepeatMenuValue
+                    setShowRepeatMenuValue = setShowRepeatMenuValue,
+
                 )
+                AnimatedVisibility(
+                    visible = showEndRepeatField,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                ) {
+
+                    Divider(
+                        thickness = 1.dp,
+                        color = CollaborantColors.BorderGray.copy(0.4f),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        // Due date component
+                        EndDatePickerComp(
+                            date = endRepeatDate,
+                            setDueDate = setEndRepeatDateValue,
+                            showDueDateDialog = showEndRepeatDateDialog,
+                            setShowDueDateDialogValue = setShowEndRepeatDateDialogValue
+                        )
+                    }
+                }
             }
         }
 
@@ -284,8 +324,8 @@ fun TaskFormPage(
         }
     }
 
-    if(dueDateError.isNotBlank() || delegatedMembersError.isNotBlank()) {
-        val message = dueDateError.ifBlank { delegatedMembersError }
+    if(dueDateError.isNotBlank() || delegatedMembersError.isNotBlank() || endRepeatDateError.isNotBlank()) {
+        val message = dueDateError.ifBlank { delegatedMembersError }.ifBlank { endRepeatDateError }
 
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         resetErrorMsg()

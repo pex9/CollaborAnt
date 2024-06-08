@@ -325,7 +325,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 2),
                     description = "Task delegated"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 1.toString(),
@@ -355,7 +357,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 3),
                     description = "Task delegated"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
 
         Task(
@@ -379,7 +383,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 3),
                     description = "Task created"
                 ),
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 3.toString(),
@@ -402,7 +408,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 4.toString(),
@@ -425,7 +433,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
 
         Task(
@@ -466,7 +476,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 8),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 6.toString(),
@@ -508,7 +520,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 8),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 7.toString(),
@@ -554,7 +568,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 14),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 8.toString(),
@@ -600,7 +616,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 14),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 9.toString(),
@@ -644,7 +662,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 21),
                     description = "Task completed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 10.toString(),
@@ -688,7 +708,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 23),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 11.toString(),
@@ -734,7 +756,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 23),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 12.toString(),
@@ -776,7 +800,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 8),
                     description = "Task status changed"
                 )
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 13.toString(),
@@ -802,7 +828,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-            )
+            ),
+            parentId=null,
+            endDateRepeat = null
         ),
         Task(
             id = 14.toString(),
@@ -828,7 +856,9 @@ object DataBase {
                     date = LocalDate.of(2024, 5, 6),
                     description = "Task created"
                 ),
-            )
-        ),
+            ),
+            parentId=null,
+            endDateRepeat = null
+        )
     )
 }

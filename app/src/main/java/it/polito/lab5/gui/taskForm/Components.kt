@@ -49,6 +49,7 @@ import it.polito.lab5.R
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.gui.taskView.DueDateComp
+import it.polito.lab5.gui.taskView.EndRepeatDateComp
 import it.polito.lab5.gui.taskView.MemberItem
 import it.polito.lab5.gui.taskView.RepeatComponent
 import it.polito.lab5.gui.taskView.TagComp
@@ -247,14 +248,104 @@ fun DatePickerComp(
         }
     }
 }
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun EndDatePickerComp(
+    date: LocalDate?, // Currently selected date
+    setDueDate: (LocalDate) -> Unit, // Callback to set the due date
+    showDueDateDialog: Boolean, // Indicates whether the date picker dialog is shown or not
+    setShowDueDateDialogValue: (Boolean) -> Unit // Callback to toggle the visibility of the date picker dialog
+) {
+    // Remember the state of the date picker
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
+    )
 
+    // Due date component with an arrow icon to toggle the date picker dialog
+    EndRepeatDateComp(
+        date = date,
+        isEdit = true,
+        updateVisible = { setShowDueDateDialogValue(!showDueDateDialog) })
+
+    // Date picker dialog
+    if (showDueDateDialog) {
+        DatePickerDialog(
+            onDismissRequest = {
+                datePickerState.setSelection(
+                    date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+                )
+                setShowDueDateDialogValue(false)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let {
+                            LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of("UTC"))
+                        }?.toLocalDate()?.let { setDueDate(it) }
+                        setShowDueDateDialogValue(false)
+                    }
+                ) {
+                    Text(
+                        text = "OK",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.setSelection(
+                            date?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()
+                        )
+                        setShowDueDateDialogValue(false)
+                    }
+                ) {
+                    Text(
+                        text = "Cancel",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 15.sp
+                    )
+                }
+            },
+            colors = DatePickerDefaults.colors(containerColor = Color.White),
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            // Date picker component
+            DatePicker(
+                state = datePickerState,
+                title = {
+                    Text(
+                        text = "Select end due date",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.offset(x = 25.dp, y = 16.dp)
+                    )
+                },
+                colors = DatePickerDefaults.colors(
+                    titleContentColor = CollaborantColors.DarkBlue,
+                    weekdayContentColor = CollaborantColors.DarkBlue
+                ),
+                dateValidator = {
+                    // Date validator to allow only future dates
+                    val selectedDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val currentDate = LocalDate.now()
+                    selectedDate >= currentDate
+                }
+            )
+        }
+    }
+}
 
 @Composable
 fun RepeatMenuComp(
     repeat: Repeat, // Selected repeat option
     setRepeat: (Repeat) -> Unit, // Callback to update the repeat option
     showRepeatMenu: Boolean, // Flag to indicate if the repeat menu is shown
-    setShowRepeatMenuValue: (Boolean) -> Unit // Callback to toggle the visibility of the repeat menu
+    setShowRepeatMenuValue: (Boolean) -> Unit, // Callback to toggle the visibility of the repeat menu
 ) {
     // Box to contain the repeat menu
     Box(contentAlignment = Alignment.BottomEnd) {

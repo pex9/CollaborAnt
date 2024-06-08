@@ -99,6 +99,8 @@ data class Task(
     val teamId: String,
     val dueDate: LocalDate?,
     val repeat: Repeat,
+    val parentId: String?,
+    val endDateRepeat: LocalDate?,
     val tag: Tag,
     val teamMembers: List<String>,
     val state: TaskState,

@@ -557,7 +557,6 @@ class MyModel(val context: Context) {
             }
         }
 
-        //  TODO: might be a better way to delete a sub collection
         val teamReference = db.collection("Teams").document(team.id)
         val r = teamReference.collection("chat").get().await()
         r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
@@ -964,7 +963,13 @@ class MyModel(val context: Context) {
     fun addTask(task: Task): String {
         val updatedTasks = _tasks.value.toMutableList()
         val id = updatedTasks.size
-        updatedTasks.add(task.copy(id = (id + 1).toString()))
+        if(task.repeat!=Repeat.NEVER){
+            updatedTasks.add(task.copy(id = (id + 1).toString(), parentId = (id + 1).toString()))
+        }
+        else{
+            updatedTasks.add(task.copy(id = (id + 1).toString(), parentId = null))
+        }
+
 
         _tasks.value = updatedTasks
         return (id + 1).toString()

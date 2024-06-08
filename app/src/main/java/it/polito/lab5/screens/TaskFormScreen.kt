@@ -26,11 +26,11 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            val team = vm.teamId?.let { vm.getTeam(teamId = it).collectAsState(initial = null).value }
-            val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
-                val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
-                user.copy(kpiValues = kpi.toMap())
-            }
+            val team = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
+            val users= team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+                    val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+                    user.copy(kpiValues = kpi.toMap())
+                }
 
             if (team != null && users !=null) {
                 TaskFormPage(
@@ -52,13 +52,20 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
                     removeMember = vm::removeMember,
                     delegatedMembersError = vm.delegatedMembersError,
                     repeat = vm.repeat,
+                    setEndRepeatDateValue = vm::setEndRepeatDateValue,
+                    endRepeatDateError = vm.endRepeatDateError,
+                    endRepeatDate = vm.endRepeatDate,
+                    parentId= vm.parentId,
                     setRepeatValue = vm::setRepeatValue,
                     showTagMenu = vm.showTagMenu,
                     setShowTagMenuValue = vm::setShowTagMenuValue,
                     showRepeatMenu = vm.showRepeatMenu,
                     setShowRepeatMenuValue = vm::setShowRepeatMenuValue,
                     showDueDateDialog = vm.showDueDateDialog,
+                    setShowEndRepeatDateDialogValue = vm::setShowEndRepeatDateDialogValue,
+                    showEndRepeatDateDialog = vm.showEndRepeatDateDialog,
                     setShowDueDateDialogValue = vm::setShowDueDateDialogValue,
+                    showEndRepeatField= vm.showEndRepeatField,
                     showMemberBottomSheet = vm.showMemberBottomSheet,
                     setShowMemberBottomSheetValue = vm::setShowMemberBottomSheetValue,
                     resetErrorMsg = vm::resetErrorMsg,
