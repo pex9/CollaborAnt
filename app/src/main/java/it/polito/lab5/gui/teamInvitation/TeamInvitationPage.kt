@@ -2,7 +2,10 @@ package it.polito.lab5.gui.teamInvitation
 
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,12 +35,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -47,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
@@ -57,15 +64,19 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TeamInvitationTopBar(navController: NavController) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
         title = {
             Text(
                 text = "Invite",
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground
             )
         },
         navigationIcon = {
@@ -74,7 +85,7 @@ fun TeamInvitationTopBar(navController: NavController) {
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent, // Transparent background
-                    contentColor = CollaborantColors.DarkBlue // Dark blue icon color
+                    contentColor = colors.onBackground // Dark blue icon color
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding // Standard padding
             ) {
@@ -88,7 +99,8 @@ fun TeamInvitationTopBar(navController: NavController) {
                     style = MaterialTheme.typography.titleLarge, // Text style
                     fontFamily = interFamily, // Custom font family
                     fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                    fontSize = 20.sp // Font size
+                    fontSize = 20.sp, // Font size
+                    color = colors.onBackground
                 )
             }
         }
@@ -102,13 +114,14 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
     val clipboardManager: ClipboardManager = LocalClipboardManager.current
     val url = "https://team.collaborant.com/${team.id}"
     val qrCodeBitmap = generateQRCode(url)
+    val colors = MaterialTheme.colorScheme
 
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .padding(paddingValues)
-            .padding(horizontal = 28.dp)
+            .padding(horizontal = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(28.dp))
@@ -119,11 +132,11 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
                 Toast.makeText(context, "Link copied", Toast.LENGTH_SHORT).show()
             },
             colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
+                containerColor = colors.surfaceColorAtElevation(10.dp),
+                contentColor = colors.onBackground
             ),
-            modifier = Modifier
-                    .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, colors.outline),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -173,22 +186,31 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
         Spacer(modifier = Modifier.height(40.dp))
 
         qrCodeBitmap?.let { bitmap ->
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = "QR Code",
-                modifier = Modifier.clip(RoundedCornerShape(16.dp))
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize() // Ensures the Box takes up the entire available space
+                    .border(BorderStroke(1.dp, colors.outline), RoundedCornerShape(10.dp))
+            ) {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = "QR Code",
+                    contentScale = ContentScale.Crop, // Ensures the image scales correctly
+                    modifier = Modifier
+                        .fillMaxSize() // Ensures the Image takes up the entire space of the Box
+                        .clip(RoundedCornerShape(10.dp))
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(40.dp))
 
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
+                containerColor = colors.surfaceColorAtElevation(10.dp),
+                contentColor = colors.onBackground
             ),
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            border = BorderStroke(1.dp, colors.outline),
         ) {
             ListItem(
                 headlineContent = {},
@@ -196,18 +218,19 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
                     Text(
                         text = "Share link",
                         fontWeight = FontWeight.Medium,
-                        fontSize = 15.sp,
-                        fontFamily = interFamily
+                        fontSize = 16.sp,
+                        fontFamily = interFamily,
+                        color = colors.onBackground
                     )
                 },
                 trailingContent = {
                     Icon(
                         painter = painterResource(id = R.drawable.upload),
                         contentDescription = "Share Icon",
-                        tint = CollaborantColors.DarkBlue
+                        tint = colors.onBackground
                     )
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.White),
+                colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                 modifier = Modifier.clickable {
                     val intent = Intent(Intent.ACTION_SEND)
                     intent.type = "text/plain"
@@ -218,7 +241,7 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
 
             Divider(
                 thickness = 1.dp,
-                color = CollaborantColors.BorderGray.copy(0.4f),
+                color = colors.outline.copy(0.4f),
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
@@ -228,18 +251,19 @@ fun TeamInvitationPage(team: Team, paddingValues: PaddingValues) {
                     Text(
                         text = "Copy link",
                         fontWeight = FontWeight.Medium,
-                        fontSize = 15.sp,
-                        fontFamily = interFamily
+                        fontSize = 16.sp,
+                        fontFamily = interFamily,
+                        color = colors.onBackground
                     )
                 },
                 trailingContent = {
                     Icon(
                         painter = painterResource(id = R.drawable.copy),
                         contentDescription = "Copy Icon",
-                        tint = CollaborantColors.DarkBlue
+                        tint = colors.onBackground
                     )
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.White),
+                colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                 modifier = Modifier.clickable {
                     clipboardManager.setText(AnnotatedString((url)))
                     Toast.makeText(context, "Link copied", Toast.LENGTH_SHORT).show()
