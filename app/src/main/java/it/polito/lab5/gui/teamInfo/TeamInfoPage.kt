@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.teamInfo
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -261,24 +262,31 @@ fun TeamInfoPage(
             text = "Are you sure to leave this team?",
             onConfirmText = "Leave",
             onConfirm = {
-                setShowLeaveDialogValue(false)
+                var leaveSuccess = false
 
-                /*  TODO: check this */
-
-//                scope.launch {
-//                    if(team.members.size > 1) {
-//                        users.find { it.id == loggedInUserId }?.let { user ->
-//                            removeUserFromTeam(user, team, chosenMember)
-//                        }
-//                    } else {
-//                        deleteTeam(team, users)
-//                    }
-//                }.invokeOnCompletion {
-//                    navController.popBackStack(
-//                        route = "myTeams",
-//                        inclusive = false
-//                    )
-//                }
+                scope.launch {
+                    if(team.members.size > 1) {
+                        try {
+                            users.find { it.id == loggedInUserId }?.let { user ->
+                                removeUserFromTeam(user, team, chosenMember)
+                                leaveSuccess = true
+                            }
+                        } catch (e: Exception) {
+                            Log.e("DeleteTeam", "Failed to delete team", e)
+                            leaveSuccess = false
+                        }
+                    } else {
+                        leaveSuccess = deleteTeam(team, users)
+                    }
+                }.invokeOnCompletion {
+                    if(leaveSuccess) {
+                        setShowLeaveDialogValue(false)
+                        navController.popBackStack(
+                            route = "myTeams",
+                            inclusive = false
+                        )
+                    }
+                }
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )
