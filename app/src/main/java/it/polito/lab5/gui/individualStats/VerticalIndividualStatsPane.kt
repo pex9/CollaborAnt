@@ -136,7 +136,7 @@ fun VerticalIndividualStatsPane(
             ) {
                 Card(
                     modifier = Modifier.fillMaxSize(),
-                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                    border = BorderStroke(width = 1.dp, color = colors.outline),
                     colors = CardDefaults.cardColors(
                         containerColor = colors.surfaceColorAtElevation(10.dp),
                         contentColor = colors.onBackground
@@ -215,7 +215,7 @@ fun VerticalIndividualStatsPane(
                         .weight(1f)
                         .fillMaxSize()
                         .padding(bottom = 3.dp),
-                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                    border = BorderStroke(width = 1.dp, color = colors.outline),
                     colors = CardDefaults.cardColors(
                         containerColor = colors.surfaceColorAtElevation(10.dp),
                         contentColor = colors.onBackground
@@ -257,7 +257,7 @@ fun VerticalIndividualStatsPane(
                         .weight(1f)
                         .fillMaxSize()
                         .padding(top = 3.dp),
-                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                    border = BorderStroke(width = 1.dp, color = colors.outline),
                     colors = CardDefaults.cardColors(
                         containerColor = colors.surfaceColorAtElevation(10.dp),
                         contentColor = colors.onBackground
@@ -313,7 +313,7 @@ fun VerticalIndividualStatsPane(
             Card(
                 modifier = Modifier
                     .fillMaxSize().padding(top = 10.dp),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                border = BorderStroke(width = 1.dp, color = colors.outline),
                 colors = CardDefaults.cardColors(
                     containerColor = colors.surfaceColorAtElevation(10.dp),
                     contentColor = colors.onBackground
@@ -403,11 +403,12 @@ fun HorizontalIndividualStatsPane(
     membersList: List<User>,
     teamId: Int,
 ) {
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .padding(top = p.calculateTopPadding())
             .fillMaxSize()
-            .background(Color.White)
+            .background(colors.background)
             .padding(start = 35.dp, end = 35.dp, top = 20.dp, bottom = 20.dp)
     ) {
         Column(
@@ -487,9 +488,10 @@ fun HorizontalIndividualStatsPane(
                 ) {
                     Card(
                         modifier = Modifier.fillMaxSize(),
-                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                        border = BorderStroke(width = 1.dp, color = colors.outline),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White,
+                            containerColor = colors.surfaceColorAtElevation(10.dp),
+                            contentColor = colors.onBackground
                         )
                     ) {
                         Column(
@@ -566,9 +568,10 @@ fun HorizontalIndividualStatsPane(
                             .weight(1f)
                             .fillMaxSize()
                             .padding(bottom = 3.dp),
-                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                        border = BorderStroke(width = 1.dp, color = colors.outline),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White,
+                            containerColor = colors.surfaceColorAtElevation(10.dp),
+                            contentColor = colors.onBackground
                         )
                     ) {
 
@@ -607,9 +610,10 @@ fun HorizontalIndividualStatsPane(
                             .weight(1f)
                             .fillMaxSize()
                             .padding(top = 3.dp),
-                        border = BorderStroke(width = 1.dp, color = Color.Gray),
+                        border = BorderStroke(width = 1.dp, color = colors.outline),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color.White,
+                            containerColor = colors.surfaceColorAtElevation(10.dp),
+                            contentColor = colors.onBackground
                         )
                     ) {
                         val literalCompletedTask =
@@ -666,9 +670,10 @@ fun HorizontalIndividualStatsPane(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 10.dp),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                border = BorderStroke(width = 1.dp, color = colors.outline),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
                 )
             ) {
                 Column(
@@ -738,7 +743,7 @@ fun HorizontalIndividualStatsPane(
                                 )
                             },
                             modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
-                            colors = ListItemDefaults.colors(containerColor = Color.White),
+                            colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                         )
                     }
                 }
