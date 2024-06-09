@@ -1,5 +1,7 @@
 package it.polito.lab5.gui.teamView
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,7 +33,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,9 +49,10 @@ import it.polito.lab5.ui.theme.interFamily
 import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
-import it.polito.lab5.model.DataBase.LOGGED_IN_USER_ID
 import it.polito.lab5.gui.teamForm.getMonogramText
+import it.polito.lab5.model.Task
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,18 +151,21 @@ fun TeamViewTopBar(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TeamViewPage(
     vm: TeamViewModel, // ViewModel for team data
+    tasks: List<Task>,
+    users: List<User>,
+    loggedInUserId: String,
     navController: NavController, // NavController for navigation
     p: PaddingValues, // Padding values for layout
     c: ColorScheme, // Color scheme for the UI
     filterState: Boolean, // State for showing/hiding filter sheet
     hideFilter: () -> Unit // Function to hide the filter sheet
 ) {
-    val tasks = vm.tasks.collectAsState().value.filter { it.teamId == vm.teamId }
-    val users = vm.users.collectAsState().value
+
     // State to remember the scroll position
     val scrollState = rememberLazyListState()
     // Snap behavior for flinging
@@ -210,7 +215,7 @@ fun TeamViewPage(
 
                 // Apply "My Tasks" filter if set
                 if (vm.myTasksFilter.value) {
-                    filteredTasks = filteredTasks.filter { it.teamMembers.contains(LOGGED_IN_USER_ID) }
+                    filteredTasks = filteredTasks.filter { it.teamMembers.contains(loggedInUserId) }
                 }
 
                 // Sort tasks by priority

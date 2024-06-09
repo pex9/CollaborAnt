@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,6 +13,7 @@ import it.polito.lab5.gui.taskForm.TaskFormPage
 import it.polito.lab5.gui.taskForm.TaskFormTopBar
 import it.polito.lab5.viewModels.TaskFormViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
     Scaffold(
@@ -27,10 +30,10 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
             modifier = Modifier.padding(paddingValues)
         ) {
             val team = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
-            val users= team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
-                    val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
-                    user.copy(kpiValues = kpi.toMap())
-                }
+            val users = team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+                val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+                user.copy(kpiValues = kpi.toMap())
+            }
 
             if (team != null && users !=null) {
                 TaskFormPage(
@@ -55,7 +58,6 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
                     setEndRepeatDateValue = vm::setEndRepeatDateValue,
                     endRepeatDateError = vm.endRepeatDateError,
                     endRepeatDate = vm.endRepeatDate,
-                    parentId= vm.parentId,
                     setRepeatValue = vm::setRepeatValue,
                     showTagMenu = vm.showTagMenu,
                     setShowTagMenuValue = vm::setShowTagMenuValue,

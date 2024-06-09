@@ -5,10 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.Timestamp
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.Date
 
 sealed class ImageProfile
 data class Taken(val image: Bitmap): ImageProfile()
@@ -39,7 +42,7 @@ enum class Repeat {
 }
 
 data class Comment(
-    val id: String,
+val id: String,
     val content: String,
     val authorId: String,
     val date: LocalDateTime
@@ -153,5 +156,51 @@ fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
     } catch (e: Exception) {
         e.printStackTrace()
         null
+    }
+}
+
+fun localDateToTimestamp(localDate: LocalDate?, zoneId: ZoneId): Timestamp? {
+    if(localDate != null) {
+        // Step 1: Combine LocalDate with time to create LocalDateTime at start of day
+        val localDateTime = localDate.atStartOfDay()
+
+        // Step 2: Specify a time zone to create a ZonedDateTime
+        val zonedDateTime = localDateTime.atZone(zoneId)
+
+        // Step 3: Convert ZonedDateTime to Instant
+        val instant = zonedDateTime.toInstant()
+
+        // Step 4: Convert Instant to Timestamp
+        return Timestamp(Date(instant.toEpochMilli()))
+    }
+    return null
+}
+
+fun getTaskState(state: String?): TaskState {
+    return when(state) {
+        "NOT_ASSIGNED" -> TaskState.NOT_ASSIGNED
+        "PENDING" -> TaskState.PENDING
+        "IN_PROGRESS" -> TaskState.IN_PROGRESS
+        "ON_HOLD" -> TaskState.ON_HOLD
+        "COMPLETED" -> TaskState.COMPLETED
+        else -> TaskState.OVERDUE
+    }
+}
+
+fun getTag(tag: String?): Tag {
+    return when(tag) {
+        "UNDEFINED" -> Tag.UNDEFINED
+        "LOW" -> Tag.LOW
+        "MEDIUM" -> Tag.MEDIUM
+        else -> Tag.HIGH
+    }
+}
+
+fun getRepeat(repeat: String?): Repeat {
+    return when(repeat) {
+        "NEVER" -> Repeat.NEVER
+        "DAILY" -> Repeat.DAILY
+        "WEEKLY" -> Repeat.WEEKLY
+        else -> Repeat.MONTHLY
     }
 }

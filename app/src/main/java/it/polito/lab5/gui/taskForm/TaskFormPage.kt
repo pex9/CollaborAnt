@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +51,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -57,9 +59,11 @@ import java.time.LocalDate
 fun TaskFormTopBar(
     taskId: String?,
     navController: NavController,
-    validate: () -> String,
+    validate: suspend () -> String,
     resetErrorMsg: (Boolean) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.White,
@@ -98,11 +102,17 @@ fun TaskFormTopBar(
         actions = {
             TextButton(
                 onClick = {
-                    val id = validate()
-                    if(id.isNotBlank()) {
-                        navController.popBackStack()
-                        navController.navigate("viewTask/${id}")
-                    } },
+                    var id = ""
+
+                    scope.launch {
+                        id = validate()
+                    }.invokeOnCompletion {
+                        if(id.isNotBlank()) {
+                            navController.popBackStack()
+                            navController.navigate("viewTask/${id}")
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
                     contentColor = CollaborantColors.DarkBlue
@@ -135,7 +145,6 @@ fun TaskFormPage(
     dueDate: LocalDate?,
     setDueDateValue: (LocalDate) -> Unit,
     dueDateError: String,
-    parentId: String?,
     endRepeatDate : (LocalDate?),
     setEndRepeatDateValue: (LocalDate) -> Unit,
     endRepeatDateError: String,

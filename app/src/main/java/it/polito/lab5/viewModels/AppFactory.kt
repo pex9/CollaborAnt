@@ -1,6 +1,8 @@
 package it.polito.lab5.viewModels
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import it.polito.lab5.model.GoogleAuthentication
@@ -14,6 +16,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
     val auth: GoogleAuthentication = (context.applicationContext as? MyApplication)?.auth ?:
     throw java.lang.IllegalArgumentException("Bad application class")
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Suppress("unchecked_cast")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -30,10 +33,10 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 TeamFormViewModel(teamId, model, auth)  as T
             }
             modelClass.isAssignableFrom(TaskViewViewModel::class.java) -> {
-                taskId?.let { TaskViewViewModel(taskId, model,auth) } as T
+                taskId?.let { TaskViewViewModel(taskId, model, auth) } as T
             }
             modelClass.isAssignableFrom(TaskFormViewModel::class.java) -> {
-                TaskFormViewModel(teamId, taskId, model) as T
+                TaskFormViewModel(teamId, taskId, model, auth) as T
             }
             modelClass.isAssignableFrom(TaskHistoryViewModel::class.java) -> {
                 taskId?.let { TaskHistoryViewModel(it, model) } as T

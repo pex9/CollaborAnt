@@ -1,6 +1,7 @@
 package it.polito.lab5.model
 
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.Date
 
@@ -31,7 +33,6 @@ class MyModel(val context: Context) {
 
     private val db = Firebase.firestore
     private val storage = FirebaseStorage.getInstance()
-
 
     private suspend fun uploadImage(
         imageId: String,
@@ -549,9 +550,8 @@ class MyModel(val context: Context) {
             deleteImage(team.id)
         }
 
-        //  TODO: probably useless filter
         //  Update kpi values for all team members
-        members.filter { team.members.containsKey(it.id) }.forEach { member ->
+        members.forEach { member ->
             member.kpiValues[team.id]?.let { kpi ->
                 updateUserKpi(member.id, member.joinedTeams - 1, team.id to kpi, true)
             }
@@ -652,228 +652,285 @@ class MyModel(val context: Context) {
         )
     }
 
-    // TASKS
+    // Tasks
+    suspend fun createTask(task: Task): String {
+        val documentReference = db.collection("Tasks")
 
-//    suspend fun createTask(task: Task, userId: String): String {
-//        val documentReference = db.collection("Tasks")
-//
-//
-//        //  Create the new task document
-//        val result = documentReference.add(
-//            hashMapOf(
-//                "title" to task.title,
-//                "description" to task.description,
-//                "teamId" to task.teamId,
-//                "dueDate" to task.dueDate?.toString(),
-//                "repeat" to task.repeat,
-//                "tag" to task.tag,
-//                "teamMembers" to task.teamMembers,
-//                "state" to task.state
-//            )
-//        ).await()
-//        //comments -> empty map  attachments -> empty map
-//        //history
-//        documentReference.document(result.id).collection("history").add(
-//            hashMapOf(
-//                "memberId" to userId,
-//                "taskState" to TaskState.NOT_ASSIGNED,
-//                "date" to Timestamp.now(),
-//                "description" to "Task created"
-//            )
-//        )
-//        if (task.teamMembers.size > 0) {
-//            documentReference.document(result.id).collection("history").add(
-//                hashMapOf(
-//                    "memberId" to userId,
-//                    "taskState" to task.state,
-//                    "date" to Timestamp.now(),
-//                    "description" to "Task created"
-//                )
-//            )
-//        }
-//        //categories
-//        for (memberId in task.teamMembers) {
-//            documentReference.document(result.id).collection("categories").document(memberId)
-//                .set("Recently Assigned")
-//        }
-//        return result.id
+        //  Create the new task document
+        val result = documentReference.add(
+            hashMapOf(
+                "title" to task.title,
+                "description" to task.description,
+                "parentId" to task.parentId,
+                "teamId" to task.teamId,
+                "dueDate" to localDateToTimestamp(task.dueDate, ZoneId.systemDefault()),
+                "repeat" to task.repeat,
+                "tag" to task.tag,
+                "teamMembers" to task.teamMembers,
+                "state" to task.state,
+                "categories" to task.categories.values.toList(),
+                "endDateRepeat" to localDateToTimestamp(task.endDateRepeat, ZoneId.systemDefault())
+            )
+        ).await()
+
+        //history
+        val historyReference = documentReference.document(result.id).collection("history")
+
+        task.history.forEach { action ->
+            historyReference.add(
+                hashMapOf(
+                    "memberId" to action.memberId,
+                    "taskState" to action.taskState,
+                    "date" to localDateToTimestamp(action.date, ZoneId.systemDefault()),
+                    "description" to action.description
+                )
+            )
+        }
+
+        return result.id
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getTaskComments(taskId: String): Flow<List<Comment>> = callbackFlow {
+        val documentReference = db.collection("Tasks").document(taskId).collection("comments")
+
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if (snapshot != null) {
+                val comments = snapshot.documents.map { document ->
+                    val timestamp = document.get("date") as Timestamp
+
+                    Comment(
+                        id = document.id,
+                        content = document.getString("content") ?: "",
+                        authorId = document.getString("authorId") ?: "",
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
+                    )
+                }
+                trySend(comments)
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+
+    fun getAttachments(taskId: String): Flow<List<Attachment>> = callbackFlow {
+        val documentReference = db.collection("Tasks").document(taskId).collection("attachments")
+
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if (snapshot != null) {
+                val attachments = snapshot.documents.map { document ->
+                    val attachmentUrl = document.getString("url")
+
+                    Attachment(
+                        id = document.id,
+                        name = document.getString("name") ?: "",
+                        type = document.getString("type") ?: "",
+                        uri = attachmentUrl?.toUri() ?: Uri.EMPTY,
+                        size = document.get("size") as Float
+                    )
+                }
+
+                trySend(attachments)
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getHistory(taskId: String): Flow<List<Action>> = callbackFlow {
+        val documentReference = db.collection("Tasks").document(taskId).collection("history")
+
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if (snapshot != null) {
+                val history = snapshot.documents.map { document ->
+                    val timestamp = document.get("date") as Timestamp
+                    val state = getTaskState(document.getString("taskState"))
+
+                    Action(
+                        id = document.id,
+                        memberId = document.getString("memberId") ?: "",
+                        taskState = state,
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC).toLocalDate(),
+                        description = document.getString("description") ?: ""
+                    )
+                }
+                trySend(history)
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    fun getTask(taskId: String): Flow<Task?> = callbackFlow {
+        val documentReference = db.collection("Tasks").document(taskId)
+
+        val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
+            if (snapshot != null && snapshot.exists()) {
+                val dueDateTimestamp = snapshot.get("dueDate")?.let { it as Timestamp }
+                val endDateRepeatTimestamp = snapshot.get("endDateRepeat")?.let { it as Timestamp }
+                val literalParentId = snapshot.get("parentId").toString()
+                val delegatedMembers = snapshot.get("teamMembers") as List<String>
+                val categories = delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
+
+                trySend(
+                    Task(
+                        id = taskId,
+                        title = snapshot.getString("title") ?: "",
+                        description = snapshot.getString("description") ?: "",
+                        teamId = snapshot.getString("teamId") ?: "",
+                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        repeat = getRepeat(snapshot.getString("repeat")),
+                        parentId = if(literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        tag = getTag(snapshot.getString("tag")),
+                        teamMembers = snapshot.get("teamMembers") as List<String>,
+                        state = getTaskState(snapshot.getString("state")),
+                        comments = emptyList(),
+                        categories = categories,
+                        attachments = emptyList(),
+                        history = emptyList(),
+                    )
+                )
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(null)
+            }
+        }
+        awaitClose { snapshotListener.remove() }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    fun getTasksTeam(teamId: String): Flow<List<Task>> = callbackFlow {
+        val tasksDocumentReference = db.collection("Tasks").whereEqualTo("teamId", teamId)
+
+        val tasksSnapshotListener = tasksDocumentReference.addSnapshotListener { tasksSnapshot, e ->
+            if (tasksSnapshot != null) {
+                val tasks = tasksSnapshot.documents.map { taskDocument ->
+                    val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
+                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val literalParentId = taskDocument.get("parentId").toString()
+                    val delegatedMembers = taskDocument.get("teamMembers") as List<String>
+                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+
+                    Task(
+                        id = taskDocument.id,
+                        title = taskDocument.getString("title") ?: "",
+                        description = taskDocument.getString("description") ?: "",
+                        teamId = taskDocument.getString("teamId") ?: "",
+                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        repeat = getRepeat(taskDocument.getString("repeat")),
+                        parentId = if(literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        tag = getTag(taskDocument.getString("tag")),
+                        teamMembers = taskDocument.get("teamMembers") as List<String>,
+                        state = getTaskState(taskDocument.getString("state")),
+                        comments = emptyList(),
+                        categories = categories,
+                        attachments = emptyList(),
+                        history = emptyList(),
+                    )
+                }
+                trySend(tasks)
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose { tasksSnapshotListener.remove() }
+    }
+
+    suspend fun updateTask(task: Task, userId: String) {
+        db.collection("Tasks").document(task.id).update(
+            hashMapOf(
+                "title" to task.title,
+                "description" to task.description,
+                "parentId" to task.parentId,
+                "teamId" to task.teamId,
+                "dueDate" to localDateToTimestamp(task.dueDate, ZoneId.systemDefault()),
+                "repeat" to task.repeat,
+                "tag" to task.tag,
+                "teamMembers" to task.teamMembers,
+                "state" to task.state,
+                "categories" to task.categories.values.toList(),
+                "endDateRepeat" to localDateToTimestamp(task.endDateRepeat, ZoneId.systemDefault())
+            )
+        ).await()
+    }
+
+
+//    //  Remove Team image if needed
+//    if (team.image is Uploaded) {
+//        deleteImage(team.id)
 //    }
-
-//    suspend fun getComments(taskId: String): MutableMap<String, Comment> {
-//        val comments = mutableMapOf<String, Comment>()
-//        val documentReference = db.collection("Tasks").document(taskId).collection("comments")
 //
-//        val snapshot = documentReference.get().await()
-//        for (document in snapshot.documents) {
-//            val comment = Comment(
-//                content = document.get("content").toString(),
-//                authorId = document.get("authorId").toString(),
-//                date = document.get("date").toString() as LocalDateTime
-//            )
-//            if (comment != null) {
-//                comments[document.id] = comment
-//            }
-//        }
-//        return comments
-//    }
-
-//    suspend fun getAttachments(taskId: String): MutableMap<String, Attachment> {
-//        val attachments = mutableMapOf<String, Attachment>()
-//        val documentReference = db.collection("Tasks").document(taskId).collection("attachments")
-//
-//        val snapshot = documentReference.get().await()
-//        for (document in snapshot.documents) {
-//            val attachment = Attachment(
-//                id = document.id,
-//                name = document.get("name").toString(),
-//                type = document.get("type").toString(),
-//                uri = document.get("url").toString().toUri(),
-//                size = document.get("size") as Float
-//            )
-//            if (attachment != null) {
-//                attachments[document.id] = attachment
-//            }
-//        }
-//        return attachments
-//    }
-
-//    suspend fun getHistory(taskId: String): Map<String, Action> {
-//        val history = mutableMapOf<String, Action>()
-//        val documentReference = db.collection("Tasks").document(taskId).collection("history")
-//
-//        val snapshot = documentReference.get().await()
-//        for (document in snapshot.documents) {
-//            val action = Action(
-//                id = document.id,
-//                memberId = document.get("memberId").toString(),
-//                taskState = document.get("taskState") as TaskState,
-//                date = document.get("date").toString() as LocalDate,
-//                description = document.get("description").toString()
-//            )
-//            if (action != null) {
-//                history[action.id] = action
-//            }
-//        }
-//        return history
-//    }
-
-//    suspend fun getTask(taskId: String): Task? {
-//        val documentReference = db.collection("Tasks").document(taskId)
-//
-//        val documentSnapshot = documentReference.get().await()
-//
-//        if (!documentSnapshot.exists()) {
-//            return null
-//        }
-//
-//        val task = documentSnapshot.toObject(Task::class.java)
-//
-//        if (task != null) {
-//            task.comments = getComments(taskId)
-//            task.attachments = getAttachments(taskId)
-//            task.history = getHistory(taskId)
-//        }
-//
-//        return task
-//    }
-
-//    suspend fun deleteTask2(taskId: String): Boolean {
-//        val documentReference = db.collection("Tasks").document(taskId)
-//
-//        return try {
-//            documentReference.delete().await()
-//            true
-//        } catch (e: Exception) {
-//            println("Error deleting task: $e")
-//            false
+//    //  Update kpi values for all team members
+//    members.forEach { member ->
+//        member.kpiValues[team.id]?.let { kpi ->
+//            updateUserKpi(member.id, member.joinedTeams - 1, team.id to kpi, true)
 //        }
 //    }
+//
+//    val teamReference = db.collection("Teams").document(team.id)
+//    val r = teamReference.collection("chat").get().await()
+//    r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
+//
+//    //  Delete Team document
+//    teamReference.delete().await()
 
-//    suspend fun updateTask(task: Task, userId: String): Boolean {
-//        val documentReference = db.collection("Tasks").document(task.id)
-//
-//        // Update the basic details of the task
-//        val taskData = hashMapOf(
-//            "title" to task.title,
-//            "description" to task.description,
-//            "teamId" to task.teamId,
-//            "dueDate" to task.dueDate?.toString(),
-//            "repeat" to task.repeat,
-//            "tag" to task.tag,
-//            "teamMembers" to task.teamMembers,
-//            "state" to task.state
-//        )
-//
-//        return try {
-//            documentReference.set(taskData).await()
-//
-//            // Update comments
-//            val commentsCollection = documentReference.collection("comments")
-//            // Delete existing comments
-//            commentsCollection.get().await().forEach { it.reference.delete().await() }
-//            // Add new comments
-//            for (comment in task.comments.values) {
-//                commentsCollection.add(
-//                    hashMapOf(
-//                        "content" to comment.content,
-//                        "authorId" to comment.authorId,
-//                        "date" to comment.date
-//                    )
-//                ).await()
-//            }
-//
-//            // Update attachments
-//            val attachmentsCollection = documentReference.collection("attachments")
-//            // Delete existing attachments
-//            attachmentsCollection.get().await().forEach { it.reference.delete().await() }
-//            // Add new attachments
-//            for (attachment in task.attachments.values) {
-//                attachmentsCollection.add(
-//                    hashMapOf(
-//                        "name" to attachment.name,
-//                        "type" to attachment.type,
-//                        "url" to attachment.uri.toString(),
-//                        "size" to attachment.size
-//                    )
-//                ).await()
-//            }
-//
-//            // Update history
-//            val historyCollection = documentReference.collection("history")
-//            // Delete existing history
-//            historyCollection.get().await().forEach { it.reference.delete().await() }
-//            // Add new history actions
-//            for (action in task.history.values) {
-//                historyCollection.add(
-//                    hashMapOf(
-//                        "memberId" to action.memberId,
-//                        "taskState" to action.taskState,
-//                        "date" to action.date,
-//                        "description" to action.description
-//                    )
-//                ).await()
-//            }
-//
-//            // Update categories
-//            val categoriesCollection = documentReference.collection("categories")
-//            // Delete existing categories
-//            categoriesCollection.get().await().forEach { it.reference.delete().await() }
-//            // Add new categories
-//            for ((key, value) in task.categories) {
-//                categoriesCollection.document(key).set(
-//                    hashMapOf(
-//                        "category" to value
-//                    )
-//                ).await()
-//            }
-//
-//            true
-//        } catch (e: Exception) {
-//            println("Error updating task: ${e.message}")
-//            false
-//        }
-//    }
+    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {
+        val taskReference = db.collection("Tasks").document(task.id)
+        val commentsReference = taskReference.collection("comments")
+        val attachmentsReference = taskReference.collection("attachments")
+        val historyReference = taskReference.collection("history")
 
+        //  Delete Task comments
+        commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
+
+        //  Delete Task attachments
+        attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
+
+        //  Delete Task history
+        historyReference.get().await().documents.forEach { historyReference.document(it.id).delete().await() }
+
+        //  Update kpi for delegated members
+        if (task.state != TaskState.COMPLETED) {
+            delegateMembers.forEach { member ->
+                member.kpiValues[task.teamId]?.let { kpi ->
+                    val updatedKpi = kpi.copy(
+                        assignedTasks = kpi.assignedTasks - 1,
+                        score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
+                    )
+
+                    updateUserKpi(member.id, member.joinedTeams, task.teamId to updatedKpi)
+                }
+            }
+        }
+
+
+
+        //  Delete Task
+        taskReference.delete().await()
+    }
 
     //  Users
     private val _users = MutableStateFlow(DataBase.users)
@@ -985,7 +1042,7 @@ class MyModel(val context: Context) {
         }
     }
 
-    fun deleteTask(taskId: String) {
+    fun deleteTask1(taskId: String) {
         val updatedTask = _tasks.value.toMutableList()
 
         //  If state of deleted task is different of Completed, we decrease the assignedTasks Kpi value for all delegated members

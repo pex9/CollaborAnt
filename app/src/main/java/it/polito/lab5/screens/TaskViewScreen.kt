@@ -1,6 +1,9 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,9 +19,10 @@ import it.polito.lab5.gui.taskView.TaskTopBar
 import it.polito.lab5.model.Role
 import it.polito.lab5.viewModels.TaskViewViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
-    val task = vm.tasks.collectAsState().value.find { it.id == vm.taskId }
+    val task = vm.getTask(vm.taskId).collectAsState(initial = null).value
     val team= task?.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
     val users = team?.members?.keys?.let { vm.getUsersTeam(it.toList()).collectAsState(initial = emptyList()).value }
 
@@ -50,7 +54,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
     ) { paddingValues ->
         // BoxWithConstraints for responsive layout
         BoxWithConstraints(
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.fillMaxSize().padding(paddingValues)
         ) {
             task?.let { task ->
                 if (isDelegatedMember != null && loggedInUserRole != null && users != null) {

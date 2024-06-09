@@ -1,5 +1,7 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,10 +12,17 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Team
 
+@RequiresApi(Build.VERSION_CODES.O)
 class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    fun getUser(userId: String) = model.getUser(userId)
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
+
+    fun getTasksTeam(teamId: String) = model.getTasksTeam(teamId)
+
+    fun getTaskComments(taskId: String) = model.getTaskComments(taskId)
 
     suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 

@@ -1,5 +1,7 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,11 +18,14 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
     val tasks = model.tasks
 
     val loggedInUserId = auth.getSignedInUserId()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getTask(taskId: String) = model.getTask(taskId)
     fun getTeam(teamId: String) = model.getTeam(teamId)
     fun getUser(userId: String) = model.getUser(userId)
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
-    fun deleteTask(taskId: String) = model.deleteTask(taskId)
+    fun deleteTask(taskId: String) = model.deleteTask1(taskId)
 
     fun setTaskState(taskId: String, state: TaskState) = model.setTaskState(taskId, state)
 

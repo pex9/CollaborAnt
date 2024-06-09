@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +40,7 @@ import it.polito.lab5.viewModels.TeamViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamViewScreen(
     vm: TeamViewModel, // ViewModel for team data
@@ -46,7 +49,12 @@ fun TeamViewScreen(
     val scope = rememberCoroutineScope()
     val loggedInUserId = vm.auth.getSignedInUserId()
     val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
     val loggedInUserRole =  team?.members?.get(loggedInUserId)
+    val tasks = vm.getTasksTeam(vm.teamId).collectAsState(initial = emptyList()).value.map {
+        val comments = vm.getTaskComments(it.id).collectAsState(initial = emptyList()).value
+        it.copy(comments = comments)
+    }
     val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(key1 = vm.showInfoText) {
@@ -189,13 +197,18 @@ fun TeamViewScreen(
         }
     ) { paddingValues ->
         // Content area
-        TeamViewPage(
-            vm = vm,
-            navController = navController,
-            p = paddingValues,
-            c = colors,
-            filterState = vm.filterState,
-            hideFilter = { vm.setFilterStateValue(false) } // Function to hide filter
-        )
+        if (users != null && loggedInUserId != null) {
+            TeamViewPage(
+                vm = vm,
+                loggedInUserId = loggedInUserId,
+                tasks = tasks,
+                users = users,
+                navController = navController,
+                p = paddingValues,
+                c = colors,
+                filterState = vm.filterState,
+                hideFilter = { vm.setFilterStateValue(false) } // Function to hide filter
+            )
+        }
     }
 }
