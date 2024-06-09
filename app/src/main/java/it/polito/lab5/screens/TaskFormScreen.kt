@@ -16,26 +16,29 @@ import it.polito.lab5.viewModels.TaskFormViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
+    val team = (vm.currentTask?.teamId ?: vm.teamId)?.let { vm.getTeam(it).collectAsState(initial = null).value }
+    val users = team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+        val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+        user.copy(kpiValues = kpi.toMap())
+    }
+
     Scaffold(
         topBar = {
-            TaskFormTopBar(
-                taskId = vm.currentTask?.id,
-                navController = navController,
-                validate = vm::validate,
-                resetErrorMsg = vm::resetErrorMsg
-            )
+            if (team != null && users != null) {
+                TaskFormTopBar(
+                    taskId = vm.currentTask?.id,
+                    navController = navController,
+                    validate = vm::validate,
+                    resetErrorMsg = vm::resetErrorMsg,
+                    showLoading = vm.showLoading
+                )
+            }
         }
     ) { paddingValues ->
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            val team = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
-            val users = team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
-                val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
-                user.copy(kpiValues = kpi.toMap())
-            }
-
-            if (team != null && users !=null) {
+            if (team != null && users != null) {
                 TaskFormPage(
                     team = team,
                     users = users,
@@ -67,7 +70,7 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
                     setShowEndRepeatDateDialogValue = vm::setShowEndRepeatDateDialogValue,
                     showEndRepeatDateDialog = vm.showEndRepeatDateDialog,
                     setShowDueDateDialogValue = vm::setShowDueDateDialogValue,
-                    showEndRepeatField= vm.showEndRepeatField,
+                    showEndRepeatField = vm.showEndRepeatField,
                     showMemberBottomSheet = vm.showMemberBottomSheet,
                     setShowMemberBottomSheetValue = vm::setShowMemberBottomSheetValue,
                     resetErrorMsg = vm::resetErrorMsg,

@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -60,7 +61,8 @@ fun TaskFormTopBar(
     taskId: String?,
     navController: NavController,
     validate: suspend () -> String,
-    resetErrorMsg: (Boolean) -> Unit
+    resetErrorMsg: (Boolean) -> Unit,
+    showLoading: Boolean
 ) {
     val scope = rememberCoroutineScope()
 
@@ -100,31 +102,40 @@ fun TaskFormTopBar(
             }
         },
         actions = {
-            TextButton(
-                onClick = {
-                    var id = ""
-
-                    scope.launch {
-                        id = validate()
-                    }.invokeOnCompletion {
-                        if(id.isNotBlank()) {
-                            navController.popBackStack()
-                            navController.navigate("viewTask/${id}")
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text = if (taskId == null) "Create" else "Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = CollaborantColors.DarkBlue,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            } else {
+                TextButton(
+                    onClick = {
+                        var id = ""
+
+                        scope.launch {
+                            id = validate()
+                        }.invokeOnCompletion {
+                            if(id.isNotBlank()) {
+                                navController.popBackStack()
+                                if(taskId == null) {
+                                    navController.navigate("viewTask/${id}")
+                                }
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = CollaborantColors.DarkBlue
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text = if (taskId == null) "Create" else "Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
     )
@@ -276,6 +287,7 @@ fun TaskFormPage(
                     setShowRepeatMenuValue = setShowRepeatMenuValue,
 
                 )
+
                 AnimatedVisibility(
                     visible = showEndRepeatField,
                     enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),

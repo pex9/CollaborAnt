@@ -1,6 +1,7 @@
 package it.polito.lab5.viewModels
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -10,8 +11,8 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.Action
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.GoogleAuthentication
+import it.polito.lab5.model.KPI
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
@@ -20,9 +21,11 @@ import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.model.calculateScore
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
@@ -37,9 +40,13 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
     fun getUserKpi(userId: String) = model.getUserKpi(userId)
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
-    private fun updateTask(taskId: String, task: Task) = model.updateTask(taskId, task)
+    private suspend fun createTask(task: Task) = model.createTask(task)
 
-    private fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) = model.updateKpi(userId, teamId, kpiCategory, value)
+    private suspend fun updateTask(task: Task) = model.updateTask(task)
+
+    private suspend fun addActionToHistory(taskId: String, action: Action) = model.addActionToTaskHistory(taskId, action)
+
+    private suspend fun updateUserKpi( userId: String, joinedTeams: Long, kpiValues: Pair<String, KPI>) = model.updateUserKpi(userId, joinedTeams, kpiValues)
 
     suspend fun validate(): String {
         var id = ""
@@ -51,119 +58,142 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         checkEndRepeatDate()
 
         if(titleError.isBlank() && descriptionError.isBlank() && dueDateError.isBlank() && delegatedMembersError.isBlank() && endRepeatDateError.isBlank()) {
-            if (currentTask == null) {
-                val categories: MutableMap<String, String> = mutableMapOf()
-                val history = mutableListOf(
-                    Action(
-                        id = 0.toString(),
-                        memberId = loggedInUser?.id ?: "",
-                        taskState = TaskState.NOT_ASSIGNED,
-                        date = LocalDate.now(),
-                        description = "Task created"
-                    )
-                )
+            try {
+                viewModelScope.async {
+                    showLoading = true
 
-                if(delegatedMembers.isNotEmpty()) {
-                    history.add(
-                        Action(
-                            id = "",
-                            memberId = loggedInUser?.id ?: "",
-                            taskState = TaskState.PENDING,
-                            date = LocalDate.now(),
-                            description = "Task assigned"
+                    if (currentTask == null) {
+                        val categories: MutableMap<String, String> = mutableMapOf()
+                        val history = mutableListOf(
+                            Action(
+                                id = "",
+                                memberId = loggedInUser?.id ?: "",
+                                taskState = TaskState.NOT_ASSIGNED,
+                                date = LocalDateTime.now(),
+                                description = "Task created"
+                            )
                         )
-                    )
 
-                    users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
-                        if(teamId != null) {
-                            val kpi = member.kpiValues[teamId]
-                            val updatedKpi = kpi?.copy(
-                                assignedTasks = kpi.assignedTasks + 1,
-                                score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                        if(delegatedMembers.isNotEmpty()) {
+                            history.add(
+                                Action(
+                                    id = "",
+                                    memberId = loggedInUser?.id ?: "",
+                                    taskState = TaskState.PENDING,
+                                    date = LocalDateTime.now(),
+                                    description = "Task assigned"
+                                )
                             )
 
-                            updatedKpi?.let { model.updateUserKpi(member.id, member.joinedTeams, teamId to it) }
+                            users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                                if(teamId != null) {
+                                    val kpi = member.kpiValues[teamId]
+                                    val updatedKpi = kpi?.copy(
+                                        assignedTasks = kpi.assignedTasks + 1,
+                                        score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                                    )
+
+                                    updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
+                                }
+                                categories[member.id] = "Recently assigned"
+                            }
                         }
-                        categories[member.id] = "Recently assigned"
-                    }
-                }
 
-                //  TODO: add case of repeat task
+                        //  TODO: add case of repeat task
 
-                teamId?.let {
-                    id = model.createTask(
-                        Task(
-                            id = "",
-                            title = title,
-                            description = description,
-                            teamId = teamId,
-                            dueDate = dueDate,
-                            repeat = repeat,
-                            tag = tag,
-                            teamMembers = delegatedMembers,
-                            state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
-                            comments = emptyList(),
-                            categories = categories,
-                            attachments = emptyList(),
-                            history = history,
-                            parentId = null,
-                            endDateRepeat = endRepeatDate
+                        teamId?.let {
+                            id = createTask(
+                                Task(
+                                    id = "",
+                                    title = title,
+                                    description = description,
+                                    teamId = teamId,
+                                    dueDate = dueDate,
+                                    repeat = repeat,
+                                    tag = tag,
+                                    teamMembers = delegatedMembers,
+                                    state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
+                                    comments = emptyList(),
+                                    categories = categories,
+                                    attachments = emptyList(),
+                                    history = history,
+                                    parentId = null,
+                                    endDateRepeat = endRepeatDate
+                                )
+                            )
+                        }
+
+                    } else {
+                        id = currentTask!!.id
+                        var taskState = currentTask!!.state
+                        val categories: MutableMap<String, String> = currentTask!!.categories.toMutableMap()
+
+                        if(currentTask!!.teamMembers.isEmpty() && delegatedMembers.isNotEmpty()) {
+                            addActionToHistory(currentTask!!.id,
+                                Action(
+                                    id = "",
+                                    memberId = loggedInUser?.id ?: "",
+                                    taskState = TaskState.PENDING,
+                                    date = LocalDateTime.now(),
+                                    description = "Task assigned"
+                                )
+                            )
+
+                            taskState = TaskState.PENDING
+                        }
+
+                        users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                            //  Add task to Recently assigned category for all new delegated members
+                            if(!currentTask!!.categories.containsKey(member.id)) { categories[member.id] = "Recently assigned" }
+
+                            //  Increase assignedTasks Kpi value for all new delegated members
+                            if(!currentTask!!.teamMembers.contains(member.id)) {
+                                val kpi = member.kpiValues[currentTask!!.teamId]
+                                val updatedKpi = kpi?.copy(
+                                    assignedTasks = kpi.assignedTasks + 1,
+                                    score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                                )
+
+                                updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                            }
+                        }
+
+
+                        //  Remove from categories all members no longer delegated for the task
+                        currentTask!!.categories.filterKeys { !delegatedMembers.contains(it) }.map { it.key }.forEach {
+                                memberId -> categories.remove(memberId)
+                        }
+
+                        //  Decrease assignedTasks Kpi value for all members no longer delegated for the task
+                        users?.filter { currentTask!!.teamMembers.contains(it.id) && !delegatedMembers.contains(it.id)}?.forEach { member ->
+                            val kpi = member.kpiValues[currentTask!!.teamId]
+                            val updatedKpi = kpi?.copy(
+                                assignedTasks = kpi.assignedTasks - 1,
+                                score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
+                            )
+
+                            updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                        }
+
+                        updateTask(
+                            currentTask!!.copy(
+                                title = title,
+                                description = description,
+                                repeat = repeat,
+                                tag = tag,
+                                teamMembers = delegatedMembers,
+                                dueDate = dueDate,
+                                state = taskState,
+                                categories = categories,
+                                endDateRepeat = endRepeatDate
+                            )
                         )
-                    )
-                }
-
-            } else {
-                id = currentTask!!.id
-                var taskState = currentTask!!.state
-                val categories: MutableMap<String, String> = currentTask!!.categories.toMutableMap()
-                val history: MutableList<Action> = currentTask!!.history.toMutableList()
-
-                if(currentTask!!.teamMembers.isEmpty() && delegatedMembers.isNotEmpty()) {
-                    history.add(
-                        Action(
-                            id = currentTask!!.history.size.toString(),
-                            memberId = DataBase.LOGGED_IN_USER_ID,
-                            taskState = TaskState.PENDING,
-                            date = LocalDate.now(),
-                            description = "Task assigned"
-                        )
-                    )
-
-                    taskState = TaskState.PENDING
-                }
-
-                delegatedMembers.forEach { memberId ->
-                    //  Add task to Recently assigned category for all new delegated members
-                    if(!currentTask!!.categories.containsKey(memberId)) { categories[memberId] = "Recently assigned" }
-
-                    //  Increase assignedTasks Kpi value for all new delegated members
-                    if(!currentTask!!.teamMembers.contains(memberId)) {
-                        updateKpi(memberId, currentTask!!.teamId, "assignedTasks")
                     }
-                }
-
-                //  Remove from categories all members no longer delegated for the task
-                currentTask!!.categories.filterKeys { !delegatedMembers.contains(it) }.map { it.key }.forEach {
-                    memberId -> categories.remove(memberId)
-                }
-
-                //  Decrease assignedTasks Kpi value for all members no longer delegated for the task
-                currentTask!!.teamMembers.filter { !delegatedMembers.contains(it) }.forEach{ memberId ->
-                    updateKpi(memberId, currentTask!!.teamId, "assignedTasks", -1)
-                }
-
-                updateTask(
-                    currentTask!!.id, currentTask!!.copy(
-                    title = title,
-                    description = description,
-                    repeat = repeat,
-                    tag = tag,
-                    teamMembers = delegatedMembers,
-                    dueDate = dueDate,
-                    state = taskState,
-                    history = history,
-                    categories = categories
-                ))
+                }.await()
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+                showLoading = false
+                return ""
             }
         }
         return id
@@ -254,19 +284,16 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
     fun setRepeatValue(r: Repeat) {
         repeat = r
         if(r != Repeat.NEVER){
-            setShowEndRepeatFieldValue(true)
+            showEndRepeatField = true
         }
         else{
             setEndRepeatDateValue(null)
-            setShowEndRepeatFieldValue(false)
+            showEndRepeatField = false
         }
     }
+
     var showEndRepeatField by mutableStateOf(false)
         private set
-    fun setShowEndRepeatFieldValue(b: Boolean) {
-        showEndRepeatField = b
-    }
-
 
     fun resetErrorMsg(all: Boolean = false) {
         if(all) {
@@ -335,6 +362,9 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         }
     }
 
+    var showLoading by mutableStateOf(false)
+        private set
+
     init {
         val userid = auth.getSignedInUserId()
 
@@ -353,6 +383,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
             endRepeatDate = currentTask?.endDateRepeat
             tag = currentTask?.tag ?: Tag.UNDEFINED
             currentTask?.let { delegatedMembers.addAll(it.teamMembers) }
+            showEndRepeatField = endRepeatDate != null
         }
     }
 }

@@ -879,7 +879,7 @@ fun AttachmentComponent(
 }
 
 @Composable
-fun CommentItem(comment: Comment, users: List<User>) {
+fun CommentItem(loggedInUserId: String, comment: Comment, users: List<User>) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -919,7 +919,8 @@ fun CommentItem(comment: Comment, users: List<User>) {
                 ) {
                     // Text for displaying the user's name
                     Text(
-                        text = user.first.plus(" ").plus(user.last),
+                        text = if(user.id == loggedInUserId) { "You" }
+                            else { user.first.plus(" ").plus(user.last) },
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp
@@ -950,7 +951,7 @@ fun CommentItem(comment: Comment, users: List<User>) {
 }
 
 @Composable
-fun CommentsComp(comments: List<Comment>, users: List<User>) {
+fun CommentsComp(loggedInUserId: String, comments: List<Comment>, users: List<User>) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -982,7 +983,7 @@ fun CommentsComp(comments: List<Comment>, users: List<User>) {
             // Looping through comments and displaying each comment item
             comments.sortedBy { it.date }.forEachIndexed { idx, comment ->
                 // Displaying the comment item
-                CommentItem(comment = comment, users = users)
+                CommentItem(loggedInUserId = loggedInUserId, comment = comment, users = users)
 
                 // Adding a divider between comment items
                 if (idx < comments.size - 1) {
@@ -1021,10 +1022,13 @@ fun CommentTextField(
     // Task ID associated with the comment
     taskId: String,
     // Callback to add a comment
-    addComment: (String, Comment) -> Unit,
+    addComment: suspend (String, Comment) -> Unit,
+    loggedInUserId: String,
     // Modifier for styling and layout customization
     modifier: Modifier
 ) {
+    val scope = rememberCoroutineScope()
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -1106,15 +1110,18 @@ fun CommentTextField(
                 onClick = {
                     // Check if the text field is not blank
                     if (value.isNotBlank()) {
-                        // Add the comment using the provided callback
-                        addComment(taskId, Comment(
-                            id = "",
-                            content = value,
-                            authorId = DataBase.LOGGED_IN_USER_ID,
-                            date = LocalDateTime.now()
-                        ))
-                        // Clear the text field by updating its value
-                        updateValue("")
+                        scope.launch {
+                            // Add the comment using the provided callback
+                            addComment(taskId, Comment(
+                                id = "",
+                                content = value,
+                                authorId = loggedInUserId,
+                                date = LocalDateTime.now()
+                            ))
+                        }.invokeOnCompletion {
+                            // Clear the text field by updating its value
+                            updateValue("")
+                        }
                     }
                 },
                 // Customizing the colors of the IconButton

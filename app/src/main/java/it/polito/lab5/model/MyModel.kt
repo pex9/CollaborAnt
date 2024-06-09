@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -351,7 +350,8 @@ class MyModel(val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getTeamChat(teamId: String): Flow<List<Message>> = callbackFlow {
-        val ref = db.collection("Teams").document(teamId).collection("chat").orderBy("date", Query.Direction.ASCENDING)
+        val ref = db.collection("Teams").document(teamId)
+            .collection("chat").orderBy("date", Query.Direction.ASCENDING)
 
         val chatsSnapshotListener = ref.addSnapshotListener { chatSnapshot, err ->
             if (chatSnapshot != null) {
@@ -544,7 +544,7 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun deleteTeam(team: Team, members: List<User>) {    //  TODO: removeTasks
+    suspend fun deleteTeam(team: Team, members: List<User>) {
         //  Remove Team image if needed
         if (team.image is Uploaded) {
             deleteImage(team.id)
@@ -558,8 +558,28 @@ class MyModel(val context: Context) {
         }
 
         val teamReference = db.collection("Teams").document(team.id)
+
+        //  Delete Team chat
         val r = teamReference.collection("chat").get().await()
         r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
+
+        db.collection("Tasks").whereEqualTo("teamId", team.id).get().await().documents.forEach { documentSnapshot ->
+            val commentsReference = documentSnapshot.reference.collection("comments")
+            val attachmentsReference = documentSnapshot.reference.collection("attachments")
+            val historyReference = documentSnapshot.reference.collection("history")
+
+            //  Delete Task comments
+            commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
+
+            //  Delete Task attachments     //  TODO: manage deletion in storage
+            attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
+
+            //  Delete Task history
+            historyReference.get().await().documents.forEach { historyReference.document(it.id).delete().await() }
+
+            //  Delete Task
+            documentSnapshot.reference.delete().await()
+        }
 
         //  Delete Team document
         teamReference.delete().await()
@@ -681,10 +701,10 @@ class MyModel(val context: Context) {
                 hashMapOf(
                     "memberId" to action.memberId,
                     "taskState" to action.taskState,
-                    "date" to localDateToTimestamp(action.date, ZoneId.systemDefault()),
+                    "date" to Timestamp(Date(action.date.toInstant(ZoneOffset.UTC).toEpochMilli())),
                     "description" to action.description
                 )
-            )
+            ).await()
         }
 
         return result.id
@@ -692,7 +712,8 @@ class MyModel(val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getTaskComments(taskId: String): Flow<List<Comment>> = callbackFlow {
-        val documentReference = db.collection("Tasks").document(taskId).collection("comments")
+        val documentReference = db.collection("Tasks")
+            .document(taskId).collection("comments").orderBy("date", Query.Direction.ASCENDING)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
@@ -747,7 +768,8 @@ class MyModel(val context: Context) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun getHistory(taskId: String): Flow<List<Action>> = callbackFlow {
-        val documentReference = db.collection("Tasks").document(taskId).collection("history")
+        val documentReference = db.collection("Tasks")
+            .document(taskId).collection("history").orderBy("date", Query.Direction.ASCENDING)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
@@ -759,7 +781,7 @@ class MyModel(val context: Context) {
                         id = document.id,
                         memberId = document.getString("memberId") ?: "",
                         taskState = state,
-                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC).toLocalDate(),
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC),
                         description = document.getString("description") ?: ""
                     )
                 }
@@ -859,7 +881,7 @@ class MyModel(val context: Context) {
         awaitClose { tasksSnapshotListener.remove() }
     }
 
-    suspend fun updateTask(task: Task, userId: String) {
+    suspend fun updateTask(task: Task) {
         db.collection("Tasks").document(task.id).update(
             hashMapOf(
                 "title" to task.title,
@@ -877,26 +899,6 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-
-//    //  Remove Team image if needed
-//    if (team.image is Uploaded) {
-//        deleteImage(team.id)
-//    }
-//
-//    //  Update kpi values for all team members
-//    members.forEach { member ->
-//        member.kpiValues[team.id]?.let { kpi ->
-//            updateUserKpi(member.id, member.joinedTeams - 1, team.id to kpi, true)
-//        }
-//    }
-//
-//    val teamReference = db.collection("Teams").document(team.id)
-//    val r = teamReference.collection("chat").get().await()
-//    r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
-//
-//    //  Delete Team document
-//    teamReference.delete().await()
-
     suspend fun deleteTask(task: Task, delegateMembers: List<User>) {
         val taskReference = db.collection("Tasks").document(task.id)
         val commentsReference = taskReference.collection("comments")
@@ -906,7 +908,7 @@ class MyModel(val context: Context) {
         //  Delete Task comments
         commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
 
-        //  Delete Task attachments
+        //  Delete Task attachments     //  TODO: manage deletion in storage
         attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
 
         //  Delete Task history
@@ -926,10 +928,60 @@ class MyModel(val context: Context) {
             }
         }
 
-
-
         //  Delete Task
         taskReference.delete().await()
+    }
+
+    suspend fun addActionToTaskHistory(taskId: String, action: Action) {
+        val historyReference = db.collection("Tasks").document(taskId).collection("history")
+
+        historyReference.add(
+            hashMapOf(
+                "memberId" to action.memberId,
+                "taskState" to action.taskState,
+                "date" to Timestamp(Date(action.date.toInstant(ZoneOffset.UTC).toEpochMilli())),
+                "description" to action.description
+            )
+        ).await()
+    }
+
+    suspend fun updateTaskState(task: Task, delegatedMembers: List<User>, loggedInUserId: String, state: TaskState) {
+        //  Update delegated members kpi
+        if (state == TaskState.COMPLETED) {
+            delegatedMembers.forEach { member ->
+                val kpi = member.kpiValues[task.teamId]
+                val updatedKpi = kpi?.copy(
+                    completedTasks = kpi.completedTasks + 1,
+                    score = calculateScore(kpi.assignedTasks, kpi.completedTasks + 1)
+                )
+
+                updatedKpi?.let {updateUserKpi(member.id, member.joinedTeams, task.teamId to it) }
+            }
+        }
+
+        //  Add new action to Task history
+        addActionToTaskHistory(task.id,
+            Action(
+                id = "",
+                memberId = loggedInUserId,
+                taskState = state,
+                date = LocalDateTime.now(),
+                description = if (state == TaskState.COMPLETED) "Task completed"
+                else "Task state changed"
+            )
+        )
+
+        db.collection("Tasks").document(task.id).update("state", state).await()
+    }
+
+    suspend fun addCommentToTask(taskId: String, comment: Comment) {
+        db.collection("Tasks").document(taskId).collection("comments").add(
+            mapOf(
+                "authorId" to comment.authorId,
+                "content" to comment.content,
+                "date" to Timestamp(Date(comment.date.toInstant(ZoneOffset.UTC).toEpochMilli()))
+            )
+        ).await()
     }
 
     //  Users
@@ -994,7 +1046,7 @@ class MyModel(val context: Context) {
         _tasks.value.find { it.id == taskId }?.let { task ->
             val categories = task.categories.toMutableMap()
             categories[userId] = new
-            updateTask(taskId, task.copy(categories = categories))
+            updateTask1(taskId, task.copy(categories = categories))
         }
     }
 
@@ -1017,22 +1069,7 @@ class MyModel(val context: Context) {
     private val _tasks = MutableStateFlow(DataBase.tasks)
     val tasks: StateFlow<List<Task>> = _tasks
 
-    fun addTask(task: Task): String {
-        val updatedTasks = _tasks.value.toMutableList()
-        val id = updatedTasks.size
-        if(task.repeat!=Repeat.NEVER){
-            updatedTasks.add(task.copy(id = (id + 1).toString(), parentId = (id + 1).toString()))
-        }
-        else{
-            updatedTasks.add(task.copy(id = (id + 1).toString(), parentId = null))
-        }
-
-
-        _tasks.value = updatedTasks
-        return (id + 1).toString()
-    }
-
-    fun updateTask(taskId: String, task: Task) {
+    fun updateTask1(taskId: String, task: Task) {
         val updatedTasks = _tasks.value.toMutableList()
         val index = updatedTasks.indexOfFirst { it.id == taskId }
 
@@ -1073,13 +1110,13 @@ class MyModel(val context: Context) {
                     id = task.history.size.toString(),
                     memberId = DataBase.LOGGED_IN_USER_ID,
                     taskState = state,
-                    date = LocalDate.now(),
+                    date = LocalDateTime.now(),
                     description = if (state == TaskState.COMPLETED) "Task completed"
                     else "Task state changed"
                 )
             )
 
-            updateTask(taskId, task.copy(state = state, history = history))
+            updateTask1(taskId, task.copy(state = state, history = history))
         }
     }
 
@@ -1089,7 +1126,7 @@ class MyModel(val context: Context) {
             val id = comments.size
 
             comments.add(comment.copy(id = (id + 1).toString()))
-            updateTask(taskId, task.copy(comments = comments))
+            updateTask1(taskId, task.copy(comments = comments))
         }
     }
 
@@ -1099,7 +1136,7 @@ class MyModel(val context: Context) {
             val id = attachments.size
 
             attachments.add(attachment.copy(id = (id + 1).toString()))
-            updateTask(taskId, task.copy(attachments = attachments))
+            updateTask1(taskId, task.copy(attachments = attachments))
         }
     }
 
@@ -1108,7 +1145,7 @@ class MyModel(val context: Context) {
             val attachments = task.attachments.toMutableList()
 
             attachments.removeIf { it.id == attachmentId }
-            updateTask(taskId, task.copy(attachments = attachments))
+            updateTask1(taskId, task.copy(attachments = attachments))
         }
     }
 }

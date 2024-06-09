@@ -310,22 +310,7 @@ object DataBase {
             ),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 0.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 1),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 1.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 2),
-                    description = "Task delegated"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -342,22 +327,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 2.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 3),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 3.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 3),
-                    description = "Task delegated"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -375,15 +345,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 4.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 3),
-                    description = "Task created"
-                ),
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -400,15 +362,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 5.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -425,15 +379,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 6.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -454,29 +400,7 @@ object DataBase {
             ),
             categories = mapOf("1" to "Recently assigned"),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 7.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 8.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 9.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 8),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -498,29 +422,7 @@ object DataBase {
                 "1" to "Recently assigned"
             ),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 10.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 11.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 12.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 8),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -539,36 +441,7 @@ object DataBase {
                 "1" to "To do today"
             ),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 13.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 10),
-                    description = "Task assigned"
-                ),
-                Action(
-                    id = 14.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 11),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 15.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 12),
-                    description = "Task status changed"
-                ),
-                Action(
-                    id = 16.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.ON_HOLD,
-                    date = LocalDate.of(2024, 5, 14),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -587,36 +460,7 @@ object DataBase {
                 "1" to "To do today"
             ),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 17.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 10),
-                    description = "Task assigned"
-                ),
-                Action(
-                    id = 18.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 11),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 19.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 12),
-                    description = "Task status changed"
-                ),
-                Action(
-                    id = 20.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.ON_HOLD,
-                    date = LocalDate.of(2024, 5, 14),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -633,36 +477,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 21.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 17),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 22.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 18),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 23.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 19),
-                    description = "Task status changed"
-                ),
-                Action(
-                    id = 24.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.COMPLETED,
-                    date = LocalDate.of(2024, 5, 21),
-                    description = "Task completed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -679,36 +494,7 @@ object DataBase {
             comments = emptyList(),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 25.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 17),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 26.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 18),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 27.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 19),
-                    description = "Task status changed"
-                ),
-                Action(
-                    id = 28.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.OVERDUE,
-                    date = LocalDate.of(2024, 5, 23),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -727,36 +513,7 @@ object DataBase {
                 "1" to "To do next week"
             ),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 29.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 17),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 30.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 18),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 31.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 19),
-                    description = "Task status changed"
-                ),
-                Action(
-                    id = 32.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.OVERDUE,
-                    date = LocalDate.of(2024, 5, 23),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -778,29 +535,7 @@ object DataBase {
                 "1" to "Recently assigned"
             ),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 10.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-                Action(
-                    id = 11.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.PENDING,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task delegated"
-                ),
-                Action(
-                    id = 12.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.IN_PROGRESS,
-                    date = LocalDate.of(2024, 5, 8),
-                    description = "Task status changed"
-                )
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -820,15 +555,7 @@ object DataBase {
             ),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 13.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         ),
@@ -848,15 +575,7 @@ object DataBase {
             ),
             categories = emptyMap(),
             attachments = emptyList(),
-            history = listOf(
-                Action(
-                    id = 14.toString(),
-                    memberId = LOGGED_IN_USER_ID,
-                    taskState = TaskState.NOT_ASSIGNED,
-                    date = LocalDate.of(2024, 5, 6),
-                    description = "Task created"
-                ),
-            ),
+            history = emptyList(),
             parentId=null,
             endDateRepeat = null
         )

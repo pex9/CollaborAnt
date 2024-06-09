@@ -10,8 +10,11 @@ import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
+import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
+import it.polito.lab5.model.User
 
+@RequiresApi(Build.VERSION_CODES.O)
 class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleAuthentication): ViewModel() {
     val teams = model.teams
     val users = model.users
@@ -19,17 +22,26 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
 
     val loggedInUserId = auth.getSignedInUserId()
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getTask(taskId: String) = model.getTask(taskId)
+
+    fun getTaskComments(taskId: String) = model.getTaskComments(taskId)
+
+    fun getAttachments(taskId: String) = model.getAttachments(taskId)
+
     fun getTeam(teamId: String) = model.getTeam(teamId)
-    fun getUser(userId: String) = model.getUser(userId)
+
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
+
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
+    suspend fun updateTaskState(task: Task, delegatedMembers: List<User>, loggedInUserId: String, state: TaskState) =
+        model.updateTaskState(task, delegatedMembers, loggedInUserId, state)
+
+    suspend fun addCommentToTask(taskId: String, comment: Comment) = model.addCommentToTask(taskId, comment)
+
+
+
     fun deleteTask(taskId: String) = model.deleteTask1(taskId)
-
-    fun setTaskState(taskId: String, state: TaskState) = model.setTaskState(taskId, state)
-
-    fun addComment(taskId: String, comment: Comment) = model.addComment(taskId, comment)
 
     fun addAttachment(taskId: String, attachment: Attachment) = model.addAttachment(taskId, attachment)
 

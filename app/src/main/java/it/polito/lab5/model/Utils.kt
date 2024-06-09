@@ -42,7 +42,7 @@ enum class Repeat {
 }
 
 data class Comment(
-val id: String,
+    val id: String,
     val content: String,
     val authorId: String,
     val date: LocalDateTime
@@ -52,7 +52,7 @@ data class Action(
     val id: String,
     val memberId: String,
     val taskState: TaskState,
-    val date: LocalDate,
+    val date: LocalDateTime,
     val description: String
 )
 

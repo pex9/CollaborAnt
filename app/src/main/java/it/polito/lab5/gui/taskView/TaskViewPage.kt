@@ -132,6 +132,7 @@ fun TaskPage(
     task: Task,
     users: List<User>,
     isDelegatedMember: Boolean,
+    loggedInUserId: String,
     loggedInUserRole: Role,
     addAttachment: (String, Attachment) -> Unit,
     removeAttachment: (String, String) -> Unit,
@@ -213,7 +214,8 @@ fun TaskPage(
 
                 // Repeat component
                 RepeatComponent(repeat = task.repeat)
-                if(task.repeat!=Repeat.NEVER) {
+
+                if(task.repeat != Repeat.NEVER) {
                     Divider(
                         thickness = 1.dp,
                         color = CollaborantColors.BorderGray.copy(0.4f),
@@ -252,7 +254,7 @@ fun TaskPage(
         )
 
         // Comments component
-        CommentsComp(comments = task.comments, users = users)
+        CommentsComp(loggedInUserId = loggedInUserId, comments = task.comments, users = users)
 
         Spacer(modifier = Modifier.height(88.dp)) // Spacer for layout spacing
     }
