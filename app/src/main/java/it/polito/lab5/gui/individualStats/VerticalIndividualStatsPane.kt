@@ -23,7 +23,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -52,11 +54,12 @@ fun VerticalIndividualStatsPane(
     membersList: List<User>,
     teamId: Int,
 ) {
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .padding(top = p.calculateTopPadding())
             .fillMaxSize()
-            .background(Color.White)
+            .background(colors.background)
             .verticalScroll(rememberScrollState())
     ) {
         Row(
@@ -135,7 +138,8 @@ fun VerticalIndividualStatsPane(
                     modifier = Modifier.fillMaxSize(),
                     border = BorderStroke(width = 1.dp, color = Color.Gray),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
                     )
                 ) {
                     Column(
@@ -213,7 +217,8 @@ fun VerticalIndividualStatsPane(
                         .padding(bottom = 3.dp),
                     border = BorderStroke(width = 1.dp, color = Color.Gray),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
                     )
                 ) {
 
@@ -254,7 +259,8 @@ fun VerticalIndividualStatsPane(
                         .padding(top = 3.dp),
                     border = BorderStroke(width = 1.dp, color = Color.Gray),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
                     )
                 ) {
                     val literalCompletedTask =
@@ -309,7 +315,8 @@ fun VerticalIndividualStatsPane(
                     .fillMaxSize().padding(top = 10.dp),
                 border = BorderStroke(width = 1.dp, color = Color.Gray),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
                 )
             ) {
                 Column(
@@ -333,10 +340,7 @@ fun VerticalIndividualStatsPane(
                                     Spacer(modifier = Modifier.width(5.dp))
                                     Box(
                                         contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .size(50.dp)
-                                        //.aspectRatio(1f)
-                                        //.padding(start = 5.dp)
+                                        modifier = Modifier.size(50.dp)
                                     ) {
                                         //position of member in membersList + 1
                                         ImagePresentationComp(
@@ -380,7 +384,7 @@ fun VerticalIndividualStatsPane(
                                 )
                             },
                             modifier = itemModifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
-                            colors = ListItemDefaults.colors(containerColor = Color.White),
+                            colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                         )
                     }
                 }

@@ -4,15 +4,19 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
@@ -20,10 +24,13 @@ import it.polito.lab5.ui.theme.interFamily
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileTopBar(navController: NavController) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
+            containerColor = containerColor,
+            titleContentColor = colors.onBackground,
         ),
         title = {
             Text(
@@ -38,7 +45,7 @@ fun UserProfileTopBar(navController: NavController) {
                 onClick = { navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {

@@ -81,7 +81,7 @@ fun OptionsComp(
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
-                tint = CollaborantColors.DarkBlue,
+                tint = colors.onBackground,
                 modifier = Modifier.size(32.dp)
             )
         }
@@ -91,14 +91,14 @@ fun OptionsComp(
                 expanded = optionsOpened,
                 onDismissRequest = { setOptionsOpenedValue(false) },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.edit_square),
                             contentDescription = "Edit Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.onBackground
                         )
                     },
                     text = {
@@ -106,7 +106,8 @@ fun OptionsComp(
                             text = "Edit Team",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; navController.navigate("myTeams/edit/${team.id}") },
@@ -126,7 +127,7 @@ fun OptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.logout),
                             contentDescription = "Leave Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.error
                         )
                     },
                     text = {
@@ -134,7 +135,8 @@ fun OptionsComp(
                             text = "Leave Team",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.error
                         )
                     },
                     onClick = {
@@ -157,16 +159,16 @@ fun OptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.delete),
                             contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed
+                            tint = colors.error
                         )
                     },
                     text = {
                         Text(
                             text = "Delete Team",
                             fontFamily = interFamily,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 16.sp,
-                            color = Color.Red
+                            color = colors.error
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; setShowDeleteDialogValue(true) },
