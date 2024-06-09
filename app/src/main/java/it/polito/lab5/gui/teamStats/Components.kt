@@ -80,11 +80,11 @@ fun CustomCircularProgressIndicator(
     circleRadius:Float,
 ) {
     var circleCenter by remember { mutableStateOf(Offset.Zero) }
-
     val positionValue by remember { mutableIntStateOf(value) }
+    val colors = MaterialTheme.colorScheme
 
     Box(
-        modifier = modifier
+        modifier = modifier.background(colors.surfaceColorAtElevation(10.dp))
     ){
         Canvas(
             modifier = Modifier
@@ -92,11 +92,11 @@ fun CustomCircularProgressIndicator(
         ){
             val width = size.width
             val height = size.height
-            val circleThickness = width / 11f
+            val circleThickness = width / 10f
             circleCenter = Offset(x = width/2f, y = height/2f)
 
 
-            drawCircle(
+/*            drawCircle(
                 brush = Brush.radialGradient(
                     listOf(
                         primaryColor.copy(0.45f),
@@ -105,7 +105,7 @@ fun CustomCircularProgressIndicator(
                 ),
                 radius = circleRadius,
                 center = circleCenter
-            )
+            )*/
 
 
             drawCircle(
@@ -146,7 +146,7 @@ fun CustomCircularProgressIndicator(
                         Paint().apply {
                             textSize = 30.sp.toPx()
                             textAlign = Paint.Align.CENTER
-                            color = CollaborantColors.DarkBlue.toArgb()
+                            color = colors.onBackground.toArgb()
                             isFakeBoldText = true
                         }
                     )
@@ -168,7 +168,7 @@ fun Chart(
     // Scale Dimensions
     val scaleYAxisWidth by remember { mutableStateOf(50.dp) }
     val scaleLineWidth by remember { mutableStateOf(2.dp) }
-
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .padding(start= 30.dp,end = 50.dp)
@@ -214,7 +214,7 @@ fun Chart(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(scaleLineWidth)
-                    .background(Color.Black)
+                    .background(colors.onBackground)
             )
 
             // graph
@@ -224,12 +224,7 @@ fun Chart(
                     .clip(CircleShape)
                     .width(barGraphWidth)
                     .fillMaxHeight(data.keys.first())
-                    .background(CollaborantColors.DarkBlue)
-                /*.clickable {
-                    Toast
-                        .makeText(context, it.key.toString(), Toast.LENGTH_SHORT)
-                        .show()
-                }*/
+                    .background(colors.secondaryContainer)
             )
 
             Box(
@@ -238,12 +233,7 @@ fun Chart(
                     .clip(CircleShape)
                     .width(barGraphWidth)
                     .fillMaxHeight(data.keys.last())
-                    .background(CollaborantColors.DarkBlue)
-                /*.clickable {
-                    Toast
-                        .makeText(context, it.key.toString(), Toast.LENGTH_SHORT)
-                        .show()
-                }*/
+                    .background(colors.secondaryContainer)
             )
         }
 
@@ -252,7 +242,7 @@ fun Chart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(scaleLineWidth)
-                .background(Color.Black)
+                .background(colors.onBackground)
         )
 
         // Scale X-Axis
@@ -341,6 +331,7 @@ fun StatsTopBar(team: Team, navController: NavController) {
 
 @Composable
 fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController: NavController, teamId: Int){
+    val colors = MaterialTheme.colorScheme
     Text(
         text = "Team Members Ranking",
         overflow = TextOverflow.Ellipsis,
@@ -349,17 +340,22 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
         fontSize = 18.sp,
         letterSpacing = 0.sp
     )
+    Spacer(modifier = Modifier.height(5.dp))
     Card(
-        modifier = Modifier.fillMaxSize().padding(top = 10.dp),
-        border = BorderStroke(width = 1.dp, color = Color.Gray),
+        modifier = Modifier.fillMaxSize(),
+        border = BorderStroke(width = 1.dp, color = colors.outline),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = colors.surfaceColorAtElevation(10.dp),
+            contentColor = colors.onBackground
         )
     ) {
         Column(
             modifier = Modifier.padding(bottom = 10.dp),
         ) {
-            membersList.forEach{ member ->
+            membersList.forEachIndexed(){ index, member ->
+                if(index == 0){
+                    Spacer(modifier = Modifier.height(5.dp))
+                }
                 ListItem(
                     leadingContent = {
                         Row(
@@ -421,7 +417,7 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
                         )
                     },
                     modifier = Modifier.clickable { navController.navigate("viewIndividualStats/${teamId}/${member.id}") },
-                    colors = ListItemDefaults.colors(containerColor = Color.White),
+                    colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                 )
             }
         }
@@ -430,14 +426,16 @@ fun TeamMembersRanking(membersList: List<User>, teams: List<Team>, navController
 
 @Composable
 fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCompletionPercentage: Int, horizontal: Boolean){
+    val colors = MaterialTheme.colorScheme
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = colors.surfaceColorAtElevation(10.dp),
+            contentColor = colors.onBackground
         ),
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
-        border = BorderStroke(width = 1.dp, color = Color.Gray),
+        border = BorderStroke(width = 1.dp, color = colors.outline),
     ){
         Row(
             modifier = Modifier
@@ -460,18 +458,19 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                     fontSize = 15.sp,
                     letterSpacing = 0.sp,
                     textAlign = TextAlign.Center,
-                    modifier = textModifier
+                    modifier = textModifier,
+                    color = colors.onBackground
                 )
 
-                val circleRadius = if(horizontal) 180f else 150f
+                val circleRadius = if(horizontal) 180f else 160f
                 CustomCircularProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White)
                         .wrapContentHeight(),
                     value = literalCompletionPercentage,
-                    primaryColor = CollaborantColors.DarkBlue,
-                    secondaryColor = CollaborantColors.Yellow,
+                    primaryColor = colors.secondaryContainer,
+                    secondaryColor = colors.primaryContainer,
                     circleRadius = circleRadius,
                 )
             }
@@ -484,7 +483,8 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
             ) {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -520,7 +520,9 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                 }
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
+
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -536,7 +538,6 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                     ) {
                         Text(
                             text = "Completed Tasks",
-                            //modifier = Modifier.padding(start= 20.dp, top = 22.dp),
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 15.sp,
@@ -546,7 +547,6 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = literalTotCompletedTasks.toString(),
-                            //modifier = Modifier.padding(start= 20.dp, top = 22.dp),
                             fontFamily = interFamily,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 24.sp,

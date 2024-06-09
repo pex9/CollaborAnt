@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,14 +56,22 @@ fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController:
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(
-                modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f).padding(end = 15.dp),
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(end = 15.dp),
 
                 ) {
                 TeamStatsCard(literalTotTasks, literalTotCompletedTasks, literalCompletionPercentage, true)
             }
 
             Card(
-                modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f).padding(start = 15.dp),
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(start = 15.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
                 ),
@@ -68,7 +79,8 @@ fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController:
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize().padding(start = 30.dp),
+                        .fillMaxSize()
+                        .padding(start = 30.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -107,7 +119,7 @@ fun VerticalTeamStatsPane(
     val literalTotTasks = teamTasks.count()
     val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
     val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()*100f)
-
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -118,7 +130,8 @@ fun VerticalTeamStatsPane(
         // CARD1
         Column(
             modifier = Modifier
-                .padding(horizontal = 40.dp, vertical = 10.dp)
+                .padding(horizontal = 30.dp, vertical = 10.dp)
+                .padding(top = 10.dp)
                 .fillMaxWidth()
                 .aspectRatio(1.4f),
         ) {
@@ -128,15 +141,17 @@ fun VerticalTeamStatsPane(
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp,
-                letterSpacing = 0.sp
+                letterSpacing = 0.sp,
+                color = colors.onBackground
             )
+            Spacer(modifier = Modifier.height(5.dp))
             TeamStatsCard(literalTotTasks, literalTotCompletedTasks, literalCompletionPercentage, false)
         }
 
         // CHARTS
         Column(
             modifier = Modifier
-                .padding(horizontal = 40.dp, vertical = 10.dp)
+                .padding(horizontal = 30.dp, vertical = 10.dp)
                 .fillMaxWidth()
                 .aspectRatio(1f),
             verticalArrangement = Arrangement.Center
@@ -149,10 +164,12 @@ fun VerticalTeamStatsPane(
                 fontSize = 18.sp,
                 letterSpacing = 0.sp
             )
+            Spacer(modifier = Modifier.height(5.dp))
             Card(
                 modifier = Modifier.fillMaxSize(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
                 ),
                 border = BorderStroke(width = 1.dp, color = Color.Gray),
             ) {
@@ -177,7 +194,7 @@ fun VerticalTeamStatsPane(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(35.dp)
+                .padding(vertical = 10.dp, horizontal = 30.dp)
         ) {
             TeamMembersRanking(membersList, teams, navController, teamId)
         }
