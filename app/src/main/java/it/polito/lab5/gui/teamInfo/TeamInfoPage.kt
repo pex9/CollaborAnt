@@ -1,6 +1,7 @@
 package it.polito.lab5.gui.teamInfo
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,10 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.ImagePresentationComp
@@ -57,18 +63,21 @@ fun TeamInfoTopBar(
     setShowLeaveDialogValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
 ) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
+            containerColor = containerColor,
         ),
         title = {
             Text(
                 text = "Team Info",
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                color = Color.Black // Adjust color as needed
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground // Adjust color as needed
             )
         },
         navigationIcon = {
@@ -77,13 +86,14 @@ fun TeamInfoTopBar(
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent, // Transparent background
-                    contentColor = CollaborantColors.DarkBlue // Dark blue icon color
+                    contentColor = colors.onBackground // Dark blue icon color
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding // Standard padding
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_left), // Back arrow icon
-                    contentDescription = "Back Icon" // Description for accessibility
+                    contentDescription = "Back Icon", // Description for accessibility
+                    tint = colors.onBackground
                 )
 
                 Text(
@@ -91,7 +101,8 @@ fun TeamInfoTopBar(
                     style = MaterialTheme.typography.titleLarge, // Text style
                     fontFamily = interFamily, // Custom font family
                     fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                    fontSize = 20.sp // Font size
+                    fontSize = 20.sp, // Font size
+                    color = colors.onBackground
                 )
             }
         },
@@ -113,7 +124,7 @@ fun TeamInfoTopBar(
                     Icon(
                         painter = painterResource(id = R.drawable.logout),
                         contentDescription = "Leave Icon",
-                        tint = CollaborantColors.DarkBlue,
+                        tint = colors.onBackground,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -150,7 +161,7 @@ fun TeamInfoPage(
     paddingValues: PaddingValues
 ) {
     val context = LocalContext.current
-
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -162,7 +173,7 @@ fun TeamInfoPage(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 28.dp)
+                .padding(horizontal = 20.dp)
         ) {
             val (first, last) = getMonogramText(team.name)
 
@@ -179,14 +190,28 @@ fun TeamInfoPage(
                 )
             }
 
-            Text(
-                text = team.name,
-                fontFamily = interFamily, // Custom font family
-                fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                fontSize = 22.sp, // Font size
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                colors = CardDefaults.cardColors(
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
+                ),
+                border = BorderStroke(1.dp, colors.outline),
+            ) {
+                Text(
+                    text = team.name,
+                    fontFamily = interFamily, // Custom font family
+                    fontWeight = FontWeight.SemiBold, // Semi-bold font weight
+                    fontSize = 22.sp, // Font size
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2,
+                    color = colors.onBackground,
+                    modifier = Modifier.padding(10.dp).align(Alignment.CenterHorizontally),
+                    textAlign = TextAlign.Center
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -194,7 +219,7 @@ fun TeamInfoPage(
                 text = team.description.ifBlank { "No description" }, // Default text if description is empty
                 label = "Description ", // Label for the description
                 minHeight = 125.dp, // Minimum height for the description container
-                modifier = Modifier.padding(10.dp) // Padding for the description
+                modifier = Modifier.padding(10.dp), // Padding for the description
             )
         }
 

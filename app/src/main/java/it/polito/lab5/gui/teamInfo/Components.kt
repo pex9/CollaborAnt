@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.teamInfo
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.bringPairToHead
@@ -187,7 +190,7 @@ fun MembersHeaderComp(teamId: Int, loggedInUserRole: Role, navController: NavCon
             text = "Members",
             fontFamily = interFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 20.sp
+            fontSize = 18.sp
         )
 
         if(loggedInUserRole == Role.TEAM_MANAGER) {
@@ -247,7 +250,7 @@ fun MemberRow(
         Role.SENIOR_MEMBER -> "Senior Member"
         Role.JUNIOR_MEMBER -> "Junior Member"
     }
-
+    val colors = MaterialTheme.colorScheme
     ListItem(
         leadingContent = {
             Box(
@@ -300,8 +303,8 @@ fun MemberRow(
               Icon(painter = painterResource(id = R.drawable.arrow_right), contentDescription = "Arrow Icon")
         },
         colors = ListItemDefaults.colors(
-            containerColor = CollaborantColors.PageBackGroundGray,
-            trailingIconColor = CollaborantColors.DarkBlue
+            containerColor = colors.background,
+            trailingIconColor = colors.onBackground
         ),
         modifier = Modifier.clickable {
             setShowBottomSheetValue(true)
@@ -367,7 +370,7 @@ fun RoleOptionsComp(
                 expanded = roleSelectionOpened,
                 onDismissRequest = { setRoleSelectionOpenedValue(memberId, false) },
                 offset = DpOffset(x = 2.dp, y = 2.dp),
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
                 Role.entries.drop(1).forEachIndexed { idx, r ->
                     val textRole = when (r) {
@@ -375,14 +378,14 @@ fun RoleOptionsComp(
                         Role.SENIOR_MEMBER -> "Senior Member"
                         Role.JUNIOR_MEMBER -> "Junior Member"
                     }
-
+                    val iconColor = if(LocalTheme.current.isDark) colors.secondary else colors.primaryContainer
                     DropdownMenuItem(
                         trailingIcon = {
                             if(r == role) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = colors.outline,
+                                    tint = iconColor,
                                     modifier = Modifier.size(13.dp)
                                 )
                             }
@@ -432,11 +435,12 @@ fun MemberOptionsBottomSheet(
         Role.JUNIOR_MEMBER -> "Junior Member"
         null -> ""
     }
+    val colors = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = { setShowMemberOptBottomSheetValue(false) }, // Dismiss the bottom sheet when requested
-        containerColor = CollaborantColors.PageBackGroundGray, // Background color of the bottom sheet
+        containerColor = colors.surfaceColorAtElevation(10.dp), // Background color of the bottom sheet
         dragHandle = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -478,14 +482,16 @@ fun MemberOptionsBottomSheet(
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 20.sp,
                                 overflow = TextOverflow.Ellipsis,
-                                maxLines = 1
+                                maxLines = 1,
+                                color = colors.onBackground
                             )
 
                             Text(
                                 text = literalRole,
                                 fontWeight = FontWeight.Light,
                                 fontSize = 14.sp,
-                                fontFamily = interFamily
+                                fontFamily = interFamily,
+                                color = colors.onBackground
                             )
                         }
                     }
@@ -506,7 +512,8 @@ fun MemberOptionsBottomSheet(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.cross),
-                                contentDescription = "Close Icon"
+                                contentDescription = "Close Icon",
+                                tint = colors.onBackground
                             )
                         }
                     }
@@ -523,9 +530,10 @@ fun MemberOptionsBottomSheet(
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
-                )
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
+                ),
+                border = BorderStroke(1.dp, colors.outline.copy(0.4f)),
             ) {
                 ListItem(
                     headlineContent = {},
@@ -533,15 +541,17 @@ fun MemberOptionsBottomSheet(
                         Text(
                             text = "Info",
                             fontFamily = interFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 16.sp
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     trailingContent = {
                         Icon(
                             painter = painterResource(id = R.drawable.info),
                             contentDescription = "Info Icon",
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(28.dp),
+                            tint = colors.onBackground
                         )
                     },
                     modifier = Modifier.clickable {
@@ -551,7 +561,7 @@ fun MemberOptionsBottomSheet(
                             navController.navigate("users/${member.id}/profile")
                         }
                     },
-                    colors = ListItemDefaults.colors(containerColor = Color.White)
+                    colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(20.dp))
                 )
             }
 
@@ -563,9 +573,10 @@ fun MemberOptionsBottomSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
-            )
+                containerColor = colors.surfaceColorAtElevation(10.dp),
+                contentColor = colors.onBackground
+            ),
+            border = BorderStroke(1.dp, colors.outline.copy(0.4f)),
         ) {
             ListItem(
                 headlineContent = {},
@@ -573,15 +584,17 @@ fun MemberOptionsBottomSheet(
                     Text(
                         text = "Analytics",
                         fontFamily = interFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = colors.onBackground
                     )
                 },
                 trailingContent = {
                     Icon(
                         painter = painterResource(id = R.drawable.chart),
                         contentDescription = "Chart Icon",
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(28.dp),
+                        tint = colors.onBackground
                     )
                 },
                 modifier = Modifier.clickable {
@@ -592,13 +605,13 @@ fun MemberOptionsBottomSheet(
                     }
 
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.White)
+                colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp)),
             )
 
             if(member.id != DataBase.LOGGED_IN_USER_ID) {
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
 
@@ -608,15 +621,17 @@ fun MemberOptionsBottomSheet(
                         Text(
                             text = "Chat",
                             fontFamily = interFamily,
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 16.sp
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     trailingContent = {
                         Icon(
                             painter = painterResource(id = R.drawable.send),
                             contentDescription = "Send Icon",
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(28.dp),
+                            tint = colors.onBackground
                         )
                     },
                     modifier = Modifier.clickable {
@@ -626,14 +641,14 @@ fun MemberOptionsBottomSheet(
                             navController.navigate("viewChat/${team.id}/${member.id}")
                         }
                     },
-                    colors = ListItemDefaults.colors(containerColor = Color.White)
+                    colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp))
                 )
             }
 
             if(loggedInUserRole ==  Role.TEAM_MANAGER && member.id != DataBase.LOGGED_IN_USER_ID) {
                 Divider(
                     thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
 
@@ -643,16 +658,16 @@ fun MemberOptionsBottomSheet(
                         Text(
                             text = "Remove from team",
                             fontFamily = interFamily,
-                            fontWeight = FontWeight.Normal,
+                            fontWeight = FontWeight.Medium,
                             fontSize = 16.sp,
-                            color = CollaborantColors.PriorityRed
+                            color = colors.error
                         )
                     },
                     trailingContent = {
                         Icon(
                             painter = painterResource(id = R.drawable.delete),
                             contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed,
+                            tint = colors.error,
                             modifier = Modifier.size(28.dp)
                         )
                     },
@@ -663,7 +678,7 @@ fun MemberOptionsBottomSheet(
                             removeMember(member.id)
                         }
                     },
-                    colors = ListItemDefaults.colors(containerColor = Color.White)
+                    colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp))
                 )
             }
         }
@@ -687,6 +702,7 @@ fun MemberSelectionBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState()
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
+    val colors = MaterialTheme.colorScheme
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
@@ -695,7 +711,7 @@ fun MemberSelectionBottomSheet(
             setChosenMemberValue(null)
             setErrorMsgValue("")
         },
-        containerColor = CollaborantColors.PageBackGroundGray, // Background color of the bottom sheet
+        containerColor = colors.background, // Background color of the bottom sheet
         dragHandle = {
             Column(
                 verticalArrangement = Arrangement.Top,
