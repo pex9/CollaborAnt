@@ -105,7 +105,7 @@ fun VerticalTeamStatsPane(
     val teamTasks = tasks.filter { it.teamId == team.id }
     val literalTotTasks = teamTasks.count()
     val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
-    val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()*100f)
+    val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat() / literalTotTasks.toFloat() * 100f)
 
     Column(
         modifier = Modifier

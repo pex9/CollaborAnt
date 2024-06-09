@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -10,6 +12,7 @@ import it.polito.lab5.gui.teamStats.StatsTopBar
 import it.polito.lab5.gui.teamStats.VerticalTeamStatsPane
 import it.polito.lab5.viewModels.TeamStatsViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamStatsScreen(
     vm: TeamStatsViewModel,
@@ -20,7 +23,8 @@ fun TeamStatsScreen(
         val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
         user.copy(kpiValues = kpi.toMap())
     }
-    //  TODO: fix this page with database team tasks
+    val tasks = team?.let { vm.getTasksTeam(it.id).collectAsState(initial = emptyList()).value }
+
     Scaffold(
         topBar = {
             if (team != null) {
@@ -30,10 +34,8 @@ fun TeamStatsScreen(
     ) {
         paddingValues ->
         BoxWithConstraints {
-
-            val tasks = vm.tasks.collectAsState().value
             if (this.maxHeight > this.maxWidth) {
-                if (team != null && membersList != null) {
+                if (team != null && membersList != null && tasks != null) {
                     VerticalTeamStatsPane(
                         team = team,
                         tasks = tasks,
@@ -43,7 +45,7 @@ fun TeamStatsScreen(
                     )
                 }
             } else {
-                if (team != null && membersList != null) {
+                if (team != null && membersList != null && tasks != null) {
                     HorizontalTeamStatsPane(
                         team = team,
                         tasks = tasks,
