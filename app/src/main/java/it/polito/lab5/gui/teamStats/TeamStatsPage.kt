@@ -40,7 +40,7 @@ fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController:
     val literalTotTasks = teamTasks.count()
     val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
     val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()*100f)
-
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,9 +73,10 @@ fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController:
                     .weight(1f)
                     .padding(start = 15.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
+                    containerColor = colors.surfaceColorAtElevation(10.dp),
+                    contentColor = colors.onBackground
                 ),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
+                border = BorderStroke(width = 1.dp, color = colors.outline),
             ) {
                 Column(
                     modifier = Modifier

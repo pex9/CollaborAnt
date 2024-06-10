@@ -46,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -67,7 +66,6 @@ import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
@@ -92,21 +90,8 @@ fun CustomCircularProgressIndicator(
         ){
             val width = size.width
             val height = size.height
-            val circleThickness = width / 10f
+            val circleThickness = width / 9f
             circleCenter = Offset(x = width/2f, y = height/2f)
-
-
-/*            drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(
-                        primaryColor.copy(0.45f),
-                        secondaryColor.copy(0.15f)
-                    )
-                ),
-                radius = circleRadius,
-                center = circleCenter
-            )*/
-
 
             drawCircle(
                 style = Stroke(
@@ -167,7 +152,7 @@ fun Chart(
     val barGraphWidth by remember { mutableStateOf(20.dp) }
     // Scale Dimensions
     val scaleYAxisWidth by remember { mutableStateOf(50.dp) }
-    val scaleLineWidth by remember { mutableStateOf(2.dp) }
+    val scaleLineWidth by remember { mutableStateOf(3.dp) }
     val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
@@ -214,7 +199,7 @@ fun Chart(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(scaleLineWidth)
-                    .background(colors.onBackground)
+                    .background(colors.onSecondary)
             )
 
             // graph
@@ -242,7 +227,7 @@ fun Chart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(scaleLineWidth)
-                .background(colors.onBackground)
+                .background(colors.onSecondary)
         )
 
         // Scale X-Axis
@@ -461,7 +446,7 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                     modifier = textModifier,
                     color = colors.onBackground
                 )
-
+                val primaryContainerColor = if(LocalTheme.current.isDark) colors.onSecondary else colors.primaryContainer
                 val circleRadius = if(horizontal) 180f else 160f
                 CustomCircularProgressIndicator(
                     modifier = Modifier
@@ -470,7 +455,7 @@ fun TeamStatsCard(literalTotTasks: Int, literalTotCompletedTasks: Int, literalCo
                         .wrapContentHeight(),
                     value = literalCompletionPercentage,
                     primaryColor = colors.secondaryContainer,
-                    secondaryColor = colors.primaryContainer,
+                    secondaryColor = primaryContainerColor,
                     circleRadius = circleRadius,
                 )
             }
