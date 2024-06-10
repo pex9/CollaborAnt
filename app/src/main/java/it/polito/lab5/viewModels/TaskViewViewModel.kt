@@ -1,5 +1,6 @@
 package it.polito.lab5.viewModels
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
@@ -13,6 +14,7 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
+import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleAuthentication): ViewModel() {
@@ -38,6 +40,11 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
         model.updateTaskState(task, delegatedMembers, loggedInUserId, state)
 
     suspend fun addCommentToTask(taskId: String, comment: Comment) = model.addCommentToTask(taskId, comment)
+
+    suspend fun addAttachmentToTask(taskId: String, attachment: Attachment) = model.addAttachmentToTask(taskId, attachment)
+
+    suspend fun downloadFileFromFirebase(taskId: String, attachment: Attachment, onComplete: (File) -> Unit, onFailure: (Exception) -> Unit) =
+        model.downloadFileFromFirebase(taskId, attachment, onComplete, onFailure)
 
 
 

@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.taskView
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.journeyapps.barcodescanner.Util
 import it.polito.lab5.R
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.model.Attachment
@@ -43,6 +45,7 @@ import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import java.io.File
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,9 +137,10 @@ fun TaskPage(
     isDelegatedMember: Boolean,
     loggedInUserId: String,
     loggedInUserRole: Role,
-    addAttachment: (String, Attachment) -> Unit,
+    addAttachment: suspend (String, Attachment) -> Unit,
     removeAttachment: (String, String) -> Unit,
-    setShowBottomSheetValue: (Boolean) -> Unit
+    setShowBottomSheetValue: (Boolean) -> Unit,
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -250,7 +254,8 @@ fun TaskPage(
             loggedInUserRole = loggedInUserRole,
             attachments = task.attachments,
             addAttachment = addAttachment,
-            removeAttachment = removeAttachment
+            removeAttachment = removeAttachment,
+            downloadFileFromFirebase = downloadFileFromFirebase
         )
 
         // Comments component

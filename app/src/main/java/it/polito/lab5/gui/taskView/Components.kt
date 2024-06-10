@@ -1,6 +1,9 @@
 package it.polito.lab5.gui.taskView
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
@@ -56,6 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
@@ -75,6 +79,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -666,8 +671,10 @@ fun AttachmentItem(
     context: Context, // Android context
     taskId: String, // ID of the task to which the attachment belongs
     attachment: Attachment, // Attachment data
-    removeAttachment: (String, String) -> Unit // Function to remove the attachment
+    removeAttachment: (String, String) -> Unit, // Function to remove the attachment
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     // Row containing the attachment item
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -675,7 +682,19 @@ fun AttachmentItem(
         modifier = Modifier
             .defaultMinSize(0.dp, 55.dp)
             .fillMaxSize()
-            .clickable { openDocument(context, attachment.uri) } // Click listener to open the attached document
+            .clickable {
+                scope.launch {
+                    downloadFileFromFirebase(
+                        taskId,
+                        attachment,
+                        { openDocument(context, it) },
+                        {
+                            Log.e("Server Error", it.message.toString())
+                            Toast.makeText(context, "Unable to download attachment!", Toast.LENGTH_LONG).show()
+                        }
+                    )
+                }
+            } // Click listener to open the attached document
     ) {
         // Row containing the attachment icon and name
         Row(
@@ -747,9 +766,11 @@ fun AttachmentComponent(
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     attachments: List<Attachment>,
-    addAttachment: (String, Attachment) -> Unit,
-    removeAttachment: (String, String) -> Unit
+    addAttachment: suspend (String, Attachment) -> Unit,
+    removeAttachment: (String, String) -> Unit,
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     // Accessing the current context
     val context = LocalContext.current
     // Creating a launcher for activity result to open documents
@@ -762,15 +783,17 @@ fun AttachmentComponent(
                 // Getting information about the attachment
                 getAttachmentInfo(context, uri)?.let { (name, size) ->
                     // Adding the attachment to the list
-                    addAttachment(
-                        taskId, Attachment(
-                            id = "",
-                            name = name,
-                            type = mimeType,
-                            size = size,
-                            uri = uri,
+                    scope.launch {
+                        addAttachment(
+                            taskId, Attachment(
+                                id = "",
+                                name = name,
+                                type = mimeType,
+                                size = size,
+                                uri = uri,
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -860,7 +883,8 @@ fun AttachmentComponent(
                             context = context,
                             taskId = taskId,
                             attachment = attachment,
-                            removeAttachment = removeAttachment
+                            removeAttachment = removeAttachment,
+                            downloadFileFromFirebase = downloadFileFromFirebase
                         )
 
                         // Adding a divider between attachment items

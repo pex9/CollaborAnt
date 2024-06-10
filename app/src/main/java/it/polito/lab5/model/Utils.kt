@@ -61,7 +61,7 @@ data class Attachment(
     val name: String,
     val type: String,
     val uri: Uri,
-    val size: Float
+    val size: Double
 )
 
 enum class Role{
@@ -157,6 +157,25 @@ fun uriToBitmap(context: Context, uri: Uri): Bitmap? {
         e.printStackTrace()
         null
     }
+}
+
+fun uriToByteArray(context: Context, uri: Uri): ByteArray? {
+    var inputStream: InputStream? = null
+    try {
+        inputStream = context.contentResolver.openInputStream(uri)
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(1024)
+        var bytesRead: Int
+        while (inputStream?.read(buffer).also { bytesRead = it ?: 0 } != -1) {
+            outputStream.write(buffer, 0, bytesRead)
+        }
+        return outputStream.toByteArray()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    } finally {
+        inputStream?.close()
+    }
+    return null
 }
 
 fun localDateToTimestamp(localDate: LocalDate?, zoneId: ZoneId): Timestamp? {

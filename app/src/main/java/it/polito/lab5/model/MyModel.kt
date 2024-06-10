@@ -14,12 +14,14 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import java.io.File
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -49,6 +51,47 @@ class MyModel(val context: Context) {
             imageRef.putBytes(byteArray).await()
             val downloadUrl = imageRef.downloadUrl.await()
             onSuccess(downloadUrl.toString())
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+    private suspend fun uploadAttachment(
+        taskId: String,
+        attachment: Attachment,
+        onSuccess: suspend (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val storageRef = storage.reference
+
+        try {
+            val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
+            val attachmentRef = storageRef.child(fileName)
+
+            // Upload ByteArray to Firebase Storage
+            uriToByteArray(this.context, attachment.uri)?.let {
+                attachmentRef.putBytes(it).await()
+                val downloadUrl = attachmentRef.downloadUrl.await()
+                onSuccess(downloadUrl.toString())
+            }
+        } catch (e: Exception) {
+            onFailure(e)
+        }
+    }
+
+    suspend fun downloadFileFromFirebase(taskId: String, attachment: Attachment, onComplete: (File) -> Unit, onFailure: (Exception) -> Unit) {
+        // Create a storage reference from our app
+        val storageRef: StorageReference = storage.reference
+        val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
+        val localFile = File(context.cacheDir, "${attachment.id}.${attachment.type.split("/").last()}")
+
+        // Create a reference to the file you want to download
+        val fileRef: StorageReference = storageRef.child(fileName)
+
+        try {
+            // Download file to local file
+            fileRef.getFile(localFile).await()
+            onComplete(localFile)
         } catch (e: Exception) {
             onFailure(e)
         }
@@ -751,7 +794,7 @@ class MyModel(val context: Context) {
                         name = document.getString("name") ?: "",
                         type = document.getString("type") ?: "",
                         uri = attachmentUrl?.toUri() ?: Uri.EMPTY,
-                        size = document.get("size") as Float
+                        size = document.getDouble("size") ?: 0.0
                     )
                 }
 
@@ -943,6 +986,26 @@ class MyModel(val context: Context) {
                 "description" to action.description
             )
         ).await()
+    }
+
+    suspend fun addAttachmentToTask(taskId: String, attachment: Attachment) {
+        val attachmentsReference = db.collection("Tasks").document(taskId).collection("attachments")
+
+        val result = attachmentsReference.add(
+            hashMapOf(
+                "name" to attachment.name,
+                "type" to attachment.type,
+                "uri" to attachment.uri,
+                "size" to attachment.size
+            )
+        ).await()
+
+        uploadAttachment(
+            taskId = taskId,
+            attachment = attachment.copy(id = result.id),
+            onSuccess = { result.update("uri", it).await() },
+            onFailure = { Log.e("Server Error", it.message.toString()) }
+        )
     }
 
     suspend fun updateTaskState(task: Task, delegatedMembers: List<User>, loggedInUserId: String, state: TaskState) {
