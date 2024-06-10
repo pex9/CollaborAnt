@@ -50,6 +50,7 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
             }
         }
     ) { paddingValues ->
+        val targetTask = tasks?.find { it.id == vm.targetTaskId }
 
         if (user != null && teams != null && tasks != null) {
             PersonalTaskListPane(
@@ -72,8 +73,8 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
                 setCategorySelectionOpenedValue = vm::setCategorySelectionOpenedValue,
                 myTasksHideSheet = vm.myTasksHideSheet,
                 setMyTasksHideSheet = vm::setMyTasksHideSheetValue,
-                updateCategoryFromTask = vm::updateCategoryFromTask,
-                taskId = vm.targetTaskId,
+                updateUserCategoryToTask = vm::updateUserCategoryToTask,
+                targetTask = targetTask,
                 setTargetTaskIdValue = vm::setTargetTaskIdValue,
                 expandCategory = vm.categoryTaskListOpened,
                 setExpandCategory = vm::setCategoryTaskListOpenedValue,

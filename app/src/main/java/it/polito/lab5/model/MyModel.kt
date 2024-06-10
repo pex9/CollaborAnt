@@ -1140,6 +1140,15 @@ class MyModel(val context: Context) {
         db.collection("Tasks").document(task.id).update("state", state).await()
     }
 
+    suspend fun updateUserCategoryToTask(task: Task, userId: String, newCategory: String) {
+        val taskReference = db.collection("Tasks").document(task.id)
+
+        val updatedCategories = task.categories.toMutableMap()
+        updatedCategories[userId] = newCategory
+
+        taskReference.update("categories", updatedCategories.values.toList()).await()
+    }
+
     suspend fun addCommentToTask(taskId: String, comment: Comment) {
         db.collection("Tasks").document(taskId).collection("comments").add(
             mapOf(
@@ -1149,6 +1158,25 @@ class MyModel(val context: Context) {
             )
         ).await()
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //  Users
     private val _users = MutableStateFlow(DataBase.users)

@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.polito.lab5.R
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
 import it.polito.lab5.gui.TagCircleComp
@@ -261,6 +260,7 @@ fun TaskItem(
             ) {
                 // Display task title
                 val title = task.title.replaceFirstChar { it.uppercase() }
+
                 Text(
                     title,
                     maxLines = 2,
@@ -438,8 +438,9 @@ fun CategoryOptionsComp(
 fun MyTasksModalBottomSheet(
     setMyTasksHideSheet: (Boolean) -> Unit,
     categories: List<String>,
-    updateCategoryFromTask: (String, String, String) -> Unit,
-    taskId: String?,
+    loggedInUserId: String,
+    updateUserCategoryToTask: suspend (Task, String, String) -> Unit,
+    targetTask: Task?,
     chosenCategory: String,
     setChosenCategoryValue: (String) -> Unit,
 ){
@@ -520,12 +521,14 @@ fun MyTasksModalBottomSheet(
                         selected = chosenCategory == category,
                         onClick = {
                             coroutineScope.launch { modalBottomSheetState.hide() }.invokeOnCompletion {
-                                if(taskId != null) {
-                                    updateCategoryFromTask(taskId, DataBase.LOGGED_IN_USER_ID, category)
+                                coroutineScope.launch {
+                                    if(targetTask != null) {
+                                        updateUserCategoryToTask(targetTask, loggedInUserId, category)
+                                    }
+                                }.invokeOnCompletion {
+                                    setChosenCategoryValue("")
+                                    setMyTasksHideSheet(false)
                                 }
-
-                                setChosenCategoryValue("")
-                                setMyTasksHideSheet(false)
                             }
                         }
                     )

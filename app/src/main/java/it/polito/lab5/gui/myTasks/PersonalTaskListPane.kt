@@ -59,12 +59,12 @@ fun PersonalTaskListPane(
     categorySelectionOpened: String,
     currentCategory: String,
     setCurrentCategory: (String) -> Unit,
-    validate: suspend () -> Boolean,
+    validate: suspend (User, List<Task>) -> Boolean,
     setCategorySelectionOpenedValue: (String) -> Unit,
     myTasksHideSheet: Boolean,
     setMyTasksHideSheet: (Boolean) -> Unit,
-    updateCategoryFromTask: (String, String, String) -> Unit,
-    taskId: String?,
+    updateUserCategoryToTask: suspend (Task, String, String) -> Unit,
+    targetTask: Task?,
     setTargetTaskIdValue: (String) -> Unit,
     expandCategory: String,
     setExpandCategory: (String) -> Unit,
@@ -148,7 +148,7 @@ fun PersonalTaskListPane(
                             onClick = {
                                 var isSuccess = false
                                 scope.launch {
-                                    isSuccess = validate()
+                                    isSuccess = validate(loggedInUser, tasks)
                                 }.invokeOnCompletion {
                                     if(isSuccess) { setIsDialogOpen(false) }
                                 }
@@ -189,10 +189,11 @@ fun PersonalTaskListPane(
 
     if(myTasksHideSheet) {
         MyTasksModalBottomSheet(
-            taskId = taskId,
+            targetTask = targetTask,
             categories = categories,
+            loggedInUserId = loggedInUser.id,
             setMyTasksHideSheet = setMyTasksHideSheet,
-            updateCategoryFromTask = updateCategoryFromTask,
+            updateUserCategoryToTask = updateUserCategoryToTask,
             chosenCategory = chosenCategory,
             setChosenCategoryValue = setChosenCategoryValue,
         )

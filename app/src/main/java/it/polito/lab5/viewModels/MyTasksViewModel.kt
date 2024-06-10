@@ -9,23 +9,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.MyModel
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.GoogleAuthentication
+import it.polito.lab5.model.Task
 import it.polito.lab5.model.User
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
-    private var loggedInUser: User? = null
-
-    init {
-        viewModelScope.launch {
-            loggedInUser = auth.getSignedInUserId()?.let { getUser(it).first() }
-        }
-    }
-
     val users = model.users
     val teams = model.teams
     val tasks = model.tasks
@@ -39,6 +29,8 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
     private suspend fun addCategoryToUser(user: User, newCategory: String) = model.addCategoryToUser(user, newCategory)
 
     private suspend fun updateCategoryToUser(user: User, oldCategory: String, newCategory: String) = model.updateCategoryToUser(user, oldCategory, newCategory)
+
+    suspend fun updateUserCategoryToTask(task: Task, userId: String, newCategory: String) = model.updateUserCategoryToTask(task, userId, newCategory)
 
     suspend fun removeCategoryFromUser(user: User, category: String) = model.removeCategoryFromUser(user, category)
 
@@ -98,26 +90,21 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
         numberOfTasksForCategory = value
     }
 
-    suspend fun validate(): Boolean {
-        checkCategory()
+    suspend fun validate(loggedInUser: User, userTasks: List<Task>): Boolean {
+        checkCategory(loggedInUser)
 
         if (categoryError.isBlank()) {
             try {
                 viewModelScope.async {
                     if (currentCategory.isBlank()) {
-                        loggedInUser?.let { addCategoryToUser(it, category) }
+                        addCategoryToUser(loggedInUser, category)
                     } else {
-                        loggedInUser?.let { updateCategoryToUser(it, currentCategory, category) }
+                        updateCategoryToUser(loggedInUser, currentCategory, category)
 
-                        //  TODO: manage with database
-//                        // Update Category for all tasks of the user belonging to the previous category
-//                        tasks.value.filter {
-//                            it.categories.containsKey(DataBase.LOGGED_IN_USER_ID) && it.categories[DataBase.LOGGED_IN_USER_ID] == currentCategory
-//                        }.forEach { task ->
-//                            updateCategoryFromTask(task.id, DataBase.LOGGED_IN_USER_ID, category)
-//                        }
-
-
+                        // Update Category for all tasks of the user belonging to the previous category
+                        userTasks.filter { it.categories[loggedInUser.id] == currentCategory }.forEach { task ->
+                            updateUserCategoryToTask(task, loggedInUser.id, category)
+                        }
                     }
                 }.await()
 
@@ -135,8 +122,8 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
         return false
     }
 
-    private fun checkCategory() {
-        val userCategories = loggedInUser?.categories ?: emptyList()
+    private fun checkCategory(loggedInUser: User) {
+        val userCategories = loggedInUser.categories
 
         categoryError = if (category.isBlank())
             "Category cannot be blank"
@@ -147,8 +134,6 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
         else
             ""
     }
-
-    fun updateCategoryFromTask(taskId: String, userId: String, newCategory: String) = model.updateCategoryFromTask(taskId,userId, newCategory)
 
     var errMsg by mutableStateOf("")
         private set
