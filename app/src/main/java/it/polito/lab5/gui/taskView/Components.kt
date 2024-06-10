@@ -1105,7 +1105,7 @@ fun CommentTextField(
                 // Customizing the colors of the IconButton
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = containerColor,
-                    contentColor = colors.onSecondary
+                    contentColor = colors.background
                 ),
                 modifier = Modifier.size(50.dp)
             ) {

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.taskView.getTimeAgo
@@ -88,7 +91,7 @@ fun MessageTextField(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(colors.surfaceColorAtElevation(10.dp))
     ) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -145,8 +148,8 @@ fun MessageTextField(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = colors.outline,
                     unfocusedBorderColor = colors.outline,
-                    focusedContainerColor = colors.outline.copy(0.2f),
-                    unfocusedContainerColor = colors.outline.copy(0.2f)
+                    focusedContainerColor = colors.surfaceColorAtElevation(20.dp),
+                    unfocusedContainerColor = colors.surfaceColorAtElevation(10.dp),
                 ),
                 maxLines = 6
             )
@@ -160,6 +163,7 @@ fun MessageTextField(
             modifier = Modifier
                 .weight(1f)
         ) {
+            val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
             // IconButton for sending the comment
             IconButton(
                 onClick = {
@@ -182,8 +186,8 @@ fun MessageTextField(
                 },
                 // Customizing the colors of the IconButton
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = CollaborantColors.Yellow,
-                    contentColor = Color.White
+                    containerColor = containerColor,
+                    contentColor = colors.background
                 ),
                 modifier = Modifier.size(50.dp)
             ) {
@@ -200,9 +204,9 @@ fun MessageTextField(
 
 @Composable
 fun MessageTo(message: Message, users: List<User>) {
+    val colors = MaterialTheme.colorScheme
     val receiver = users.find { it.id == message.receiverId }
     val directMessageInfo = if(receiver != null) "(Direct Message)" else ""
-    val messageColor = CollaborantColors.LightBlue.copy(0.2f)
     val senderName = "You"
     val receiveName = when(receiver?.id) {
         null -> "Everybody"
@@ -219,10 +223,12 @@ fun MessageTo(message: Message, users: List<User>) {
     ) {
         Card(
             colors = CardDefaults.cardColors(
-                containerColor = messageColor,
+                containerColor = colors.secondary.copy(0.2f),
+                contentColor = colors.onBackground
             ),
             shape = CardDefaults.outlinedShape,
-            border = BorderStroke(width = 1.dp, color = CollaborantColors.BorderGray.copy(0.4f)),
+            //elevation = CardDefaults.cardElevation(4.dp),
+            border = BorderStroke(width = 1.dp, color = colors.outline.copy(0.4f)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -235,7 +241,7 @@ fun MessageTo(message: Message, users: List<User>) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 11.sp,
-                    color = CollaborantColors.MediumBlue
+                    color = colors.secondaryContainer
                 )
 
                 Spacer(modifier = Modifier.width(3.dp))
@@ -246,7 +252,7 @@ fun MessageTo(message: Message, users: List<User>) {
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 11.sp,
-                        color = CollaborantColors.Yellow
+                        color = colors.primary
                     )
                 }
             }
@@ -277,7 +283,7 @@ fun MessageTo(message: Message, users: List<User>) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 10.sp,
-                    color = CollaborantColors.NoPriorityGray
+                    color = colors.outline
                 )
             }
         }
@@ -286,10 +292,11 @@ fun MessageTo(message: Message, users: List<User>) {
 
 @Composable
 fun MessageFrom(message: Message, users: List<User>){
+    val colors = MaterialTheme.colorScheme
     val sender = users.find { it.id == message.senderId }
     val receiver = users.find { it.id == message.receiverId }
     val directMessageInfo = if(receiver != null) "(Direct Message)" else ""
-    val messageColor = Color.White
+    val messageColor = colors.surface
     val senderName = sender?.first + " " + sender?.last
     val receiveName = when(receiver?.id) {
         null -> "Everybody"
@@ -319,8 +326,10 @@ fun MessageFrom(message: Message, users: List<User>){
         Card(
             colors = CardDefaults.cardColors(
                 containerColor = messageColor,
+                contentColor = colors.onBackground
             ),
-            border = BorderStroke(width = 1.dp, color = CollaborantColors.BorderGray.copy(0.4f)),
+            elevation = CardDefaults.cardElevation(4.dp),
+            border = BorderStroke(width = 1.dp, color = colors.outline.copy(0.4f)),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -333,7 +342,7 @@ fun MessageFrom(message: Message, users: List<User>){
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 11.sp,
-                    color = CollaborantColors.MediumBlue
+                    color = colors.secondaryContainer
                 )
 
                 Spacer(modifier = Modifier.width(3.dp))
@@ -394,60 +403,46 @@ fun ReceiverSelector(
     val members = team.members.map { it.first }.toSet()
     val receiverList =
         users.filter { members.contains(it.id) && it.id != DataBase.LOGGED_IN_USER_ID }
-
+    val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(top = 8.dp)
+            .background(colors.background)
+            .padding(vertical = 5.dp)
     ) {
         val literalTargetReceiver = when (targetReceiver) {
-            null -> "Everybody"
+            null -> "Everyone"
             else -> receiverList.find { it.id == targetReceiver }?.first.plus(" ")
                 .plus(receiverList.find { it.id == targetReceiver }?.last)
         }
-
-        Text(
-            text = "Send to: ",
-            fontFamily = interFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 18.sp
-        )
-
-        Box(contentAlignment = Alignment.TopStart){
+        val selectorColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
+        Box(contentAlignment = Alignment.BottomCenter){
             Button(
                 onClick = { setOptionsOpenedValue(true) },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CollaborantColors.MediumBlue40,
-                    contentColor = Color.Black
+                    containerColor = selectorColor,
+                    contentColor = colors.onSecondary
                 ),
-                modifier = Modifier.width(140.dp)
+                modifier = Modifier.width(180.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier.weight(3f)
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = literalTargetReceiver,
                         fontFamily = interFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 16.sp,
+                        color = colors.onSecondary,
+                        textAlign = TextAlign.Center
                     )
-                }
-
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.End,
-                    modifier = Modifier.weight(1f)
-                ) {
+                    Spacer(modifier = Modifier.width(7.dp))
                     Icon(
                         painter = painterResource(id = R.drawable.arrow_down),
-                        contentDescription = "Arrow Icon"
+                        contentDescription = "Arrow Icon",
                     )
                 }
             }
@@ -458,7 +453,7 @@ fun ReceiverSelector(
                     onDismissRequest = { setOptionsOpenedValue(false) },
                     offset = DpOffset(x = (-28).dp, y = (4).dp),
                     modifier = Modifier
-                        .background(Color.White)
+                        .background(colors.surfaceColorAtElevation(10.dp))
                 ) {
                     Box(modifier = Modifier.size(180.dp, 200.dp)) {
                         LazyColumn {
@@ -469,7 +464,8 @@ fun ReceiverSelector(
                                             text = "Everyone",
                                             fontFamily = interFamily,
                                             fontWeight = FontWeight.Medium,
-                                            fontSize = 16.sp
+                                            fontSize = 16.sp,
+                                            color = colors.onBackground
                                         )
                                     },
                                     trailingIcon = if (targetReceiver == null) {
@@ -477,7 +473,7 @@ fun ReceiverSelector(
                                             Icon(
                                                 painter = painterResource(id = R.drawable.check),
                                                 contentDescription = "Check Icon",
-                                                tint = CollaborantColors.BorderGray,
+                                                tint = colors.outline,
                                                 modifier = Modifier.size(13.dp)
                                             )
                                         }
@@ -487,7 +483,7 @@ fun ReceiverSelector(
 
                                 Divider(
                                     thickness = 1.dp,
-                                    color = CollaborantColors.BorderGray.copy(0.4f),
+                                    color = colors.outline.copy(0.4f),
                                     modifier = Modifier.padding(horizontal = 15.dp)
                                 )
                             }
@@ -504,7 +500,7 @@ fun ReceiverSelector(
                                     Divider(
                                         thickness = 1.dp,
                                         modifier = Modifier.padding(horizontal = 15.dp),
-                                        color = CollaborantColors.BorderGray.copy(0.4f)
+                                        color = colors.outline.copy(0.4f)
                                     )
                                 }
                             }

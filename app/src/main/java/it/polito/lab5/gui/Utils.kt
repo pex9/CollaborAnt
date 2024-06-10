@@ -341,10 +341,11 @@ fun TextComp(text: String, label: String, minHeight: Dp, modifier: Modifier) {
                 .defaultMinSize(0.dp, minHeight) // Set a minimum height for the card
                 .fillMaxWidth(), // Occupy the entire available width
             colors = CardDefaults.cardColors(
-                containerColor = colors.surfaceColorAtElevation(4.dp), // Background color of the card
+                containerColor = colors.surface, // Background color of the card
                 contentColor = colors.onBackground // Text color inside the card
             ),
             border = BorderStroke(1.dp, colors.outline),
+            elevation = CardDefaults.cardElevation(4.dp)
         ) {
             // Text content displayed inside the card with a light font weight
             Text(
