@@ -6,7 +6,6 @@ import java.time.LocalDateTime
 
 object DataBase {
     val default_categories = listOf("Recently assigned", "To do today", "To do next week")
-
     val users = listOf(
         User(
             1,

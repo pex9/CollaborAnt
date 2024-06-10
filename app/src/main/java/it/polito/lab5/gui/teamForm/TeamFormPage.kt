@@ -47,7 +47,6 @@ import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.ImageProfile
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable

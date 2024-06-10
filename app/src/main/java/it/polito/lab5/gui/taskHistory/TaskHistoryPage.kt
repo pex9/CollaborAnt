@@ -29,7 +29,6 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.model.Action
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable

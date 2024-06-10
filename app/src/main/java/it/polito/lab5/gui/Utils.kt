@@ -54,7 +54,6 @@ import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.Taken
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.Uploaded
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlin.math.min
 import coil.compose.AsyncImage
@@ -198,7 +197,6 @@ fun TextFieldComp(
         focusedLabelColor = colors.secondaryContainer,
         unfocusedLabelColor = colors.secondaryContainer,
         errorLabelColor = colors.error,
-
 
         focusedBorderColor = colors.outline,
         unfocusedBorderColor = colors.outline,

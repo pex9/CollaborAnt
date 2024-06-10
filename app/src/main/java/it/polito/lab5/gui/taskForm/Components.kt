@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
@@ -57,7 +56,6 @@ import it.polito.lab5.gui.taskView.RepeatComponent
 import it.polito.lab5.gui.taskView.TagComp
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 import java.time.Instant

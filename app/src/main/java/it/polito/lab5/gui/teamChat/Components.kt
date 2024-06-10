@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -61,7 +59,6 @@ import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Message
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -353,7 +350,7 @@ fun MessageFrom(message: Message, users: List<User>){
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 11.sp,
-                        color = CollaborantColors.Yellow
+                        color = colors.primaryContainer
                     )
                 }
             }
@@ -383,7 +380,7 @@ fun MessageFrom(message: Message, users: List<User>){
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 10.sp,
-                    color = CollaborantColors.BorderGray,
+                    color = colors.outline,
                     modifier = Modifier
                 )
             }
@@ -519,6 +516,7 @@ fun SelectorItem(
     setOptionsOpenedValue: (Boolean) -> Unit,
     setReceiverTargetValue: (Int?) -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     DropdownMenuItem(
         text = {
             Text(
@@ -535,7 +533,7 @@ fun SelectorItem(
                    Icon(
                        painter = painterResource(id = R.drawable.check),
                        contentDescription = "Check Icon",
-                       tint = CollaborantColors.BorderGray,
+                       tint = colors.outline,
                        modifier = Modifier.size(13.dp)
                    )
                 }
@@ -549,7 +547,7 @@ fun DateCanvas(date: LocalDate) {
     val formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy", Locale.ENGLISH)
     val literalDate = date.format(formatter)
     val textMeasurer = rememberTextMeasurer()
-
+    val colors = MaterialTheme.colorScheme
     Canvas(modifier = Modifier
         .fillMaxWidth()
         .height(40.dp)) {
@@ -560,13 +558,13 @@ fun DateCanvas(date: LocalDate) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,
-                    color = CollaborantColors.BorderGray,
+                    color = colors.outline,
                 )
             )
         val textSize = textLayoutResult.size
 
         drawLine(
-            color = CollaborantColors.BorderGray,
+            color = colors.outline,
             start = Offset(24f, this.size.height / 2f),
             end = Offset(this.size.width / 2f - textSize.width / 2f - 20f, this.size.height / 2f),
             strokeWidth = 1f
@@ -581,7 +579,7 @@ fun DateCanvas(date: LocalDate) {
         )
 
         drawLine(
-            color = CollaborantColors.BorderGray,
+            color = colors.outline,
             start = Offset(this.size.width / 2f + textSize.width / 2f + 20f, this.size.height / 2f),
             end = Offset(this.size.width - 24f, this.size.height / 2f),
             strokeWidth = 1f

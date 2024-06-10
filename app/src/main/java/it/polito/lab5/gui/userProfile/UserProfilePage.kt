@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)

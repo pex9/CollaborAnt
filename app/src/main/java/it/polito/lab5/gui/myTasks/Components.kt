@@ -3,7 +3,6 @@ package it.polito.lab5.gui.myTasks
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,7 +38,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.surfaceColorAtElevation
@@ -65,13 +61,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
+import it.polito.lab5.gui.TagCircleComp
+import it.polito.lab5.gui.TaskStateComp
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
-import it.polito.lab5.gui.TagCircleComp
-import it.polito.lab5.gui.TaskStateComp
 import it.polito.lab5.model.Team
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -393,7 +388,7 @@ fun TaskItem(
                         overflow = TextOverflow.Ellipsis,
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         letterSpacing = 0.sp,
                         color = colors.onSurface,
                     )
@@ -438,7 +433,7 @@ fun TaskItem(
                             task.dueDate.format(formatter),
                             fontFamily = interFamily,
                             fontWeight = dueDateFont,
-                            fontSize = 13.sp,
+                            fontSize = 12.sp,
                             letterSpacing = 0.sp,
                             color = dueDateColor
                         )
@@ -505,7 +500,7 @@ fun CategoryOptionsComp(
                 )
 
                 Divider(
-                    color = CollaborantColors.BorderGray.copy(0.4f),
+                    color = colors.outline.copy(0.4f),
                     thickness = 1.dp,
                     modifier = Modifier
                         .padding(horizontal = 15.dp)

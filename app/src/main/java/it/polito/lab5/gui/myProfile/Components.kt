@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.KPI
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable

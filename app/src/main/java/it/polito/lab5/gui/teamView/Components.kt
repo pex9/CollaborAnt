@@ -43,7 +43,6 @@ import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
 import it.polito.lab5.gui.MonogramPresentationComp
 import it.polito.lab5.gui.TagCircleComp
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -201,7 +200,7 @@ fun TaskItem(
                                 first = "+",
                                 last = "${task.teamMembers.size - 3}",
                                 fontSize = 11.sp,
-                                color = CollaborantColors.Yellow
+                                color = colors.primary
                             )
                         }
                     }

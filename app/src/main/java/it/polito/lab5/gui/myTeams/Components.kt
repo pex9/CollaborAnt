@@ -22,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -33,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,7 +43,6 @@ import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Team
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 
@@ -110,7 +107,8 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                 text = "Extra Configurations Needed!",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Medium,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                color = colors.onBackground
             )
         },
         text = {
@@ -119,39 +117,41 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     text = instructionsText,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp
-
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.secondaryContainer)
             ) {
                 Text(
                     text = "Open Settings",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.background
                 )
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.secondaryContainer)
             ) {
                 Text(
                     text = "Ignore",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.background
                 )
             }
         },
-        containerColor = Color.White,
-        titleContentColor = CollaborantColors.DarkBlue,
+        containerColor = colors.surfaceColorAtElevation(10.dp),
+        titleContentColor = colors.secondaryContainer,
         textContentColor = colors.outline
     )
 }
@@ -171,11 +171,11 @@ fun InvitationTeamBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
-
+    val colors = MaterialTheme.colorScheme
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = { setShowBottomSheetValue(false) }, // Dismiss the bottom sheet when requested
-        containerColor = CollaborantColors.PageBackGroundGray, // Background color of the bottom sheet
+        containerColor = colors.background, // Background color of the bottom sheet
         dragHandle = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -241,8 +241,8 @@ fun InvitationTeamBottomSheet(
                     else { setJoinSuccessValue(addMember(team.id, DataBase.LOGGED_IN_USER_ID)) }
                 },
                 colors = ButtonDefaults.buttonColors(
-                    contentColor = if(joinSuccess) Color.White else Color.Black,
-                    containerColor = if(joinSuccess) CollaborantColors.DarkBlue else CollaborantColors.Yellow
+                    contentColor = if(joinSuccess) colors.background else colors.onSecondary,
+                    containerColor = if(joinSuccess) colors.secondaryContainer else colors.primary
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {

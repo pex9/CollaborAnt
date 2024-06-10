@@ -41,7 +41,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,7 +57,6 @@ import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 
@@ -713,7 +711,7 @@ fun MemberSelectionBottomSheet(
             setChosenMemberValue(null)
             setErrorMsgValue("")
         },
-        containerColor = colors.background, // Background color of the bottom sheet
+        containerColor = colors.surfaceColorAtElevation(10.dp), // Background color of the bottom sheet
         dragHandle = {
             Column(
                 verticalArrangement = Arrangement.Top,
@@ -743,7 +741,7 @@ fun MemberSelectionBottomSheet(
                                     setErrorMsgValue("")
                                 }
                             },
-                            colors = ButtonDefaults.textButtonColors(contentColor = CollaborantColors.DarkBlue)
+                            colors = ButtonDefaults.textButtonColors(contentColor = colors.onBackground)
                         ) {
                             Text(
                                 text = "Cancel",
@@ -790,7 +788,7 @@ fun MemberSelectionBottomSheet(
                                         }
                                 }
                             },
-                            colors = ButtonDefaults.textButtonColors(contentColor = CollaborantColors.DarkBlue)
+                            colors = ButtonDefaults.textButtonColors(contentColor = colors.onBackground)
                         ) {
                             Text(
                                 text = "Done",
@@ -862,12 +860,12 @@ fun MemberSelectionBottomSheet(
                                 selected = chosenMember == memberId,
                                 onClick = null,
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = CollaborantColors.DarkBlue,
-                                    unselectedColor = CollaborantColors.DarkBlue
+                                    selectedColor = colors.secondaryContainer,
+                                    unselectedColor = colors.secondaryContainer
                                 )
                             )
                         },
-                        colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray),
+                        colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                         modifier = Modifier.selectable(
                             selected = chosenMember == memberId,
                             onClick = { setChosenMemberValue(memberId) }

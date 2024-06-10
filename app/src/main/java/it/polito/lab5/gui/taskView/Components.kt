@@ -47,7 +47,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -76,7 +75,6 @@ import it.polito.lab5.gui.TaskStateComp
 import it.polito.lab5.gui.bringPairToHead
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -283,7 +281,7 @@ fun TaskStateSelComp(
                                 Icon(
                                     painter = painterResource(id = R.drawable.check),
                                     contentDescription = "Check Icon",
-                                    tint = CollaborantColors.BorderGray,
+                                    tint = colors.outline,
                                     modifier = Modifier.size(13.dp)
                                 )
                             }

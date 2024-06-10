@@ -377,7 +377,7 @@ fun VerticalIndividualStatsPane(
                             },
                             trailingContent = {
                                 Text(
-                                    text = "${member.kpiValues.find { it.first == teamId }?.second?.score}",
+                                    text = "${member.kpiValues.find { it.first == teamId }?.second?.score ?: 0}",
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,
@@ -409,7 +409,7 @@ fun HorizontalIndividualStatsPane(
             .padding(top = p.calculateTopPadding())
             .fillMaxSize()
             .background(colors.background)
-            .padding(start = 35.dp, end = 35.dp, top = 20.dp, bottom = 20.dp)
+            .padding(start = 30.dp, end = 30.dp, top = 20.dp, bottom = 20.dp)
     ) {
         Column(
             modifier = Modifier
@@ -735,8 +735,9 @@ fun HorizontalIndividualStatsPane(
 
                             },
                             trailingContent = {
+                                val literalScoreValue = member.kpiValues.find { it.first == teamId }?.second?.score ?: 0
                                 Text(
-                                    text = "${member.kpiValues.find { it.first == teamId }?.second?.score}",
+                                    text = literalScoreValue.toString(),
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 15.sp,

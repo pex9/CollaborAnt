@@ -31,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,7 +40,6 @@ import it.polito.lab5.R
 import it.polito.lab5.gui.camera.CameraActivity
 import it.polito.lab5.model.Empty
 import it.polito.lab5.model.ImageProfile
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import it.polito.lab5.viewModels.pickRandomColor
 import kotlinx.coroutines.launch

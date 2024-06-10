@@ -4,7 +4,6 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,7 +57,6 @@ import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Team
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable

@@ -48,7 +48,6 @@ import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)

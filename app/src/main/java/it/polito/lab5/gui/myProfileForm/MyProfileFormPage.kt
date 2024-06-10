@@ -24,9 +24,11 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,21 +41,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.gui.teamForm.OptionsBottomSheet
 import it.polito.lab5.model.ImageProfile
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.White,
-            titleContentColor = Color.Black,
+            containerColor = containerColor,
+            titleContentColor = colors.onBackground,
         ),
         title = {
         },
@@ -62,7 +67,7 @@ fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
                 onClick = {navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
@@ -84,7 +89,7 @@ fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
                 onClick = { if(validate()) { navController.popBackStack() } },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
@@ -151,6 +156,7 @@ fun MyProfileFormPage(
         val telephoneOpt = defaultOpt.copy(keyboardType = KeyboardType.Phone, capitalization = KeyboardCapitalization.None)
         val locationOpt = defaultOpt.copy(autoCorrect = true)
         val descriptionOpt = defaultOpt.copy(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.Sentences, autoCorrect = true)
+        val colors = MaterialTheme.colorScheme
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -172,7 +178,7 @@ fun MyProfileFormPage(
                     Icon(
                         painter = painterResource(id = R.drawable.edit_square),
                         contentDescription = "Edit Icon",
-                        tint = CollaborantColors.DarkBlue,
+                        tint = colors.onBackground,
                         modifier = Modifier.size(24.dp)
                     )
                 }
