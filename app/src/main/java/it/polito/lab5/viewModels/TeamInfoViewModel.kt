@@ -24,7 +24,6 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
 
     fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
 
-    //TODO FIX DELETE TEAM
     suspend fun deleteTeam(team: Team, members: List<User>): Boolean {
         try {
             viewModelScope.async {
@@ -32,7 +31,7 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
             }.await()
             return true
         } catch (e: Exception) {
-            Log.e("DeleteTeam", "Failed to delete team", e)
+            Log.e("Server Error", e.message.toString())
             return false
         }
     }

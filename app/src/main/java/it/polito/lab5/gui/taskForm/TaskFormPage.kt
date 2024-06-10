@@ -145,6 +145,7 @@ fun TaskFormTopBar(
 fun TaskFormPage(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     title: String,
     setTitleValue: (String) -> Unit,
     titleError: String,
@@ -334,6 +335,7 @@ fun TaskFormPage(
             MembersPickerBottomSheet(
                 team = team,
                 users = users,
+                loggedInUserId = loggedInUserId,
                 members = delegatedMembers,
                 setShowBottomSheetValue = setShowMemberBottomSheetValue,
                 addMember = addMember,

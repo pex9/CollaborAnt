@@ -73,7 +73,8 @@ class MyModel(val context: Context) {
         val storageRef = storage.reference
 
         try {
-            val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
+            val (name, extension) = attachment.name.split(".")
+            val fileName = "attachments/${taskId}/${name}(${attachment.id}).${extension}"
             val attachmentRef = storageRef.child(fileName)
 
             // Upload ByteArray to Firebase Storage
@@ -90,8 +91,9 @@ class MyModel(val context: Context) {
     suspend fun downloadFileFromFirebase(taskId: String, attachment: Attachment, onComplete: (File) -> Unit, onFailure: (Exception) -> Unit) {
         // Create a storage reference from our app
         val storageRef: StorageReference = storage.reference
-        val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
-        val localFile = File(context.cacheDir, "${attachment.id}.${attachment.type.split("/").last()}")
+        val (name, extension) = attachment.name.split(".")
+        val fileName = "attachments/${taskId}/${name}(${attachment.id}).${extension}"
+        val localFile = File(context.cacheDir, "${name}(${attachment.id}).${extension}")
 
         // Create a reference to the file you want to download
         val fileRef: StorageReference = storageRef.child(fileName)
@@ -596,6 +598,8 @@ class MyModel(val context: Context) {
     }
 
     suspend fun deleteTeam(team: Team, members: List<User>) {
+        val storageRef = storage.reference
+
         //  Remove Team image if needed
         if (team.image is Uploaded) {
             deleteImage(team.id)
@@ -622,7 +626,8 @@ class MyModel(val context: Context) {
             //  Delete Task comments
             commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
 
-            //  Delete Task attachments     //  TODO: manage deletion in storage
+            //  Delete Task attachments
+            storageRef.child("attachments/${documentSnapshot.id}").listAll().await().items.forEach { it.delete().await() }
             attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
 
             //  Delete Task history
@@ -790,7 +795,8 @@ class MyModel(val context: Context) {
     }
 
     fun getAttachments(taskId: String): Flow<List<Attachment>> = callbackFlow {
-        val documentReference = db.collection("Tasks").document(taskId).collection("attachments")
+        val documentReference = db.collection("Tasks").document(taskId)
+            .collection("attachments").orderBy("name", Query.Direction.ASCENDING)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
@@ -950,7 +956,8 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {
+    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {   //  TODO: manage case of recurrent task
+        val storageRef = storage.reference
         val taskReference = db.collection("Tasks").document(task.id)
         val commentsReference = taskReference.collection("comments")
         val attachmentsReference = taskReference.collection("attachments")
@@ -959,7 +966,8 @@ class MyModel(val context: Context) {
         //  Delete Task comments
         commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
 
-        //  Delete Task attachments     //  TODO: manage deletion in storage
+        //  Delete Task attachments
+        storageRef.child("attachments/${task.id}").listAll().await().items.forEach { it.delete().await() }
         attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
 
         //  Delete Task history
@@ -1069,7 +1077,7 @@ class MyModel(val context: Context) {
     private val _users = MutableStateFlow(DataBase.users)
     val users: StateFlow<List<User>> = _users
 
-    fun updateU(userId: String, user: User) {
+    private fun updateU(userId: String, user: User) {
         val updatedUsers = _users.value.toMutableList()
         val index = updatedUsers.indexOfFirst { it.id == userId }
 
@@ -1079,7 +1087,7 @@ class MyModel(val context: Context) {
         }
     }
 
-    fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) {
+    private fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) {
         _users.value.find { it.id == userId }?.let { user ->
             val kpiValues = user.kpiValues.toMutableMap()
             val kpi = kpiValues[teamId]
@@ -1150,7 +1158,7 @@ class MyModel(val context: Context) {
     private val _tasks = MutableStateFlow(DataBase.tasks)
     val tasks: StateFlow<List<Task>> = _tasks
 
-    fun updateTask1(taskId: String, task: Task) {
+    private fun updateTask1(taskId: String, task: Task) {
         val updatedTasks = _tasks.value.toMutableList()
         val index = updatedTasks.indexOfFirst { it.id == taskId }
 
@@ -1176,50 +1184,9 @@ class MyModel(val context: Context) {
         _tasks.value = updatedTask
     }
 
-    fun setTaskState(taskId: String, state: TaskState) {
-        _tasks.value.find { it.id == taskId }?.let { task ->
-            //  Increase completeTasks Kpi value for all delegated members when the state is Completed
-            if (state == TaskState.COMPLETED) {
-                task.teamMembers.forEach { memberId ->
-                    updateKpi(memberId, task.teamId, "completedTasks")
-                }
-            }
 
-            val history = task.history.toMutableList()
-            history.add(
-                Action(
-                    id = task.history.size.toString(),
-                    memberId = DataBase.LOGGED_IN_USER_ID,
-                    taskState = state,
-                    date = LocalDateTime.now(),
-                    description = if (state == TaskState.COMPLETED) "Task completed"
-                    else "Task state changed"
-                )
-            )
 
-            updateTask1(taskId, task.copy(state = state, history = history))
-        }
-    }
 
-    fun addComment(taskId: String, comment: Comment) {
-        _tasks.value.find { it.id == taskId }?.let { task ->
-            val comments = task.comments.toMutableList()
-            val id = comments.size
-
-            comments.add(comment.copy(id = (id + 1).toString()))
-            updateTask1(taskId, task.copy(comments = comments))
-        }
-    }
-
-    fun addAttachment(taskId: String, attachment: Attachment) {
-        _tasks.value.find { it.id == taskId }?.let { task ->
-            val attachments = task.attachments.toMutableList()
-            val id = attachments.size
-
-            attachments.add(attachment.copy(id = (id + 1).toString()))
-            updateTask1(taskId, task.copy(attachments = attachments))
-        }
-    }
 
     fun removeAttachment(taskId: String, attachmentId: String) {
         _tasks.value.find { it.id == taskId }?.let { task ->

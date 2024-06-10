@@ -115,11 +115,12 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                 }
 
                 // Bottom sheet for displaying task members
-                if (vm.showBottomSheet && team != null && users != null) {
+                if (vm.showBottomSheet && team != null && users != null && vm.loggedInUserId != null) {
                         MembersBottomSheet(
                             team = team,
                             users = users,
                             members = task.teamMembers,
+                            loggedInUserId = vm.loggedInUserId,
                             setShowBottomSheetValue = vm::setShowBottomSheetValue,
                             navController = navController
                         )
@@ -131,9 +132,18 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                         text = "Are you sure to delete this task?",
                         onConfirmText = "Delete",
                         onConfirm = {
-                            vm.setShowDeleteDialogValue(false)
-                            vm.deleteTask(task.id)
-                            navController.popBackStack()
+                            var deleteSuccess = false
+
+                            scope.launch {
+                                if (users != null) {
+                                    deleteSuccess = vm.deleteTask(task = task, users.filter { task.teamMembers.contains(it.id) })
+                                }
+                            }.invokeOnCompletion {
+                                if(deleteSuccess) {
+                                    vm.setShowDeleteDialogValue(false)
+                                    navController.popBackStack()
+                                }
+                            }
                         },
                         onDismiss = { vm.setShowDeleteDialogValue(false) }
                     )

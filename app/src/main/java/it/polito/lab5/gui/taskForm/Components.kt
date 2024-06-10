@@ -434,6 +434,7 @@ fun RepeatMenuComp(
 fun MembersPickerBottomSheet(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     members: List<String>, // List of selected member IDs
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
     addMember: (String) -> Unit, // Callback to add a member
@@ -571,6 +572,7 @@ fun MembersPickerBottomSheet(
                                 )
                             )
                         },
+                        loggedInUserId = loggedInUserId,
                         modifier = Modifier.clickable {
                             if(members.contains(user.id)) { removeMember(user.id) }
                             else { addMember(user.id) }

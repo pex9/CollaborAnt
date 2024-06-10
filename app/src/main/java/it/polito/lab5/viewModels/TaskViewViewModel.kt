@@ -1,12 +1,13 @@
 package it.polito.lab5.viewModels
 
-import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
 import it.polito.lab5.model.GoogleAuthentication
@@ -14,6 +15,7 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
+import kotlinx.coroutines.async
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -48,11 +50,17 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
 
     suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) = model.deleteAttachmentFromTask(taskId, attachment)
 
-
-
-    fun deleteTask(taskId: String) = model.deleteTask1(taskId)
-
-    fun removeAttachment(taskId: String, attachmentId: String) = model.removeAttachment(taskId, attachmentId)
+    suspend fun deleteTask(task: Task, delegatedMembers: List<User>): Boolean {
+        try {
+            viewModelScope.async {
+                model.deleteTask(task, delegatedMembers)
+            }.await()
+            return true
+        } catch (e: Exception) {
+            Log.e("Server Error", e.message.toString())
+            return false
+        }
+    }
 
     var comment by mutableStateOf("")
         private set

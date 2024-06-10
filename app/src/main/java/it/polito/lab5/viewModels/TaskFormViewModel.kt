@@ -30,7 +30,7 @@ import java.time.LocalDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     val teams = model.teams
-    private var loggedInUser : User? = null
+    var loggedInUser : User? = null
     var currentTask: Task? = null
     var users: List<User>? = emptyList()
     var team: Team? = null

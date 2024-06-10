@@ -65,7 +65,6 @@ import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.TaskState
@@ -673,6 +672,7 @@ fun AttachmentItem(
     attachment: Attachment, // Attachment data
     removeAttachment: suspend (String, Attachment) -> Unit, // Function to remove the attachment
     downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
     showDownloadLoading: String,
     setShowDownloadLoadingValue: (String) -> Unit
 ) {
@@ -685,7 +685,7 @@ fun AttachmentItem(
         modifier = Modifier
             .defaultMinSize(0.dp, 55.dp)
             .fillMaxSize()
-            .clickable {
+            .clickable(enabled = showDownloadLoading.isBlank() && !showLoading) {
                 scope.launch {
                     setShowDownloadLoadingValue(attachment.id)
                     downloadFileFromFirebase(
@@ -764,6 +764,7 @@ fun AttachmentItem(
             if(isDelegatedMember || loggedInUserRole == Role.TEAM_MANAGER || loggedInUserRole == Role.SENIOR_MEMBER) {
                 // IconButton to remove the attachment
                 IconButton(
+                    enabled = showDownloadLoading.isBlank() && !showLoading,
                     onClick = {
                         scope.launch {
                             removeAttachment(taskId, attachment)
@@ -882,7 +883,10 @@ fun AttachmentComponent(
                         )
                     } else {
                         // IconButton for launching the document picker
-                        IconButton(onClick = { launcher.launch(arrayOf("application/*", "image/*")) }) {
+                        IconButton(
+                            enabled = showDownloadLoading.isBlank(),
+                            onClick = { launcher.launch(arrayOf("application/*", "image/*")) }
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.paper_plus),
                                 contentDescription = "Attachment Plus Icon",
@@ -926,6 +930,7 @@ fun AttachmentComponent(
                             attachment = attachment,
                             removeAttachment = removeAttachment,
                             downloadFileFromFirebase = downloadFileFromFirebase,
+                            showLoading = showLoading,
                             showDownloadLoading = showDownloadLoading,
                             setShowDownloadLoadingValue = setShowDownloadLoadingValue
                         )
@@ -1210,7 +1215,13 @@ fun CommentTextField(
 }
 
 @Composable
-fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingContent: @Composable (() -> Unit)? = null) {
+fun MemberItem(
+    user: User,
+    role: Role,
+    loggedInUserId: String,
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable (() -> Unit)? = null
+) {
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -1236,7 +1247,7 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
         headlineContent = {
             Column {
                 Text(
-                    text = if (DataBase.LOGGED_IN_USER_ID == user.id) "You" else "${user.first} ${user.last}",
+                    text = if (loggedInUserId == user.id) "You" else "${user.first} ${user.last}",
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     fontFamily = interFamily
@@ -1263,6 +1274,7 @@ fun MembersBottomSheet(
     team: Team,
     users: List<User>,
     members: List<String>,
+    loggedInUserId: String,
     setShowBottomSheetValue: (Boolean) -> Unit,
     navController: NavController
 ) {
@@ -1324,7 +1336,7 @@ fun MembersBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.key) }.toList(), DataBase.LOGGED_IN_USER_ID)
+            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.key) }.toList(), loggedInUserId)
 
             items(sortedMembers) {(memberId, role) ->
                 // Display member items
@@ -1332,6 +1344,7 @@ fun MembersBottomSheet(
                     MemberItem(
                         user = user,
                         role = role as Role,
+                        loggedInUserId = loggedInUserId,
                         trailingContent = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1350,7 +1363,7 @@ fun MembersBottomSheet(
                                     )
                                 }
 
-                                if(memberId != DataBase.LOGGED_IN_USER_ID) {
+                                if(memberId != loggedInUserId) {
                                     IconButton(onClick = {
                                         coroutineScope.launch { bottomSheetState.hide() }
                                             .invokeOnCompletion {

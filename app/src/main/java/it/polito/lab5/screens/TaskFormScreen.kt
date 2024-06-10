@@ -38,10 +38,11 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            if (team != null && users != null) {
+            if (team != null && users != null && vm.loggedInUser != null) {
                 TaskFormPage(
                     team = team,
                     users = users,
+                    loggedInUserId = vm.loggedInUser!!.id,
                     title = vm.title,
                     setTitleValue = vm::setTitleValue,
                     titleError = vm.titleError,
