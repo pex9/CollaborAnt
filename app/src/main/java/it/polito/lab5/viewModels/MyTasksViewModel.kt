@@ -1,18 +1,31 @@
 package it.polito.lab5.viewModels
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.GoogleAuthentication
+import it.polito.lab5.model.User
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
+    private var loggedInUser: User? = null
+
+    init {
+        viewModelScope.launch {
+            loggedInUser = auth.getSignedInUserId()?.let { getUser(it).first() }
+        }
+    }
+
     val users = model.users
     val teams = model.teams
     val tasks = model.tasks
@@ -22,6 +35,12 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
     fun getUserTeams(userId: String) = model.getUserTeams(userId)
 
     fun getUserTasks(userId: String) = model.getUserTasks(userId)
+
+    private suspend fun addCategoryToUser(user: User, newCategory: String) = model.addCategoryToUser(user, newCategory)
+
+    private suspend fun updateCategoryToUser(user: User, oldCategory: String, newCategory: String) = model.updateCategoryToUser(user, oldCategory, newCategory)
+
+    suspend fun removeCategoryFromUser(user: User, category: String) = model.removeCategoryFromUser(user, category)
 
     var categorySelectionOpened by mutableStateOf("")
         private set
@@ -75,42 +94,49 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
     var numberOfTasksForCategory: Int? by mutableStateOf(null)
         private set
 
-    fun setnumberOfTasksForCategory(value: Int?) {
+    fun setNumberOfTasksForCategoryValue(value: Int?) {
         numberOfTasksForCategory = value
     }
 
-    fun validate(): Boolean {
+    suspend fun validate(): Boolean {
         checkCategory()
 
         if (categoryError.isBlank()) {
-            if (currentCategory.isBlank()){
-                addCategoryToUser(DataBase.LOGGED_IN_USER_ID, category)
+            try {
+                viewModelScope.async {
+                    if (currentCategory.isBlank()) {
+                        loggedInUser?.let { addCategoryToUser(it, category) }
+                    } else {
+                        loggedInUser?.let { updateCategoryToUser(it, currentCategory, category) }
 
-            } else{
-                auth.getSignedInUserId()?.let { updateCategory(it, currentCategory, category) }
+                        //  TODO: manage with database
+//                        // Update Category for all tasks of the user belonging to the previous category
+//                        tasks.value.filter {
+//                            it.categories.containsKey(DataBase.LOGGED_IN_USER_ID) && it.categories[DataBase.LOGGED_IN_USER_ID] == currentCategory
+//                        }.forEach { task ->
+//                            updateCategoryFromTask(task.id, DataBase.LOGGED_IN_USER_ID, category)
+//                        }
 
-                // Update Category for all tasks of the user belonging to the previous category
-                tasks.value.filter {
-                    it.categories.containsKey(DataBase.LOGGED_IN_USER_ID) && it.categories[DataBase.LOGGED_IN_USER_ID] == currentCategory
-                }.forEach { task ->
-                    updateCategoryFromTask(task.id, DataBase.LOGGED_IN_USER_ID, category)
-                }
 
-                // Reset of currentCategory state
+                    }
+                }.await()
+
                 currentCategory = ""
+                categorySelectionOpened = ""
+                categoryTaskListOpened = ""
+
+                return true
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+                //showLoading = false
+                return false
             }
-
-            categorySelectionOpened = ""
-            categoryTaskListOpened = ""
-
-            return true
         }
-
         return false
     }
 
     private fun checkCategory() {
-        val userCategories = users.value.find { it.id == DataBase.LOGGED_IN_USER_ID }?.categories ?: emptyList()
+        val userCategories = loggedInUser?.categories ?: emptyList()
 
         categoryError = if (category.isBlank())
             "Category cannot be blank"
@@ -122,14 +148,7 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
             ""
     }
 
-    private fun addCategoryToUser(userId: String, newCategory: String) = model.addCategoryToUser(userId, newCategory)
-
-    private fun updateCategory(userId: String, oldCategory: String, newCategory: String) = model.updateCategory(userId, oldCategory, newCategory)
-
     fun updateCategoryFromTask(taskId: String, userId: String, newCategory: String) = model.updateCategoryFromTask(taskId,userId, newCategory)
-
-    // check if the category has no tasks associated
-    fun deleteCategoryFromUser(userId: String, category: String) = model.deleteCategoryFromUser(userId, category)
 
     var errMsg by mutableStateOf("")
         private set

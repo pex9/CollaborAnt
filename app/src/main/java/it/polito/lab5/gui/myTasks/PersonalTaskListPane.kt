@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,18 +35,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.TextFieldComp
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @Composable
 fun PersonalTaskListPane(
     teams: List<Team>,
     categories: List<String>,
     tasks: List<Task>,
-    loggedInUserId: String,
+    loggedInUser: User,
     navController: NavController, // NavController for navigation
     p: PaddingValues, // Padding values for layout
     category: String,
@@ -57,7 +59,7 @@ fun PersonalTaskListPane(
     categorySelectionOpened: String,
     currentCategory: String,
     setCurrentCategory: (String) -> Unit,
-    validate: () -> Boolean,
+    validate: suspend () -> Boolean,
     setCategorySelectionOpenedValue: (String) -> Unit,
     myTasksHideSheet: Boolean,
     setMyTasksHideSheet: (Boolean) -> Unit,
@@ -68,7 +70,7 @@ fun PersonalTaskListPane(
     setExpandCategory: (String) -> Unit,
     isDialogDeleteOpen: Boolean,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
-    deleteCategoryFromUser: (String, String) -> Unit,
+    deleteCategoryFromUser: suspend (User, String) -> Unit,
     numberOfTasksForCategory: Int?,
     setNumberOfTasksForCategory: (Int?) -> Unit,
     errMsg: String,
@@ -78,6 +80,7 @@ fun PersonalTaskListPane(
     setIsVisibleValue: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val scrollState = rememberLazyListState()
 
     LaunchedEffect(scrollState) {
@@ -141,7 +144,15 @@ fun PersonalTaskListPane(
                             )
                         }
 
-                        TextButton(onClick = { if(validate()) { setIsDialogOpen(false) } }) {
+                        TextButton(
+                            onClick = {
+                                var isSuccess = false
+                                scope.launch {
+                                    isSuccess = validate()
+                                }.invokeOnCompletion {
+                                    if(isSuccess) { setIsDialogOpen(false) }
+                                }
+                            }) {
                             Text(
                                 text = if(currentCategory.isNotBlank()) "Save" else "Create",
                                 fontFamily = interFamily,
@@ -162,10 +173,15 @@ fun PersonalTaskListPane(
             text = "Are you sure to delete \"${currentCategory}\" category?",
             onConfirmText = "Delete",
             onConfirm = {
-                setIsDialogDeleteOpen(false)
-                if(numberOfTasksForCategory == 0){
-                    deleteCategoryFromUser(DataBase.LOGGED_IN_USER_ID, currentCategory)
-                } else{ setErrMsgValue("Cannot delete category which contains tasks!") }
+
+                if(numberOfTasksForCategory == 0) {
+                    scope.launch {
+                        deleteCategoryFromUser(loggedInUser, currentCategory)
+                    }.invokeOnCompletion { setIsDialogDeleteOpen(false) }
+                } else {
+                    setErrMsgValue("Cannot delete category which contains tasks!")
+                    setIsDialogDeleteOpen(false)
+                }
             },
             onDismiss = { setIsDialogDeleteOpen(false) }
         )
@@ -210,7 +226,7 @@ fun PersonalTaskListPane(
                 teams = teams,
                 tasks = tasks,
                 category = category,
-                loggedInUserId = loggedInUserId,
+                loggedInUserId = loggedInUser.id,
                 navController = navController,
                 setIsDialogOpen = setIsDialogOpen,
                 setCurrentCategory = setCurrentCategory,

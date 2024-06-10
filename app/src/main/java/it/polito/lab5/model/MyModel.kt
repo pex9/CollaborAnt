@@ -351,6 +351,39 @@ class MyModel(val context: Context) {
         documentReference.update("joinedTeams", joinedTeams).await()
     }
 
+    suspend fun addCategoryToUser(user: User, newCategory: String) {
+        val documentReference = db.collection("Users").document(user.id)
+
+        val updatedCategories = user.categories.toMutableList()
+        if(!updatedCategories.contains(newCategory)) {
+            updatedCategories.add(newCategory)
+
+            documentReference.update("categories", updatedCategories).await()
+        }
+    }
+
+    suspend fun updateCategoryToUser(user: User, oldCategory: String, newCategory: String) {
+        val documentReference = db.collection("Users").document(user.id)
+
+        val updatedCategories = user.categories.toMutableList()
+        val idx = updatedCategories.indexOfFirst { it == oldCategory }
+        if(idx != -1) {
+            updatedCategories[idx] = newCategory
+            documentReference.update("categories", updatedCategories).await()
+        }
+    }
+
+    suspend fun removeCategoryFromUser(user: User, category: String) {
+        val documentReference = db.collection("Users").document(user.id)
+
+        val updatedCategories = user.categories.toMutableList()
+        val idx = updatedCategories.indexOfFirst { it == category }
+        if(idx != -1) {
+            updatedCategories.removeAt(idx)
+            documentReference.update("categories", updatedCategories).await()
+        }
+    }
+
     //  Team
     suspend fun createTeam(team: Team): String {
         val documentReference = db.collection("Teams")

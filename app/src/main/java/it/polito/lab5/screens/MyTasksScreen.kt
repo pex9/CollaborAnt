@@ -17,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import it.polito.lab5.gui.myTasks.MyTasksTopBar
 import it.polito.lab5.gui.myTasks.PersonalTaskListPane
-import it.polito.lab5.model.DataBase
-import it.polito.lab5.model.TaskState
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyTasksViewModel
 
@@ -58,7 +56,7 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
                 teams = teams,
                 categories = user.categories,
                 tasks = tasks,
-                loggedInUserId = user.id,
+                loggedInUser = user,
                 navController = navController,
                 p = paddingValues,
                 category = vm.category,
@@ -81,9 +79,9 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
                 setExpandCategory = vm::setCategoryTaskListOpenedValue,
                 isDialogDeleteOpen = vm.isDialogDeleteOpen,
                 setIsDialogDeleteOpen = vm::setIsDialogDeleteOpen,
-                deleteCategoryFromUser = vm::deleteCategoryFromUser,
+                deleteCategoryFromUser = vm::removeCategoryFromUser,
                 numberOfTasksForCategory = vm.numberOfTasksForCategory,
-                setNumberOfTasksForCategory = vm::setnumberOfTasksForCategory,
+                setNumberOfTasksForCategory = vm::setNumberOfTasksForCategoryValue,
                 errMsg = vm.errMsg,
                 setErrMsgValue = vm::setErrMsgValue,
                 chosenCategory = vm.chosenCategory,
