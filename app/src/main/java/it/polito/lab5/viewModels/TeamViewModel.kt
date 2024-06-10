@@ -26,10 +26,6 @@ class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuth
 
     suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 
-    val teams = model.teams
-    val tasks = model.tasks
-    val users = model.users
-
     var myTasksFilter = mutableStateOf(false)
     var priorityFilter: MutableState<Tag?> = mutableStateOf(null)
     var prioritySort: MutableState<String> = mutableStateOf("None")

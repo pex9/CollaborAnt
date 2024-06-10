@@ -17,8 +17,6 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.io.File
@@ -88,7 +86,12 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun downloadFileFromFirebase(taskId: String, attachment: Attachment, onComplete: (File) -> Unit, onFailure: (Exception) -> Unit) {
+    suspend fun downloadFileFromFirebase(
+        taskId: String,
+        attachment: Attachment,
+        onComplete: (File) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
         // Create a storage reference from our app
         val storageRef: StorageReference = storage.reference
         val (name, extension) = attachment.name.split(".")
@@ -196,7 +199,7 @@ class MyModel(val context: Context) {
                 trySend(emptyList())
             }
         }
-        awaitClose{ snapshotListener.remove() }
+        awaitClose { snapshotListener.remove() }
     }
 
     @Suppress("unchecked_cast")
@@ -331,12 +334,17 @@ class MyModel(val context: Context) {
         }
     }
 
-    suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Pair<String, KPI>, delete: Boolean = false) {
+    suspend fun updateUserKpi(
+        userId: String,
+        joinedTeams: Long,
+        kpiValues: Pair<String, KPI>,
+        delete: Boolean = false
+    ) {
         val documentReference = db.collection("Users").document(userId)
 
         val kpiValuesReference = documentReference.collection("kpiValues").document(kpiValues.first)
 
-        if(delete) {
+        if (delete) {
             kpiValuesReference.delete().await()
         } else {
             kpiValuesReference.set(
@@ -355,7 +363,7 @@ class MyModel(val context: Context) {
         val documentReference = db.collection("Users").document(user.id)
 
         val updatedCategories = user.categories.toMutableList()
-        if(!updatedCategories.contains(newCategory)) {
+        if (!updatedCategories.contains(newCategory)) {
             updatedCategories.add(newCategory)
 
             documentReference.update("categories", updatedCategories).await()
@@ -367,7 +375,7 @@ class MyModel(val context: Context) {
 
         val updatedCategories = user.categories.toMutableList()
         val idx = updatedCategories.indexOfFirst { it == oldCategory }
-        if(idx != -1) {
+        if (idx != -1) {
             updatedCategories[idx] = newCategory
             documentReference.update("categories", updatedCategories).await()
         }
@@ -378,7 +386,7 @@ class MyModel(val context: Context) {
 
         val updatedCategories = user.categories.toMutableList()
         val idx = updatedCategories.indexOfFirst { it == category }
-        if(idx != -1) {
+        if (idx != -1) {
             updatedCategories.removeAt(idx)
             documentReference.update("categories", updatedCategories).await()
         }
@@ -448,7 +456,11 @@ class MyModel(val context: Context) {
                     Message(
                         id = messageDocument.id,
                         senderId = messageDocument.get("senderId").toString(),
-                        receiverId = if(literalReceiver == "null") { null } else { literalReceiver },
+                        receiverId = if (literalReceiver == "null") {
+                            null
+                        } else {
+                            literalReceiver
+                        },
                         content = messageDocument.get("content").toString(),
                         date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
                     )
@@ -461,7 +473,7 @@ class MyModel(val context: Context) {
                 trySend(emptyList())
             }
         }
-        awaitClose{ chatsSnapshotListener.remove() }
+        awaitClose { chatsSnapshotListener.remove() }
     }
 
     @Suppress("unchecked_cast")
@@ -472,7 +484,7 @@ class MyModel(val context: Context) {
             if (snapshot != null && snapshot.exists()) {
                 var image: Map<String, String?> = emptyMap()
 
-                if(snapshot.get("image") is Map<*, *>) {
+                if (snapshot.get("image") is Map<*, *>) {
                     image = snapshot.get("image") as Map<String, String?>
                 }
 
@@ -651,20 +663,27 @@ class MyModel(val context: Context) {
         val r = teamReference.collection("chat").get().await()
         r.documents.forEach { teamReference.collection("chat").document(it.id).delete().await() }
 
-        db.collection("Tasks").whereEqualTo("teamId", team.id).get().await().documents.forEach { documentSnapshot ->
+        db.collection("Tasks").whereEqualTo("teamId", team.id).get()
+            .await().documents.forEach { documentSnapshot ->
             val commentsReference = documentSnapshot.reference.collection("comments")
             val attachmentsReference = documentSnapshot.reference.collection("attachments")
             val historyReference = documentSnapshot.reference.collection("history")
 
             //  Delete Task comments
-            commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
+            commentsReference.get().await().documents.forEach {
+                commentsReference.document(it.id).delete().await()
+            }
 
             //  Delete Task attachments
-            storageRef.child("attachments/${documentSnapshot.id}").listAll().await().items.forEach { it.delete().await() }
-            attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
+            storageRef.child("attachments/${documentSnapshot.id}").listAll()
+                .await().items.forEach { it.delete().await() }
+            attachmentsReference.get()
+                .await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
 
             //  Delete Task history
-            historyReference.get().await().documents.forEach { historyReference.document(it.id).delete().await() }
+            historyReference.get().await().documents.forEach {
+                historyReference.document(it.id).delete().await()
+            }
 
             //  Delete Task
             documentSnapshot.reference.delete().await()
@@ -684,7 +703,7 @@ class MyModel(val context: Context) {
             )
         ).await()
 
-        val membersId = when(message.receiverId) {
+        val membersId = when (message.receiverId) {
             null -> team.members.keys.toList().filter { it != message.senderId }
             else -> listOf(message.receiverId)
         }
@@ -707,11 +726,13 @@ class MyModel(val context: Context) {
         )
 
         //  Update User kpi
-        updateUserKpi(user.id, user.joinedTeams + 1, team.id to KPI(
-            assignedTasks = 0,
-            completedTasks = 0,
-            score = calculateScore(0, 0)
-        ))
+        updateUserKpi(
+            user.id, user.joinedTeams + 1, team.id to KPI(
+                assignedTasks = 0,
+                completedTasks = 0,
+                score = calculateScore(0, 0)
+            )
+        )
     }
 
     suspend fun updateUserRole(userId: String, newRole: Role, team: Team) {
@@ -897,7 +918,8 @@ class MyModel(val context: Context) {
                 val endDateRepeatTimestamp = snapshot.get("endDateRepeat")?.let { it as Timestamp }
                 val literalParentId = snapshot.get("parentId").toString()
                 val delegatedMembers = snapshot.get("teamMembers") as List<String>
-                val categories = delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
+                val categories =
+                    delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
 
                 trySend(
                     Task(
@@ -905,10 +927,22 @@ class MyModel(val context: Context) {
                         title = snapshot.getString("title") ?: "",
                         description = snapshot.getString("description") ?: "",
                         teamId = snapshot.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        dueDate = dueDateTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         repeat = getRepeat(snapshot.getString("repeat")),
-                        parentId = if(literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        parentId = if (literalParentId == "null") {
+                            null
+                        } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         tag = getTag(snapshot.getString("tag")),
                         teamMembers = snapshot.get("teamMembers") as List<String>,
                         state = getTaskState(snapshot.getString("state")),
@@ -937,20 +971,34 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val endDateRepeatTimestamp =
+                        taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
-                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    val categories =
+                        delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
 
                     Task(
                         id = taskDocument.id,
                         title = taskDocument.getString("title") ?: "",
                         description = taskDocument.getString("description") ?: "",
                         teamId = taskDocument.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        dueDate = dueDateTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         repeat = getRepeat(taskDocument.getString("repeat")),
-                        parentId = if(literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        parentId = if (literalParentId == "null") {
+                            null
+                        } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
                         state = getTaskState(taskDocument.getString("state")),
@@ -981,20 +1029,34 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val endDateRepeatTimestamp =
+                        taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
-                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    val categories =
+                        delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
 
                     Task(
                         id = taskDocument.id,
                         title = taskDocument.getString("title") ?: "",
                         description = taskDocument.getString("description") ?: "",
                         teamId = taskDocument.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        dueDate = dueDateTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         repeat = getRepeat(taskDocument.getString("repeat")),
-                        parentId = if(literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        parentId = if (literalParentId == "null") {
+                            null
+                        } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let {
+                            LocalDateTime.ofInstant(
+                                it.toInstant(),
+                                ZoneOffset.UTC
+                            ).toLocalDate()
+                        },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
                         state = getTaskState(taskDocument.getString("state")),
@@ -1033,7 +1095,10 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {   //  TODO: manage case of recurrent task
+    suspend fun deleteTask(
+        task: Task,
+        delegateMembers: List<User>
+    ) {   //  TODO: manage case of recurrent task
         val storageRef = storage.reference
         val taskReference = db.collection("Tasks").document(task.id)
         val commentsReference = taskReference.collection("comments")
@@ -1041,14 +1106,22 @@ class MyModel(val context: Context) {
         val historyReference = taskReference.collection("history")
 
         //  Delete Task comments
-        commentsReference.get().await().documents.forEach { commentsReference.document(it.id).delete().await() }
+        commentsReference.get().await().documents.forEach {
+            commentsReference.document(it.id).delete().await()
+        }
 
         //  Delete Task attachments
-        storageRef.child("attachments/${task.id}").listAll().await().items.forEach { it.delete().await() }
-        attachmentsReference.get().await().documents.forEach { attachmentsReference.document(it.id).delete().await() }
+        storageRef.child("attachments/${task.id}").listAll().await().items.forEach {
+            it.delete().await()
+        }
+        attachmentsReference.get().await().documents.forEach {
+            attachmentsReference.document(it.id).delete().await()
+        }
 
         //  Delete Task history
-        historyReference.get().await().documents.forEach { historyReference.document(it.id).delete().await() }
+        historyReference.get().await().documents.forEach {
+            historyReference.document(it.id).delete().await()
+        }
 
         //  Update kpi for delegated members
         if (task.state != TaskState.COMPLETED) {
@@ -1111,7 +1184,12 @@ class MyModel(val context: Context) {
         )
     }
 
-    suspend fun updateTaskState(task: Task, delegatedMembers: List<User>, loggedInUserId: String, state: TaskState) {
+    suspend fun updateTaskState(
+        task: Task,
+        delegatedMembers: List<User>,
+        loggedInUserId: String,
+        state: TaskState
+    ) {
         //  Update delegated members kpi
         if (state == TaskState.COMPLETED) {
             delegatedMembers.forEach { member ->
@@ -1121,12 +1199,13 @@ class MyModel(val context: Context) {
                     score = calculateScore(kpi.assignedTasks, kpi.completedTasks + 1)
                 )
 
-                updatedKpi?.let {updateUserKpi(member.id, member.joinedTeams, task.teamId to it) }
+                updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, task.teamId to it) }
             }
         }
 
         //  Add new action to Task history
-        addActionToTaskHistory(task.id,
+        addActionToTaskHistory(
+            task.id,
             Action(
                 id = "",
                 memberId = loggedInUserId,
@@ -1157,148 +1236,5 @@ class MyModel(val context: Context) {
                 "date" to Timestamp(Date(comment.date.toInstant(ZoneOffset.UTC).toEpochMilli()))
             )
         ).await()
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //  Users
-    private val _users = MutableStateFlow(DataBase.users)
-    val users: StateFlow<List<User>> = _users
-
-    private fun updateU(userId: String, user: User) {
-        val updatedUsers = _users.value.toMutableList()
-        val index = updatedUsers.indexOfFirst { it.id == userId }
-
-        if (index != -1) {
-            updatedUsers[index] = user
-            _users.value = updatedUsers
-        }
-    }
-
-    private fun updateKpi(userId: String, teamId: String, kpiCategory: String, value: Int = 1) {
-        _users.value.find { it.id == userId }?.let { user ->
-            val kpiValues = user.kpiValues.toMutableMap()
-            val kpi = kpiValues[teamId]
-
-            if (kpi != null) {
-                if (kpiCategory == "assignedTasks") {
-                    val newAssignedTasks = kpi.assignedTasks + value
-                    val newScore = calculateScore(newAssignedTasks, kpi.completedTasks)
-
-                    kpiValues[teamId] = kpi.copy(assignedTasks = newAssignedTasks, score = newScore)
-                } else {
-                    val newCompletedTasks = kpi.completedTasks + value
-                    val newScore = calculateScore(kpi.assignedTasks, newCompletedTasks)
-
-                    kpiValues[teamId] =
-                        kpi.copy(completedTasks = newCompletedTasks, score = newScore)
-                }
-
-                updateU(userId, user.copy(kpiValues = kpiValues))
-            }
-        }
-    }
-
-    // add a new string category to the user
-    fun addCategoryToUser(userId: String, c: String) {
-        _users.value.find { it.id == userId }?.let { user ->
-            val categories = user.categories.toMutableList().apply { add(c) }
-            updateU(userId, user.copy(categories = categories))
-        }
-    }
-
-    fun updateCategory(userId: String, old: String, new: String) {
-        if (old != "Recently assigned") {
-            _users.value.find { it.id == userId }?.let { user ->
-                val categories = user.categories.toMutableList()
-                val idx = categories.indexOf(old)
-                categories[idx] = new
-
-                updateU(userId, user.copy(categories = categories))
-            }
-        }
-    }
-
-    fun updateCategoryFromTask(taskId: String, userId: String, new: String) {
-        _tasks.value.find { it.id == taskId }?.let { task ->
-            val categories = task.categories.toMutableMap()
-            categories[userId] = new
-            updateTask1(taskId, task.copy(categories = categories))
-        }
-    }
-
-    fun deleteCategoryFromUser(userId: String, c: String) {
-        if (c != "Recently assigned") {
-            _users.value.find { it.id == userId }?.let { user ->
-                val categories = user.categories.toMutableList()
-                categories.remove(c)
-
-                updateU(userId, user.copy(categories = categories))
-            }
-        }
-    }
-
-    //  Teams
-    private val _teams = MutableStateFlow(DataBase.teams)
-    val teams: StateFlow<List<Team>> = _teams
-
-    //  Tasks
-    private val _tasks = MutableStateFlow(DataBase.tasks)
-    val tasks: StateFlow<List<Task>> = _tasks
-
-    private fun updateTask1(taskId: String, task: Task) {
-        val updatedTasks = _tasks.value.toMutableList()
-        val index = updatedTasks.indexOfFirst { it.id == taskId }
-
-        if (index != -1) {
-            updatedTasks[index] = task
-            _tasks.value = updatedTasks
-        }
-    }
-
-    fun deleteTask1(taskId: String) {
-        val updatedTask = _tasks.value.toMutableList()
-
-        //  If state of deleted task is different of Completed, we decrease the assignedTasks Kpi value for all delegated members
-        updatedTask.find { it.id == taskId }?.let { task ->
-            if (task.state != TaskState.COMPLETED) {
-                task.teamMembers.forEach { memberId ->
-                    updateKpi(memberId, task.teamId, "assignedTasks", -1)
-                }
-            }
-        }
-
-        updatedTask.removeIf { it.id == taskId }
-        _tasks.value = updatedTask
-    }
-
-
-
-
-
-    fun removeAttachment(taskId: String, attachmentId: String) {
-        _tasks.value.find { it.id == taskId }?.let { task ->
-            val attachments = task.attachments.toMutableList()
-
-            attachments.removeIf { it.id == attachmentId }
-            updateTask1(taskId, task.copy(attachments = attachments))
-        }
     }
 }

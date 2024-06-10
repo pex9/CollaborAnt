@@ -12,9 +12,6 @@ import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Team
 
 class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
-    val teams = model.teams
-    val users = model.users
-
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
     fun getUser(userId: String) = model.getUser(userId)

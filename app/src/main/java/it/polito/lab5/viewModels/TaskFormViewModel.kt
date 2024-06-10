@@ -29,7 +29,6 @@ import java.time.LocalDateTime
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
-    val teams = model.teams
     var loggedInUser : User? = null
     var currentTask: Task? = null
     var users: List<User>? = emptyList()
@@ -338,22 +337,9 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
     var triState: ToggleableState by mutableStateOf(ToggleableState.Indeterminate)
         private set
-    init {
-        val team = teams.value.find { it.id == (currentTask?.teamId ?: teamId) }
-
-        triState = team?.let {
-            when (delegatedMembers.size) {
-                0 -> ToggleableState.Off
-                in 1 until it.members.size -> ToggleableState.Indeterminate
-                else -> ToggleableState.On
-            }
-        } ?: ToggleableState.Indeterminate
-    }
-
     fun setTriStateValue(t: ToggleableState) {
         triState = t
     }
-
     fun toggleTriState() {
         triState = when(triState) {
             ToggleableState.On -> ToggleableState.Off
@@ -384,6 +370,14 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
             tag = currentTask?.tag ?: Tag.UNDEFINED
             currentTask?.let { delegatedMembers.addAll(it.teamMembers) }
             showEndRepeatField = endRepeatDate != null
+
+            triState = team?.let {
+                when (delegatedMembers.size) {
+                    0 -> ToggleableState.Off
+                    in 1 until it.members.size -> ToggleableState.Indeterminate
+                    else -> ToggleableState.On
+                }
+            } ?: ToggleableState.Indeterminate
         }
     }
 }

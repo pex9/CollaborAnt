@@ -16,10 +16,6 @@ import kotlinx.coroutines.async
 
 @RequiresApi(Build.VERSION_CODES.O)
 class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
-    val users = model.users
-    val teams = model.teams
-    val tasks = model.tasks
-
     fun getUser(userId: String) = model.getUser(userId)
 
     fun getUserTeams(userId: String) = model.getUserTeams(userId)

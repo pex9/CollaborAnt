@@ -14,10 +14,8 @@ import it.polito.lab5.model.User
 import kotlinx.coroutines.async
 
 class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
-    val users = model.users
-    val teams = model.teams
-
     val loggedInUserId = auth.getSignedInUserId()
+
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
     fun getUserKpi(userId: String) = model.getUserKpi(userId)

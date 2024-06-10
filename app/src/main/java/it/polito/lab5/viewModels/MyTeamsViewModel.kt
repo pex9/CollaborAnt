@@ -16,6 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     private var invitationTeam: Team? = null
 
@@ -25,7 +26,6 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
 
     fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun getUserTeams(userId: String) = model.getUserTeams(userId)
 
     suspend fun addUserToTeam(team: Team, user: User): Boolean {

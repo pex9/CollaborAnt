@@ -20,10 +20,6 @@ import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
 class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleAuthentication): ViewModel() {
-    val teams = model.teams
-    val users = model.users
-    val tasks = model.tasks
-
     val loggedInUserId = auth.getSignedInUserId()
 
     fun getTask(taskId: String) = model.getTask(taskId)
