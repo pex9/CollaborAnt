@@ -138,9 +138,13 @@ fun TaskPage(
     loggedInUserId: String,
     loggedInUserRole: Role,
     addAttachment: suspend (String, Attachment) -> Unit,
-    removeAttachment: (String, String) -> Unit,
+    removeAttachment: suspend (String, Attachment) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit,
-    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -255,7 +259,11 @@ fun TaskPage(
             attachments = task.attachments,
             addAttachment = addAttachment,
             removeAttachment = removeAttachment,
-            downloadFileFromFirebase = downloadFileFromFirebase
+            downloadFileFromFirebase = downloadFileFromFirebase,
+            showLoading = showLoading,
+            setShowLoadingValue = setShowLoadingValue,
+            showDownloadLoading = showDownloadLoading,
+            setShowDownloadLoadingValue = setShowDownloadLoadingValue
         )
 
         // Comments component

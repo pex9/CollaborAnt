@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -671,10 +673,13 @@ fun AttachmentItem(
     context: Context, // Android context
     taskId: String, // ID of the task to which the attachment belongs
     attachment: Attachment, // Attachment data
-    removeAttachment: (String, String) -> Unit, // Function to remove the attachment
-    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
+    removeAttachment: suspend (String, Attachment) -> Unit, // Function to remove the attachment
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
+
     // Row containing the attachment item
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -684,13 +689,24 @@ fun AttachmentItem(
             .fillMaxSize()
             .clickable {
                 scope.launch {
+                    setShowDownloadLoadingValue(attachment.id)
                     downloadFileFromFirebase(
                         taskId,
                         attachment,
-                        { openDocument(context, it) },
+                        {
+                            setShowDownloadLoadingValue("")
+                            openDocument(context, it)
+                        },
                         {
                             Log.e("Server Error", it.message.toString())
-                            Toast.makeText(context, "Unable to download attachment!", Toast.LENGTH_LONG).show()
+                            setShowDownloadLoadingValue("")
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Unable to download attachment!",
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
                         }
                     )
                 }
@@ -749,7 +765,13 @@ fun AttachmentItem(
         ) {
             if(isDelegatedMember || loggedInUserRole == Role.TEAM_MANAGER || loggedInUserRole == Role.SENIOR_MEMBER) {
                 // IconButton to remove the attachment
-                IconButton(onClick = { removeAttachment(taskId, attachment.id) }) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            removeAttachment(taskId, attachment)
+                        }
+                    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.cross),
                         contentDescription = "Remove Icon"
@@ -757,6 +779,13 @@ fun AttachmentItem(
                 }
             }
         }
+    }
+
+    if(showDownloadLoading == attachment.id) {
+        LinearProgressIndicator(
+            color = CollaborantColors.DarkBlue,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -767,8 +796,12 @@ fun AttachmentComponent(
     loggedInUserRole: Role,
     attachments: List<Attachment>,
     addAttachment: suspend (String, Attachment) -> Unit,
-    removeAttachment: (String, String) -> Unit,
-    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit
+    removeAttachment: suspend (String, Attachment) -> Unit,
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     // Accessing the current context
@@ -784,6 +817,7 @@ fun AttachmentComponent(
                 getAttachmentInfo(context, uri)?.let { (name, size) ->
                     // Adding the attachment to the list
                     scope.launch {
+                        setShowLoadingValue(true)
                         addAttachment(
                             taskId, Attachment(
                                 id = "",
@@ -793,7 +827,7 @@ fun AttachmentComponent(
                                 uri = uri,
                             )
                         )
-                    }
+                    }.invokeOnCompletion { setShowLoadingValue(false) }
                 }
             }
         }
@@ -841,13 +875,22 @@ fun AttachmentComponent(
                     .weight(1f)
             ) {
                 if(isDelegatedMember || loggedInUserRole == Role.TEAM_MANAGER || loggedInUserRole == Role.SENIOR_MEMBER) {
-                    // IconButton for launching the document picker
-                    IconButton(onClick = { launcher.launch(arrayOf("application/*", "image/*")) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.paper_plus),
-                            contentDescription = "Attachment Plus Icon",
-                            tint = CollaborantColors.DarkBlue
+                    if(showLoading) {
+                        CircularProgressIndicator(
+                            color = CollaborantColors.DarkBlue,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .offset(y = 12.dp, x = (-12).dp)
                         )
+                    } else {
+                        // IconButton for launching the document picker
+                        IconButton(onClick = { launcher.launch(arrayOf("application/*", "image/*")) }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.paper_plus),
+                                contentDescription = "Attachment Plus Icon",
+                                tint = CollaborantColors.DarkBlue
+                            )
+                        }
                     }
                 }
             }
@@ -884,7 +927,9 @@ fun AttachmentComponent(
                             taskId = taskId,
                             attachment = attachment,
                             removeAttachment = removeAttachment,
-                            downloadFileFromFirebase = downloadFileFromFirebase
+                            downloadFileFromFirebase = downloadFileFromFirebase,
+                            showDownloadLoading = showDownloadLoading,
+                            setShowDownloadLoadingValue = setShowDownloadLoadingValue
                         )
 
                         // Adding a divider between attachment items

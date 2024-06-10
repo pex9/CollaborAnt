@@ -89,9 +89,13 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                         loggedInUserId = vm.loggedInUserId,
                         loggedInUserRole = loggedInUserRole,
                         addAttachment = vm::addAttachmentToTask,
-                        removeAttachment = vm::removeAttachment,
+                        removeAttachment = vm::deleteAttachmentFromTask,
                         setShowBottomSheetValue = vm::setShowBottomSheetValue,
-                        downloadFileFromFirebase = vm::downloadFileFromFirebase
+                        downloadFileFromFirebase = vm::downloadFileFromFirebase,
+                        showLoading = vm.showLoading,
+                        setShowLoadingValue = vm::setShowLoadingValue,
+                        showDownloadLoading = vm.showDownloadLoading,
+                        setShowDownloadLoadingValue = vm::setShowDownloadLoadingValue
                     )
                 }
 

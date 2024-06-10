@@ -56,6 +56,14 @@ class MyModel(val context: Context) {
         }
     }
 
+    private suspend fun deleteImage(imageId: String) {
+        val storageRef = storage.reference
+
+        val fileName = "images/${imageId}.jpg"
+        val imageRef = storageRef.child(fileName)
+        imageRef.delete().await()
+    }
+
     private suspend fun uploadAttachment(
         taskId: String,
         attachment: Attachment,
@@ -97,12 +105,12 @@ class MyModel(val context: Context) {
         }
     }
 
-    private suspend fun deleteImage(imageId: String) {
+    private suspend fun deleteAttachment(taskId: String, attachment: Attachment) {
         val storageRef = storage.reference
 
-        val fileName = "images/${imageId}.jpg"
-        val imageRef = storageRef.child(fileName)
-        imageRef.delete().await()
+        val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
+        val attachmentRef = storageRef.child(fileName)
+        attachmentRef.delete().await()
     }
 
     suspend fun createUser(user: User) {
@@ -973,6 +981,16 @@ class MyModel(val context: Context) {
 
         //  Delete Task
         taskReference.delete().await()
+    }
+
+    suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) {
+        val attachmentsReference = db.collection("Tasks").document(taskId).collection("attachments")
+
+        //  Delete attachment from storage
+        deleteAttachment(taskId, attachment)
+
+        //  Delete attachment document
+        attachmentsReference.document(attachment.id).delete().await()
     }
 
     suspend fun addActionToTaskHistory(taskId: String, action: Action) {

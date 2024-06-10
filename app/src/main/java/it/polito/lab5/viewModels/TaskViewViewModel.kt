@@ -46,11 +46,11 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
     suspend fun downloadFileFromFirebase(taskId: String, attachment: Attachment, onComplete: (File) -> Unit, onFailure: (Exception) -> Unit) =
         model.downloadFileFromFirebase(taskId, attachment, onComplete, onFailure)
 
+    suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) = model.deleteAttachmentFromTask(taskId, attachment)
+
 
 
     fun deleteTask(taskId: String) = model.deleteTask1(taskId)
-
-    fun addAttachment(taskId: String, attachment: Attachment) = model.addAttachment(taskId, attachment)
 
     fun removeAttachment(taskId: String, attachmentId: String) = model.removeAttachment(taskId, attachmentId)
 
@@ -82,5 +82,17 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
         private set
     fun setShowDeleteDialogValue(b: Boolean) {
         showDeleteDialog = b
+    }
+
+    var showLoading by mutableStateOf(false)
+        private set
+    fun setShowLoadingValue(b: Boolean) {
+        showLoading = b
+    }
+
+    var showDownloadLoading by mutableStateOf("")
+        private set
+    fun setShowDownloadLoadingValue(s: String) {
+        showDownloadLoading = s
     }
 }
