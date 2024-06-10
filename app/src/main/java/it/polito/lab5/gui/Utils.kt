@@ -82,7 +82,7 @@ fun MonogramPresentationComp(
         val textLayoutResult: TextLayoutResult =
             textMeasurer.measure(
                 text = AnnotatedString(monogramText),
-                style = TextStyle(color = Color.Black, fontSize = fontSize)
+                style = TextStyle(color = colors.onBackground, fontSize = fontSize)
             )
         val textSize = textLayoutResult.size
 
@@ -406,7 +406,7 @@ fun DialogComp(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.onBackground)
             ) {
                 Text(
                     text = "Cancel",
@@ -417,9 +417,9 @@ fun DialogComp(
                 )
             }
         },
-        containerColor = colors.background,
-        titleContentColor = CollaborantColors.DarkBlue,
-        textContentColor = colors.outline,
+        containerColor = colors.surfaceColorAtElevation(10.dp),
+        titleContentColor = colors.onBackground,
+        textContentColor = colors.onBackground,
     )
 }
 

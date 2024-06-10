@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -63,7 +65,7 @@ fun OptionsBottomSheet(
     ModalBottomSheet(
         sheetState = bottomSheetState,
         onDismissRequest = { setShowBottomSheetValue(false) }, // Dismiss the bottom sheet when requested
-        containerColor = CollaborantColors.PageBackGroundGray, // Background color of the bottom sheet
+        containerColor = colors.surfaceColorAtElevation(10.dp), // Background color of the bottom sheet
         dragHandle = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -81,7 +83,9 @@ fun OptionsBottomSheet(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
+                        modifier = Modifier.align(Alignment.Center),
+                        color = colors.onBackground
+                    )
 
                     IconButton(
                         onClick = {
@@ -90,7 +94,11 @@ fun OptionsBottomSheet(
                             }
                         }
                     ) {
-                        Icon(painter = painterResource(id = R.drawable.cross), contentDescription = "Close Icon")
+                        Icon(
+                            painter = painterResource(id = R.drawable.cross),
+                            contentDescription = "Close Icon",
+                            tint = colors.onBackground
+                            )
 
                     }
                 }
@@ -106,9 +114,11 @@ fun OptionsBottomSheet(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color.White,
-                contentColor = Color.Black
-            )
+                containerColor = colors.surface,
+                contentColor = colors.onBackground
+            ),
+            elevation = CardDefaults.cardElevation(8.dp),
+            border = BorderStroke(1.dp, colors.outline.copy(0.4f))
         ) {
             ListItem(
                 headlineContent = {},
@@ -117,7 +127,8 @@ fun OptionsBottomSheet(
                         text = "Take a photo",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = colors.onBackground
                     )
                 },
                 trailingContent = {
@@ -133,7 +144,7 @@ fun OptionsBottomSheet(
                     }
                     cameraContract.launch(Intent(context, CameraActivity::class.java))
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.White)
+                colors = ListItemDefaults.colors(containerColor = colors.surface)
             )
 
             Divider(
@@ -149,7 +160,8 @@ fun OptionsBottomSheet(
                         text = "Upload a photo",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = colors.onBackground
                     )
                 },
                 trailingContent = {
@@ -165,7 +177,7 @@ fun OptionsBottomSheet(
                     }
                     galleryContract.launch("image/*")
                 },
-                colors = ListItemDefaults.colors(containerColor = Color.White)
+                colors = ListItemDefaults.colors(containerColor = colors.surface)
             )
 
             if(image !is Empty) {
@@ -183,14 +195,14 @@ fun OptionsBottomSheet(
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Normal,
                             fontSize = 16.sp,
-                            color = CollaborantColors.PriorityRed
+                            color = colors.error,
                         )
                     },
                     trailingContent = {
                         Icon(
                             painter = painterResource(id = R.drawable.delete),
                             contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed,
+                            tint = colors.error,
                             modifier = Modifier.size(28.dp)
                         )
                     },
@@ -200,7 +212,7 @@ fun OptionsBottomSheet(
                             setImageValue(Empty(pickRandomColor()))
                         }
                     },
-                    colors = ListItemDefaults.colors(containerColor = Color.White)
+                    colors = ListItemDefaults.colors(containerColor = colors.surface)
                 )
             }
         }

@@ -43,8 +43,6 @@ import it.polito.lab5.ui.theme.interFamily
 fun MyProfileTopBar(navController: NavController) {
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
-    val iconColor = if(LocalTheme.current.isDark) colors.primary else colors.onBackground
-
     val gradientColors =
         if(LocalTheme.current.isDark)
             listOf(
@@ -74,7 +72,7 @@ fun MyProfileTopBar(navController: NavController) {
                 onClick = { navController.navigate("myProfile/edit") },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
-                    contentColor = iconColor,
+                    contentColor = colors.onBackground,
                 )
             ) {
                 Icon(
@@ -127,6 +125,7 @@ fun MyProfilePage(
     ) {
         val spacerModifier = Modifier.height(18.dp)
         val colors = MaterialTheme.colorScheme
+        Spacer(modifier = Modifier.height(10.dp))
         OverlappingComponents(
             first = first,
             last = last,
@@ -134,14 +133,12 @@ fun MyProfilePage(
             joinedTeams = joinedTeams,
             kpi = kpi
         )
-        val iconColor = if(LocalTheme.current.isDark) colors.primary else colors.onBackground
-
-
+        Spacer(modifier = Modifier.height(10.dp))
         TextPresentationComp(
             text = first.plus(" ").plus(last),
             fontWeight = FontWeight.Bold,
             fontSize = 28.sp,
-            color = iconColor
+            color = colors.onBackground
         )
         
         Spacer(modifier = Modifier.height(4.dp))
@@ -165,7 +162,7 @@ fun MyProfilePage(
                 Icon(
                     painterResource(id = R.drawable.profile_bold),
                     contentDescription = "Nickname Icon",
-                    tint = iconColor,
+                    tint = colors.onBackground,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -184,7 +181,7 @@ fun MyProfilePage(
                 Icon(
                     painterResource(id = R.drawable.mail),
                     contentDescription = "Email Icon",
-                    tint = iconColor,
+                    tint = colors.onBackground,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -203,7 +200,7 @@ fun MyProfilePage(
                 Icon(
                     painterResource(id = R.drawable.telephone),
                     contentDescription = "Telephone Icon",
-                    tint = iconColor,
+                    tint = colors.onBackground,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -222,7 +219,7 @@ fun MyProfilePage(
                 Icon(
                     painterResource(id = R.drawable.location),
                     contentDescription = "Email Icon",
-                    tint = iconColor,
+                    tint = colors.onBackground,
                     modifier = Modifier.size(32.dp)
                 )
             }

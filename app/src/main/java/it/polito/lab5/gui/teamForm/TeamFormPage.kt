@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextFieldComp
@@ -51,15 +53,19 @@ import it.polito.lab5.ui.theme.interFamily
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team?) {
+    val colors = MaterialTheme.colorScheme
+    val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+
     CenterAlignedTopAppBar(
         // Set custom colors for the top app bar
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
         title = {
             Text(
                 text = if (team == null) "New Team" else "Edit Team",
                 fontFamily = interFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground
             )
         },
         navigationIcon = {
@@ -68,13 +74,14 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent, // Transparent background
-                    contentColor = CollaborantColors.DarkBlue // Dark blue icon color
+                    contentColor = colors.onBackground // Dark blue icon color
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding // Standard padding
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.arrow_left), // Back arrow icon
-                    contentDescription = "Back Icon" // Description for accessibility
+                    contentDescription = "Back Icon", // Description for accessibility
+                    tint = colors.onBackground
                 )
 
                 Text(
@@ -82,7 +89,8 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
                     style = MaterialTheme.typography.titleLarge, // Text style
                     fontFamily = interFamily, // Custom font family
                     fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                    fontSize = 20.sp // Font size
+                    fontSize = 20.sp, // Font size
+                    color = colors.onBackground
                 )
             }
         },
@@ -99,7 +107,7 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = CollaborantColors.DarkBlue
+                    contentColor = colors.onBackground
                 ),
                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
             ) {
@@ -107,7 +115,8 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
                     text = if (team == null) "Create" else "Save",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+                    fontSize = 20.sp,
+                    color = colors.onBackground
                 )
             }
         }
@@ -149,6 +158,7 @@ fun TeamFormPage(
             capitalization = KeyboardCapitalization.Sentences,
             autoCorrect = true
         )
+        val colors = MaterialTheme.colorScheme
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -170,7 +180,7 @@ fun TeamFormPage(
                     Icon(
                         painter = painterResource(id = R.drawable.edit_square),
                         contentDescription = "Edit Icon",
-                        tint = CollaborantColors.DarkBlue,
+                        tint = colors.onBackground,
                         modifier = Modifier.size(24.dp)
                     )
                 }

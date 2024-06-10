@@ -481,14 +481,14 @@ fun CategoryOptionsComp(
                 expanded = flag,
                 onDismissRequest = { setCategorySelectionOpenedValue(category, false) },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
                 DropdownMenuItem(
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.edit_square),
                             contentDescription = "Edit Icon",
-                            tint = CollaborantColors.DarkBlue
+                            tint = colors.onBackground
                         )
                     },
                     text = {
@@ -496,7 +496,8 @@ fun CategoryOptionsComp(
                             text = "Edit Category",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     onClick = { setCategorySelectionOpenedValue(category, false); setCurrentCategory(category); setCategory(category); setIsDialogOpen(true) },
@@ -516,7 +517,7 @@ fun CategoryOptionsComp(
                         Icon(
                             painter = painterResource(id = R.drawable.delete),
                             contentDescription = "Delete Icon",
-                            tint = CollaborantColors.PriorityRed
+                            tint = colors.error
                         )
                     },
                     text = {
@@ -525,7 +526,7 @@ fun CategoryOptionsComp(
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 16.sp,
-                            color = CollaborantColors.PriorityRed
+                            color = colors.error
                         )
                     },
                     onClick = {
@@ -552,7 +553,7 @@ fun MyTasksModalBottomSheet(
 ){
     val modalBottomSheetState = rememberModalBottomSheetState()
     val coroutineScope = rememberCoroutineScope()
-
+    val colors = MaterialTheme.colorScheme
 
     // Display the modal bottom sheet for filtering tasks
     ModalBottomSheet(
@@ -560,7 +561,7 @@ fun MyTasksModalBottomSheet(
         modifier = Modifier
             .fillMaxWidth(),
         sheetState = modalBottomSheetState,
-        containerColor = CollaborantColors.PageBackGroundGray,
+        containerColor = colors.surfaceColorAtElevation(10.dp),
         dragHandle = {
             Column(
                 verticalArrangement = Arrangement.Top,
@@ -580,7 +581,9 @@ fun MyTasksModalBottomSheet(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 20.sp,
-                        modifier = Modifier.align(Alignment.Center))
+                        modifier = Modifier.align(Alignment.Center),
+                        color = colors.onBackground
+                    )
 
                     IconButton(
                         onClick = {
@@ -589,7 +592,11 @@ fun MyTasksModalBottomSheet(
                             }
                         }
                     ) {
-                        Icon(painter = painterResource(id = R.drawable.cross), contentDescription = "Close Icon")
+                        Icon(
+                            painter = painterResource(id = R.drawable.cross),
+                            contentDescription = "Close Icon",
+                            tint = colors.onBackground
+                            )
                     }
                 }
             }
@@ -609,7 +616,8 @@ fun MyTasksModalBottomSheet(
                             fontSize = 18.sp,
                             fontFamily = interFamily,
                             overflow = TextOverflow.Ellipsis,
-                            maxLines = 1
+                            maxLines = 1,
+                            color = colors.onBackground
                         )
                     },
                     trailingContent = {
@@ -617,12 +625,12 @@ fun MyTasksModalBottomSheet(
                             selected = chosenCategory == category,
                             onClick = null,
                             colors = RadioButtonDefaults.colors(
-                                selectedColor = CollaborantColors.DarkBlue,
-                                unselectedColor = CollaborantColors.DarkBlue
+                                selectedColor = colors.secondaryContainer,
+                                unselectedColor = colors.secondaryContainer
                             )
                         )
                     },
-                    colors = ListItemDefaults.colors(containerColor = CollaborantColors.PageBackGroundGray),
+                    colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
                     modifier = Modifier.selectable(
                         selected = chosenCategory == category,
                         onClick = {

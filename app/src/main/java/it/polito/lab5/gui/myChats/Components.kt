@@ -15,6 +15,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,9 +46,10 @@ fun ChatItem(
             .padding(horizontal = 15.dp, vertical = 10.dp),
         colors = CardDefaults.cardColors(
             containerColor = colors.surface,
+            contentColor = colors.onBackground
         ),
-        elevation = CardDefaults.cardElevation(4.dp),
         border = BorderStroke(width = 1.dp, color = colors.outline),
+        elevation = CardDefaults.cardElevation(4.dp)
     ){
         ListItem(
             leadingContent = {
@@ -127,11 +129,12 @@ fun ChatItem(
 
 @Composable
 fun UnreadMessageComp() {
+    val color = MaterialTheme.colorScheme.secondaryContainer
     Canvas(
         modifier = Modifier.size(12.dp),
         onDraw = {
             // Draw inner circle with the determined tag container color
-            drawCircle(color = CollaborantColors.DarkBlue, radius = 15f)
+            drawCircle(color = color, radius = 15f)
         }
     )
 }

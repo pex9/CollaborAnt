@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -92,13 +93,16 @@ fun PersonalTaskListPane(
         Dialog(
             onDismissRequest = { resetCategoryError() ; setIsDialogOpen(false) },
         ){
+            val colors = MaterialTheme.colorScheme
             Card(
                 modifier = Modifier
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
-                )
+                    containerColor = colors.surface,
+                    contentColor = colors.onBackground
+                ),
+                elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -113,7 +117,7 @@ fun PersonalTaskListPane(
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 20.sp,
-                        color = CollaborantColors.DarkBlue
+                        color = colors.onBackground
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -138,7 +142,7 @@ fun PersonalTaskListPane(
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 16.sp,
-                                color = Color.Black
+                                color = colors.onBackground
                             )
                         }
 
@@ -148,7 +152,7 @@ fun PersonalTaskListPane(
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
                                 fontSize = 16.sp,
-                                color = Color.Black
+                                color = colors.onBackground
                             )
                         }
                     }
@@ -190,7 +194,8 @@ fun PersonalTaskListPane(
         state = scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(p).padding(top = 20.dp), // Apply padding
+            .padding(p)
+            .padding(top = 20.dp), // Apply padding
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {

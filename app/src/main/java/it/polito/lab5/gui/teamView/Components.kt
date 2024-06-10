@@ -100,10 +100,10 @@ fun TaskItem(
                 // Display task due date and tag indicator
                 val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale.ENGLISH)
                 val color = when (task.tag) { // Determine the color and text to display based on the tag type
-                    Tag.LOW -> CollaborantColors.PriorityGreen
-                    Tag.MEDIUM -> CollaborantColors.PriorityOrange
-                    Tag.HIGH -> CollaborantColors.PriorityOrange2
-                    Tag.UNDEFINED -> CollaborantColors.NoPriorityGray
+                    Tag.HIGH -> colors.error
+                    Tag.MEDIUM -> colors.primary
+                    Tag.LOW -> colors.secondary
+                    else -> colors.onBackground
                 }
 
                 Row(
