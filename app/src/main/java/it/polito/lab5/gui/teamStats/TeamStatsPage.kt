@@ -100,11 +100,9 @@ fun VerticalTeamStatsPane(
     navController: NavController, // NavController for navigation
     p: PaddingValues, // Padding values for layout
     membersList: List<User>,
-)
-{
-    val teamTasks = tasks.filter { it.teamId == team.id }
-    val literalTotTasks = teamTasks.count()
-    val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
+) {
+    val literalTotTasks = tasks.size
+    val literalTotCompletedTasks = tasks.filter{ it.state == TaskState.COMPLETED }.size
     val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat() / literalTotTasks.toFloat() * 100f)
 
     Column(
@@ -161,10 +159,13 @@ fun VerticalTeamStatsPane(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val completed = if(literalTotTasks == 0 && literalTotCompletedTasks == 0) { 0f }
+                        else { literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat() }
+
                     Chart(
                         data = mapOf(
                             1f to "Total",
-                            (literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()) to "Completed"
+                            completed to "Completed"
                         ),
                         maxValue = literalTotTasks
                     )
