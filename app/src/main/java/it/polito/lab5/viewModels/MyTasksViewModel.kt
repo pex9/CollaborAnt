@@ -1,5 +1,7 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -7,30 +9,30 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.DataBase
+import it.polito.lab5.model.GoogleAuthentication
 
-class MyTasksViewModel(val model: MyModel): ViewModel() {
+@RequiresApi(Build.VERSION_CODES.O)
+class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
     val users = model.users
     val teams = model.teams
     val tasks = model.tasks
-    var categorySelectionOpened: MutableList<Pair<String, Boolean>> = mutableStateListOf()
-    fun setCategorySelectionOpenedValue(category: String, b: Boolean) {
-        val idx = categorySelectionOpened.indexOfFirst { it.first == category }
 
-        categorySelectionOpened[idx] = category to b
+    fun getUser(userId: String) = model.getUser(userId)
+
+    fun getUserTeams(userId: String) = model.getUserTeams(userId)
+
+    fun getUserTasks(userId: String) = model.getUserTasks(userId)
+
+    var categorySelectionOpened by mutableStateOf("")
+        private set
+    fun setCategorySelectionOpenedValue(s: String) {
+        categorySelectionOpened = s
     }
 
-    var categoryTaskListOpened: MutableList<Pair<String, Boolean>> = mutableStateListOf()
-    fun setCategoryTaskListOpenedValue(category: String, b: Boolean) {
-        val idx = categoryTaskListOpened.indexOfFirst { it.first == category }
-
-        categoryTaskListOpened[idx] = category to b
-    }
-
-    init {
-        users.value.find { it.id == DataBase.LOGGED_IN_USER_ID }?.categories?.forEach {
-            categorySelectionOpened.add(it to false)
-            categoryTaskListOpened.add(it to false)
-        }
+    var categoryTaskListOpened by mutableStateOf("")
+        private set
+    fun setCategoryTaskListOpenedValue(s: String) {
+        categoryTaskListOpened = s
     }
 
     var targetTaskId: String? by mutableStateOf(null)
@@ -83,28 +85,24 @@ class MyTasksViewModel(val model: MyModel): ViewModel() {
         if (categoryError.isBlank()) {
             if (currentCategory.isBlank()){
                 addCategoryToUser(DataBase.LOGGED_IN_USER_ID, category)
-                categorySelectionOpened.add(Pair(category, false))
-                categoryTaskListOpened.add(Pair(category, false))
-            }
-            else{
-                val index = categorySelectionOpened.indexOfFirst { it.first == currentCategory }
 
-                if(index != -1) {
-                    categorySelectionOpened[index] = category to false
-                    categoryTaskListOpened[index] = category to false
-                    updateCategory(DataBase.LOGGED_IN_USER_ID, currentCategory, category)
+            } else{
+                auth.getSignedInUserId()?.let { updateCategory(it, currentCategory, category) }
 
-                    // Update Category for all tasks of the user belonging to the previous category
-                    tasks.value.filter {
-                        it.categories.containsKey(DataBase.LOGGED_IN_USER_ID) && it.categories[DataBase.LOGGED_IN_USER_ID] == currentCategory
-                    }.forEach { task ->
-                        updateCategoryFromTask(task.id, DataBase.LOGGED_IN_USER_ID, category)
-                    }
-
-                    // Reset of currentCategory state
-                    currentCategory = ""
+                // Update Category for all tasks of the user belonging to the previous category
+                tasks.value.filter {
+                    it.categories.containsKey(DataBase.LOGGED_IN_USER_ID) && it.categories[DataBase.LOGGED_IN_USER_ID] == currentCategory
+                }.forEach { task ->
+                    updateCategoryFromTask(task.id, DataBase.LOGGED_IN_USER_ID, category)
                 }
+
+                // Reset of currentCategory state
+                currentCategory = ""
             }
+
+            categorySelectionOpened = ""
+            categoryTaskListOpened = ""
+
             return true
         }
 

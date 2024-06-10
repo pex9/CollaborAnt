@@ -938,6 +938,50 @@ class MyModel(val context: Context) {
         awaitClose { tasksSnapshotListener.remove() }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    fun getUserTasks(userId: String): Flow<List<Task>> = callbackFlow {
+        val tasksDocumentReference = db.collection("Tasks")
+            .whereArrayContains("teamMembers", userId).whereNotEqualTo("state", "COMPLETED")
+
+        val tasksSnapshotListener = tasksDocumentReference.addSnapshotListener { tasksSnapshot, e ->
+            if (tasksSnapshot != null) {
+                val tasks = tasksSnapshot.documents.map { taskDocument ->
+                    val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
+                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val literalParentId = taskDocument.get("parentId").toString()
+                    val delegatedMembers = taskDocument.get("teamMembers") as List<String>
+                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+
+                    Task(
+                        id = taskDocument.id,
+                        title = taskDocument.getString("title") ?: "",
+                        description = taskDocument.getString("description") ?: "",
+                        teamId = taskDocument.getString("teamId") ?: "",
+                        dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        repeat = getRepeat(taskDocument.getString("repeat")),
+                        parentId = if(literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        tag = getTag(taskDocument.getString("tag")),
+                        teamMembers = taskDocument.get("teamMembers") as List<String>,
+                        state = getTaskState(taskDocument.getString("state")),
+                        comments = emptyList(),
+                        categories = categories,
+                        attachments = emptyList(),
+                        history = emptyList(),
+                    )
+                }
+                trySend(tasks)
+            } else {
+                if (e != null) {
+                    Log.e("Server Error", e.message.toString())
+                }
+                trySend(emptyList())
+            }
+        }
+        awaitClose { tasksSnapshotListener.remove() }
+    }
+
     suspend fun updateTask(task: Task) {
         db.collection("Tasks").document(task.id).update(
             hashMapOf(

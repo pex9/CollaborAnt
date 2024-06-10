@@ -95,7 +95,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
                                     updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
                                 }
-                                categories[member.id] = "Recently assigned"
+                                categories[member.id] = "Recently Assigned"
                             }
                         }
 
@@ -144,7 +144,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
                         users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
                             //  Add task to Recently assigned category for all new delegated members
-                            if(!currentTask!!.categories.containsKey(member.id)) { categories[member.id] = "Recently assigned" }
+                            if(!currentTask!!.categories.containsKey(member.id)) { categories[member.id] = "Recently Assigned" }
 
                             //  Increase assignedTasks Kpi value for all new delegated members
                             if(!currentTask!!.teamMembers.contains(member.id)) {

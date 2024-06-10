@@ -42,7 +42,7 @@ class AppFactory(context: Context, val teamId: String? = null, val userId: Strin
                 taskId?.let { TaskHistoryViewModel(it, model) } as T
             }
             modelClass.isAssignableFrom(MyTasksViewModel::class.java) -> {
-                MyTasksViewModel(model) as T
+                MyTasksViewModel(model, auth) as T
             }
             modelClass.isAssignableFrom(MyChatsViewModel::class.java) -> {
                 MyChatsViewModel(model,auth) as T

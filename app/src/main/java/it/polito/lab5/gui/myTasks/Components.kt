@@ -103,30 +103,31 @@ fun CategoryItem(
     teams: List<Team>,
     tasks: List<Task>,
     category: String,
+    loggedInUserId: String,
     navController: NavController,
     setIsDialogOpen: (Boolean) -> Unit,
     setCurrentCategory: (String) -> Unit,
-    setCategorySelectionOpenedValue: (String, Boolean) -> Unit,
-    categorySelectionOpened: MutableList<Pair<String, Boolean>>,
+    setCategorySelectionOpenedValue: (String) -> Unit,
+    categorySelectionOpened: String,
     setCategory: (String) -> Unit,
     setMyTasksHideSheet: (Boolean) -> Unit,
     setTargetTaskIdValue: (String) -> Unit,
-    expandCategory: MutableList<Pair<String, Boolean>>,
-    setExpandCategory: (String, Boolean) -> Unit,
+    expandCategory: String,
+    setExpandCategory: (String) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
     setNumberOfTasksForCategory: (Int?) -> Unit,
     setChosenCategoryValue: (String) -> Unit,
 ) {
     // Filter tasks for the current category
-    val userTasks = tasks.filter { it.categories[DataBase.LOGGED_IN_USER_ID] == category }
-    val flag = expandCategory.find { it.first == category }?.second ?: false
+    val userTasks = tasks.filter { it.categories[loggedInUserId] == category }
+    val flag = expandCategory == category
 
     // Row containing category name and task count
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .clickable { setExpandCategory(category, !flag) }, // Toggle expansion on click
+            .clickable { setExpandCategory(if(flag) "" else category) }, // Toggle expansion on click
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
@@ -177,7 +178,8 @@ fun CategoryItem(
                 letterSpacing = 0.sp,
                 modifier = Modifier.padding(end = 10.dp)
             )
-            if(category!= DataBase.default_categories[0]) {
+
+            if(category != "Recently Assigned") {
                 CategoryOptionsComp(
                     setCategorySelectionOpenedValue = setCategorySelectionOpenedValue,
                     setIsDialogOpen = setIsDialogOpen,
@@ -339,22 +341,21 @@ fun TaskItem(
 // Alert dialog for confirming deletion
 @Composable
 fun CategoryOptionsComp(
-    categorySelectionOpened: MutableList<Pair<String, Boolean>>,
+    categorySelectionOpened: String,
     setIsDialogOpen: (Boolean) -> Unit,
     setCurrentCategory: (String) -> Unit,
     category: String,
-    setCategorySelectionOpenedValue: (String, Boolean) -> Unit,
+    setCategorySelectionOpenedValue: (String) -> Unit,
     setCategory: (String) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
-
     setNumberOfTasksForCategory: (Int?) -> Unit,
     numberOfTasks: Int
 ) {
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
-        val flag = categorySelectionOpened.find { it.first == category }?.second ?: false
+        val flag = categorySelectionOpened == category
         // IconButton to trigger the opening/closing of options
-        IconButton(onClick = { setCategorySelectionOpenedValue(category, !flag) ; }) {
+        IconButton(onClick = { setCategorySelectionOpenedValue(category) ; }) {
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
@@ -366,7 +367,7 @@ fun CategoryOptionsComp(
         Box {
             DropdownMenu(
                 expanded = flag,
-                onDismissRequest = { setCategorySelectionOpenedValue(category, false) },
+                onDismissRequest = { setCategorySelectionOpenedValue("") },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
                 modifier = Modifier.background(Color.White)
             ) {
@@ -386,7 +387,12 @@ fun CategoryOptionsComp(
                             fontSize = 16.sp
                         )
                     },
-                    onClick = { setCategorySelectionOpenedValue(category, false); setCurrentCategory(category); setCategory(category); setIsDialogOpen(true) },
+                    onClick = {
+                        setCategorySelectionOpenedValue("")
+                        setCurrentCategory(category)
+                        setCategory(category)
+                        setIsDialogOpen(true)
+                    },
                     modifier = Modifier.offset(y = (-4).dp) // Offset for better alignment
                 )
 
@@ -416,7 +422,7 @@ fun CategoryOptionsComp(
                         )
                     },
                     onClick = {
-                        setCategorySelectionOpenedValue(category, false)
+                        setCategorySelectionOpenedValue("")
                         setIsDialogDeleteOpen(true);setCurrentCategory(category)
                         setNumberOfTasksForCategory(numberOfTasks)
                     },
