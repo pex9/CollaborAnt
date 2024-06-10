@@ -41,6 +41,12 @@ enum class Repeat {
     MONTHLY
 }
 
+enum class Option {
+    CURRENT,
+    ALL,
+    AFTER
+}
+
 data class Comment(
     val id: String,
     val content: String,
