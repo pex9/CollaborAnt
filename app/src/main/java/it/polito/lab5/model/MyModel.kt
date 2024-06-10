@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.io.File
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -33,6 +34,7 @@ class MyModel(val context: Context) {
     private val db = Firebase.firestore
     private val storage = FirebaseStorage.getInstance()
 
+    //  Storage
     private suspend fun uploadImage(
         imageId: String,
         byteArray: ByteArray,
@@ -118,6 +120,7 @@ class MyModel(val context: Context) {
         attachmentRef.delete().await()
     }
 
+    //  Users
     suspend fun createUser(user: User) {
         val documentReference = db.collection("Users").document(user.id)
 
@@ -392,7 +395,7 @@ class MyModel(val context: Context) {
         }
     }
 
-    //  Team
+    //  Teams
     suspend fun createTeam(team: Team): String {
         val documentReference = db.collection("Teams")
         val byteArray = when (team.image) {
@@ -908,18 +911,25 @@ class MyModel(val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    @Suppress("unchecked_cast")
     fun getTask(taskId: String): Flow<Task?> = callbackFlow {
         val documentReference = db.collection("Tasks").document(taskId)
 
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null && snapshot.exists()) {
                 val dueDateTimestamp = snapshot.get("dueDate")?.let { it as Timestamp }
+                val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
                 val endDateRepeatTimestamp = snapshot.get("endDateRepeat")?.let { it as Timestamp }
                 val literalParentId = snapshot.get("parentId").toString()
                 val delegatedMembers = snapshot.get("teamMembers") as List<String>
-                val categories =
-                    delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
+                val categories = delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
+                var state = getTaskState(snapshot.getString("state"))
+
+                if(state != TaskState.OVERDUE && state != TaskState.COMPLETED &&  dueDate != null && dueDate < LocalDate.now()) {
+                    //  Update task state with Overdue on database
+                    state = TaskState.OVERDUE
+                    snapshot.reference.update("state", state)
+                }
 
                 trySend(
                     Task(
@@ -927,25 +937,13 @@ class MyModel(val context: Context) {
                         title = snapshot.getString("title") ?: "",
                         description = snapshot.getString("description") ?: "",
                         teamId = snapshot.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        dueDate = dueDate,
                         repeat = getRepeat(snapshot.getString("repeat")),
-                        parentId = if (literalParentId == "null") {
-                            null
-                        } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        parentId = if (literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
                         tag = getTag(snapshot.getString("tag")),
                         teamMembers = snapshot.get("teamMembers") as List<String>,
-                        state = getTaskState(snapshot.getString("state")),
+                        state = state,
                         comments = emptyList(),
                         categories = categories,
                         attachments = emptyList(),
@@ -963,7 +961,7 @@ class MyModel(val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    @Suppress("unchecked_cast")
     fun getTasksTeam(teamId: String): Flow<List<Task>> = callbackFlow {
         val tasksDocumentReference = db.collection("Tasks").whereEqualTo("teamId", teamId)
 
@@ -971,37 +969,31 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val endDateRepeatTimestamp =
-                        taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
+                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
-                    val categories =
-                        delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    var state = getTaskState(taskDocument.getString("state"))
+
+                    if(state != TaskState.OVERDUE && state != TaskState.COMPLETED && dueDate != null && dueDate < LocalDate.now()) {
+                        //  Update task state with Overdue on database
+                        state = TaskState.OVERDUE
+                        taskDocument.reference.update("state", state)
+                    }
 
                     Task(
                         id = taskDocument.id,
                         title = taskDocument.getString("title") ?: "",
                         description = taskDocument.getString("description") ?: "",
                         teamId = taskDocument.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        dueDate = dueDate,
                         repeat = getRepeat(taskDocument.getString("repeat")),
-                        parentId = if (literalParentId == "null") {
-                            null
-                        } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        parentId = if (literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
-                        state = getTaskState(taskDocument.getString("state")),
+                        state = state,
                         comments = emptyList(),
                         categories = categories,
                         attachments = emptyList(),
@@ -1020,7 +1012,7 @@ class MyModel(val context: Context) {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    @Suppress("unchecked_cast")     //  TODO: add Overdue check
+    @Suppress("unchecked_cast")
     fun getUserTasks(userId: String): Flow<List<Task>> = callbackFlow {
         val tasksDocumentReference = db.collection("Tasks")
             .whereArrayContains("teamMembers", userId).whereNotEqualTo("state", "COMPLETED")
@@ -1029,37 +1021,31 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val endDateRepeatTimestamp =
-                        taskDocument.get("endDateRepeat")?.let { it as Timestamp }
+                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
+                    val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
-                    val categories =
-                        delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
+                    var state = getTaskState(taskDocument.getString("state"))
+
+                    if(state != TaskState.OVERDUE && state != TaskState.COMPLETED && dueDate != null && dueDate < LocalDate.now()) {
+                        //  Update task state with Overdue on database
+                        state = TaskState.OVERDUE
+                        taskDocument.reference.update("state", state)
+                    }
 
                     Task(
                         id = taskDocument.id,
                         title = taskDocument.getString("title") ?: "",
                         description = taskDocument.getString("description") ?: "",
                         teamId = taskDocument.getString("teamId") ?: "",
-                        dueDate = dueDateTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        dueDate = dueDate,
                         repeat = getRepeat(taskDocument.getString("repeat")),
-                        parentId = if (literalParentId == "null") {
-                            null
-                        } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let {
-                            LocalDateTime.ofInstant(
-                                it.toInstant(),
-                                ZoneOffset.UTC
-                            ).toLocalDate()
-                        },
+                        parentId = if (literalParentId == "null") { null } else literalParentId,
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
-                        state = getTaskState(taskDocument.getString("state")),
+                        state = state,
                         comments = emptyList(),
                         categories = categories,
                         attachments = emptyList(),
@@ -1095,10 +1081,7 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-    suspend fun deleteTask(
-        task: Task,
-        delegateMembers: List<User>
-    ) {   //  TODO: manage case of recurrent task
+    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {   //  TODO: manage case of recurrent task
         val storageRef = storage.reference
         val taskReference = db.collection("Tasks").document(task.id)
         val commentsReference = taskReference.collection("comments")
@@ -1184,12 +1167,7 @@ class MyModel(val context: Context) {
         )
     }
 
-    suspend fun updateTaskState(
-        task: Task,
-        delegatedMembers: List<User>,
-        loggedInUserId: String,
-        state: TaskState
-    ) {
+    suspend fun updateTaskState(task: Task, delegatedMembers: List<User>, loggedInUserId: String, state: TaskState) {
         //  Update delegated members kpi
         if (state == TaskState.COMPLETED) {
             delegatedMembers.forEach { member ->

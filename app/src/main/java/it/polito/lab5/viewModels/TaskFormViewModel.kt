@@ -141,6 +141,21 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                             taskState = TaskState.PENDING
                         }
 
+                        //  Overdue Task rescheduled
+                        if((taskState == TaskState.OVERDUE || taskState == TaskState.COMPLETED) && dueDate!! > LocalDate.now()) {
+                            addActionToHistory(currentTask!!.id,
+                                Action(
+                                    id = "",
+                                    memberId = loggedInUser?.id ?: "",
+                                    taskState = TaskState.PENDING,
+                                    date = LocalDateTime.now(),
+                                    description = "Task rescheduled"
+                                )
+                            )
+
+                            taskState = TaskState.PENDING
+                        }
+
                         users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
                             //  Add task to Recently assigned category for all new delegated members
                             if(!currentTask!!.categories.containsKey(member.id)) { categories[member.id] = "Recently Assigned" }
