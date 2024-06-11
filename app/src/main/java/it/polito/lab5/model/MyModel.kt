@@ -925,9 +925,18 @@ class MyModel(val context: Context) {
                 val categories = delegatedMembers.zip(snapshot.get("categories") as List<String>).toMap()
                 var state = getTaskState(snapshot.getString("state"))
 
+                //  Update task state with Overdue on database
                 if(state != TaskState.OVERDUE && state != TaskState.COMPLETED &&  dueDate != null && dueDate < LocalDate.now()) {
-                    //  Update task state with Overdue on database
                     state = TaskState.OVERDUE
+                    snapshot.reference.collection("history").add(
+                        hashMapOf(
+                            "memberId" to "",
+                            "taskState" to state,
+                            "date" to localDateToTimestamp(dueDate.plusDays(1), ZoneId.systemDefault()),
+                            "description" to "Task overdue"
+                        )
+                    )
+
                     snapshot.reference.update("state", state)
                 }
 
@@ -976,9 +985,17 @@ class MyModel(val context: Context) {
                     val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
                     var state = getTaskState(taskDocument.getString("state"))
 
+                    //  Update task state with Overdue on database
                     if(state != TaskState.OVERDUE && state != TaskState.COMPLETED && dueDate != null && dueDate < LocalDate.now()) {
-                        //  Update task state with Overdue on database
                         state = TaskState.OVERDUE
+                        taskDocument.reference.collection("history").add(
+                            hashMapOf(
+                                "memberId" to "",
+                                "taskState" to state,
+                                "date" to localDateToTimestamp(dueDate.plusDays(1), ZoneId.systemDefault()),
+                                "description" to "Task overdue"
+                            )
+                        )
                         taskDocument.reference.update("state", state)
                     }
 
@@ -1028,9 +1045,17 @@ class MyModel(val context: Context) {
                     val categories = delegatedMembers.zip(taskDocument.get("categories") as List<String>).toMap()
                     var state = getTaskState(taskDocument.getString("state"))
 
+                    //  Update task state with Overdue on database
                     if(state != TaskState.OVERDUE && state != TaskState.COMPLETED && dueDate != null && dueDate < LocalDate.now()) {
-                        //  Update task state with Overdue on database
                         state = TaskState.OVERDUE
+                        taskDocument.reference.collection("history").add(
+                            hashMapOf(
+                                "memberId" to "",
+                                "taskState" to state,
+                                "date" to localDateToTimestamp(dueDate.plusDays(1), ZoneId.systemDefault()),
+                                "description" to "Task overdue"
+                            )
+                        )
                         taskDocument.reference.update("state", state)
                     }
 
