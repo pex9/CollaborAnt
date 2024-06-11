@@ -68,8 +68,11 @@ fun MyProfileFormTopBar(
         },
         navigationIcon = {
             TextButton(
-                onClick = {navController.popBackStack() },
+                enabled = !showLoading,
+                onClick = { navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = CollaborantColors.DarkBlue,
                     containerColor = Color.Transparent,
                     contentColor = CollaborantColors.DarkBlue
                 ),

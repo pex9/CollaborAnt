@@ -74,8 +74,11 @@ fun TeamFormTopBar(
         navigationIcon = {
             // Navigation button to navigate back
             TextButton(
+                enabled = !showLoading,
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = CollaborantColors.DarkBlue,
                     containerColor = Color.Transparent, // Transparent background
                     contentColor = CollaborantColors.DarkBlue // Dark blue icon color
                 ),

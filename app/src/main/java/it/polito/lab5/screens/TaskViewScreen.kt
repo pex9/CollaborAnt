@@ -2,12 +2,14 @@ package it.polito.lab5.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.RadioButton
@@ -30,6 +32,7 @@ import it.polito.lab5.gui.taskView.CommentTextField
 import it.polito.lab5.gui.taskView.MembersBottomSheet
 import it.polito.lab5.gui.taskView.TaskPage
 import it.polito.lab5.gui.taskView.TaskTopBar
+import it.polito.lab5.model.Option
 import it.polito.lab5.model.Role
 import it.polito.lab5.viewModels.TaskViewViewModel
 import kotlinx.coroutines.launch
@@ -166,40 +169,59 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
     }
 }
 
-/*
-@Preview
-@Composable
-fun Test() {
-    var showDialog by remember { mutableStateOf(true) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = "Confirm delete") },
-            text = {
-                val options = listOf("This task", "This task and all next", "All tasks")
-
-                LazyColumn {
-                    item { Text(text = "Are sure") }
-
-                    items(options) {
-                        ListItem(
-                            headlineContent = {
-
-                        },
-                            leadingContent = {
-                                RadioButton(selected = , onClick = { /*TODO*/ })
-                            }
-                        )
-                    }
-                }
-            },
-            dismissButton = { TextButton(onClick = { showDialog = false }) {
-                Text(text = "Cancel")
-            }},
-            confirmButton = { TextButton(onClick = { showDialog = false }) {
-                Text(text = "Save")
-            } }
-        )
-    }
-}*/
+//@Preview
+//@Composable
+//fun Test() {
+//    var showDialog by remember { mutableStateOf(true) }
+//    var optionSelected by remember { mutableStateOf(Option.NOT_SPECIFIED) }
+//
+//    Column(modifier = Modifier.fillMaxSize()) {
+//        if (showDialog) {
+//            AlertDialog(
+//                onDismissRequest = { showDialog = false },
+//                title = { Text(text = "Confirm delete") },
+//                text = {
+//                    val options = Option.entries.drop(1)
+//
+//                    LazyColumn {
+//                        item { Text(text = "Are sure") }
+//
+//                        items(options) { option ->
+//                            val literalOption = when (option) {
+//                                Option.CURRENT -> "This task"
+//                                Option.ALL -> "All tasks"
+//                                Option.AFTER -> "This task and all next"
+//                                Option.NOT_SPECIFIED -> ""
+//                            }
+//
+//                            ListItem(
+//                                headlineContent = { Text(text = literalOption) },
+//                                leadingContent = {
+//                                    RadioButton(
+//                                        selected = optionSelected == option,
+//                                        onClick = null
+//                                    )
+//                                },
+//                                modifier = Modifier.selectable(
+//                                    selected = optionSelected == option,
+//                                    onClick = { optionSelected = option }
+//                                )
+//                            )
+//                        }
+//                    }
+//                },
+//                dismissButton = {
+//                    TextButton(onClick = { showDialog = false }) {
+//                        Text(text = "Cancel")
+//                    }
+//                },
+//                confirmButton = {
+//                    TextButton(onClick = { showDialog = false }) {
+//                        Text(text = "Save")
+//                    }
+//                }
+//            )
+//        }
+//    }
+//}

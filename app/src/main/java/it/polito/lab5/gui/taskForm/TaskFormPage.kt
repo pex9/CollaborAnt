@@ -81,8 +81,11 @@ fun TaskFormTopBar(
         },
         navigationIcon = {
             TextButton(
+                enabled = !showLoading,
                 onClick = { resetErrorMsg(true) ; navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = CollaborantColors.DarkBlue,
                     containerColor = Color.Transparent,
                     contentColor = CollaborantColors.DarkBlue
                 ),
