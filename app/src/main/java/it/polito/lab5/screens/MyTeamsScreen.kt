@@ -30,7 +30,6 @@ fun MyTeamsScreen (
     setShowDialogValue: (Boolean) -> Unit,
     navController: NavController,
     isReadState: MutableList<Pair<Int, Boolean>>,
-    toggleTheme: () -> Unit
 ) {
     val teams = vm.teams.collectAsState().value.filter { team ->
         team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)
@@ -39,7 +38,7 @@ fun MyTeamsScreen (
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
-        topBar = { MyTeamsTopBar(toggleTheme) },
+        topBar = { MyTeamsTopBar() },
         bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
             val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary

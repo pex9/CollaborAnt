@@ -10,10 +10,12 @@ import androidx.activity.viewModels
 import androidx.camera.core.CameraSelector
 import androidx.core.content.ContextCompat
 import it.polito.lab5.ui.theme.Lab4Theme
+import it.polito.lab5.viewModels.AppViewModel
 import it.polito.lab5.viewModels.CameraViewModel
 
 class CameraActivity : ComponentActivity() {
     private val cameraViewModel: CameraViewModel by viewModels()
+    private val appViewModel: AppViewModel by viewModels()
     private val cameraPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -25,7 +27,7 @@ class CameraActivity : ComponentActivity() {
 
     private fun setCameraPreview() {
         setContent {
-            Lab4Theme(darkTheme = false) {
+            Lab4Theme(darkTheme = false, appViewModel) {
                 CameraScreen(cameraViewModel)
             }
         }

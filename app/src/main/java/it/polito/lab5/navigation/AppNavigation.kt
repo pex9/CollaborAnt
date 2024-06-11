@@ -100,7 +100,6 @@ fun AppNavigation(vm: AppViewModel) {
                 setShowDialogValue = vm::setShowDialogValue,
                 navController = navController,
                 isReadState = myChatViewModel.chatsReadState,
-                toggleTheme = vm::toggleThemeUserSettingValue
             )
         }
 

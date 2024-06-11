@@ -132,7 +132,7 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
-                    color = colors.background
+                    color = colors.onBackground
                 )
             }
         },
@@ -146,7 +146,7 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
-                    color = colors.background
+                    color = colors.onBackground
                 )
             }
         },

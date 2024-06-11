@@ -14,7 +14,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import it.polito.lab5.LocalTheme
+import it.polito.lab5.viewModels.AppViewModel
+
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryDark,
@@ -51,10 +52,13 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun Lab4Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    appViewModel: AppViewModel,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
+    appViewModel.themeUserSetting = isSystemInDarkTheme()
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -68,7 +72,7 @@ fun Lab4Theme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = if(darkTheme) colorScheme.background.toArgb() else  colorScheme.primaryContainer.toArgb()
+            window.statusBarColor = if(appViewModel.themeUserSetting) colorScheme.background.toArgb() else colorScheme.primaryContainer.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
