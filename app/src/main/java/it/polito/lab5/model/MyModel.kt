@@ -1106,7 +1106,7 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-    suspend fun deleteTask(task: Task, delegateMembers: List<User>, option: Option) {   //  TODO: manage case of recurrent task
+    suspend fun deleteTask(task: Task, delegateMembers: List<User>, option: Option) {
         var count = 0
         val storageRef = storage.reference
         val currentTimestamp = localDateToTimestamp(task.dueDate, ZoneId.systemDefault())
@@ -1162,49 +1162,6 @@ class MyModel(val context: Context) {
                 }
             }
         }
-
-
-//        val taskReference = db.collection("Tasks").document(task.id)
-//
-//
-//        val commentsReference = taskReference.collection("comments")
-//        val attachmentsReference = taskReference.collection("attachments")
-//        val historyReference = taskReference.collection("history")
-//
-//        //  Delete Task comments
-//        commentsReference.get().await().documents.forEach {
-//            commentsReference.document(it.id).delete().await()
-//        }
-//
-//        //  Delete Task attachments
-//        storageRef.child("attachments/${task.id}").listAll().await().items.forEach {
-//            it.delete().await()
-//        }
-//        attachmentsReference.get().await().documents.forEach {
-//            attachmentsReference.document(it.id).delete().await()
-//        }
-//
-//        //  Delete Task history
-//        historyReference.get().await().documents.forEach {
-//            historyReference.document(it.id).delete().await()
-//        }
-//
-//        //  Update kpi for delegated members
-//        if (task.state != TaskState.COMPLETED) {
-//            delegateMembers.forEach { member ->
-//                member.kpiValues[task.teamId]?.let { kpi ->
-//                    val updatedKpi = kpi.copy(
-//                        assignedTasks = kpi.assignedTasks - 1,
-//                        score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
-//                    )
-//
-//                    updateUserKpi(member.id, member.joinedTeams, task.teamId to updatedKpi)
-//                }
-//            }
-//        }
-//
-//        //  Delete Task
-//        taskReference.delete().await()
     }
 
     suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) {
