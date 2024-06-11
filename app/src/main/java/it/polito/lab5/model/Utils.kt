@@ -42,7 +42,6 @@ enum class Repeat {
 }
 
 enum class Option {
-    NOT_SPECIFIED,
     CURRENT,
     ALL,
     AFTER

@@ -422,8 +422,6 @@ fun RepeatDialogComp(
             )
         },
         text = {
-            val options = Option.entries.drop(1).toList()
-
             LazyColumn {
                 item {
                     Text(
@@ -434,12 +432,11 @@ fun RepeatDialogComp(
                     )
                 }
 
-                items(options) { option ->
+                items(Option.entries) { option ->
                     val literalOption = when (option) {
                         Option.CURRENT -> "This task"
                         Option.ALL -> "All tasks"
                         Option.AFTER -> "This task and all next"
-                        Option.NOT_SPECIFIED -> ""
                     }
 
                     ListItem(

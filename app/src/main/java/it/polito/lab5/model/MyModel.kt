@@ -1112,7 +1112,6 @@ class MyModel(val context: Context) {
         val currentTimestamp = localDateToTimestamp(task.dueDate, ZoneId.systemDefault())
         val tasksReference = db.collection("Tasks")
         val query = when(option) {
-            Option.NOT_SPECIFIED -> null
             Option.CURRENT -> tasksReference.whereIn(FieldPath.documentId(), listOf(task.id))
             Option.ALL -> tasksReference.whereEqualTo("parentId", task.parentId)
             Option.AFTER -> currentTimestamp?.let {

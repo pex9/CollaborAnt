@@ -177,14 +177,14 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                                 }
                             }.invokeOnCompletion {
                                 if(deleteSuccess) {
-                                    vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
+                                    vm.setOptionSelectedValue(Option.CURRENT)
                                     vm.setShowRepeatDeleteDialogValue(false)
                                     navController.popBackStack()
                                 }
                             }
                         },
                         onDismiss = {
-                            vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
+                            vm.setOptionSelectedValue(Option.CURRENT)
                             vm.setShowRepeatDeleteDialogValue(false)
                         }
                     )

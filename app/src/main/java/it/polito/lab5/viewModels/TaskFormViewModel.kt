@@ -15,6 +15,7 @@ import it.polito.lab5.model.Action
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.KPI
 import it.polito.lab5.model.MyModel
+import it.polito.lab5.model.Option
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
@@ -85,19 +86,18 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 )
                             )
 
-                            if(repeat == Repeat.NEVER) {
-                                users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
-                                    if(teamId != null) {
-                                        val kpi = member.kpiValues[teamId]
-                                        val updatedKpi = kpi?.copy(
-                                            assignedTasks = kpi.assignedTasks + 1,
-                                            score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
-                                        )
+                            users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                                if(teamId != null && repeat == Repeat.NEVER) {
+                                    val kpi = member.kpiValues[teamId]
+                                    val updatedKpi = kpi?.copy(
+                                        assignedTasks = kpi.assignedTasks + 1,
+                                        score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                                    )
 
-                                        updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
-                                    }
-                                    categories[member.id] = "Recently Assigned"
+                                    updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
                                 }
+
+                                categories[member.id] = "Recently Assigned"
                             }
                         }
 
@@ -400,6 +400,18 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
     var showLoading by mutableStateOf(false)
         private set
+
+    var showRepeatUpdateDialog by mutableStateOf(false)
+        private set
+    fun setShowRepeatUpdateDialogValue(b: Boolean) {
+        showRepeatUpdateDialog = b
+    }
+
+    var optionSelected by mutableStateOf(Option.CURRENT)
+        private set
+    fun setOptionSelectedValue(o: Option) {
+        optionSelected = o
+    }
 
     init {
         val userid = auth.getSignedInUserId()

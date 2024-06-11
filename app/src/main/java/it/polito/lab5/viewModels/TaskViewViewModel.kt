@@ -107,7 +107,7 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
         showDownloadLoading = s
     }
 
-    var optionSelected by mutableStateOf(Option.NOT_SPECIFIED)
+    var optionSelected by mutableStateOf(Option.CURRENT)
         private set
     fun setOptionSelectedValue(o: Option) {
         optionSelected = o
