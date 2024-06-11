@@ -464,7 +464,7 @@ class MyModel(val context: Context) {
                             literalReceiver
                         },
                         content = messageDocument.get("content").toString(),
-                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) )
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))
                     )
                 }
                 trySend(chat)
@@ -1116,7 +1116,7 @@ class MyModel(val context: Context) {
             Option.CURRENT -> tasksReference.whereIn(FieldPath.documentId(), listOf(task.id))
             Option.ALL -> tasksReference.whereEqualTo("parentId", task.parentId)
             Option.AFTER -> currentTimestamp?.let {
-                tasksReference.whereEqualTo("parentId", task.parentId).whereGreaterThan("dueDate", it)
+                tasksReference.whereEqualTo("parentId", task.parentId).whereGreaterThanOrEqualTo("dueDate", it)
             }
         }
 
