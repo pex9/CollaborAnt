@@ -3,14 +3,27 @@ package it.polito.lab5.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.taskView.CommentTextField
@@ -152,3 +165,41 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
         }
     }
 }
+
+/*
+@Preview
+@Composable
+fun Test() {
+    var showDialog by remember { mutableStateOf(true) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Confirm delete") },
+            text = {
+                val options = listOf("This task", "This task and all next", "All tasks")
+
+                LazyColumn {
+                    item { Text(text = "Are sure") }
+
+                    items(options) {
+                        ListItem(
+                            headlineContent = {
+
+                        },
+                            leadingContent = {
+                                RadioButton(selected = , onClick = { /*TODO*/ })
+                            }
+                        )
+                    }
+                }
+            },
+            dismissButton = { TextButton(onClick = { showDialog = false }) {
+                Text(text = "Cancel")
+            }},
+            confirmButton = { TextButton(onClick = { showDialog = false }) {
+                Text(text = "Save")
+            } }
+        )
+    }
+}*/
