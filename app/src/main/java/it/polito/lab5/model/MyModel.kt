@@ -24,7 +24,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
-import java.util.Date
 
 class MyModel(val context: Context) {
     init {
@@ -465,7 +464,7 @@ class MyModel(val context: Context) {
                             literalReceiver
                         },
                         content = messageDocument.get("content").toString(),
-                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) )
                     )
                 }
                 trySend(chat)
@@ -702,7 +701,7 @@ class MyModel(val context: Context) {
                 "senderId" to message.senderId,
                 "content" to message.content,
                 "receiverId" to message.receiverId,
-                "date" to Timestamp(Date(message.date.toInstant(ZoneOffset.UTC).toEpochMilli()))
+                "date" to localDateTimeToTimestamp(message.date, ZoneId.systemDefault())
             )
         ).await()
 
@@ -814,7 +813,7 @@ class MyModel(val context: Context) {
                 hashMapOf(
                     "memberId" to action.memberId,
                     "taskState" to action.taskState,
-                    "date" to Timestamp(Date(action.date.toInstant(ZoneOffset.UTC).toEpochMilli())),
+                    "date" to localDateTimeToTimestamp(action.date, ZoneId.systemDefault()),
                     "description" to action.description
                 )
             ).await()
@@ -837,7 +836,7 @@ class MyModel(val context: Context) {
                         id = document.id,
                         content = document.getString("content") ?: "",
                         authorId = document.getString("authorId") ?: "",
-                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC)
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) )
                     )
                 }
                 trySend(comments)
@@ -895,7 +894,7 @@ class MyModel(val context: Context) {
                         id = document.id,
                         memberId = document.getString("memberId") ?: "",
                         taskState = state,
-                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.UTC),
+                        date = LocalDateTime.ofInstant(timestamp.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ),
                         description = document.getString("description") ?: ""
                     )
                 }
@@ -918,7 +917,7 @@ class MyModel(val context: Context) {
         val snapshotListener = documentReference.addSnapshotListener { snapshot, e ->
             if (snapshot != null && snapshot.exists()) {
                 val dueDateTimestamp = snapshot.get("dueDate")?.let { it as Timestamp }
-                val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
+                val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ).toLocalDate() }
                 val endDateRepeatTimestamp = snapshot.get("endDateRepeat")?.let { it as Timestamp }
                 val literalParentId = snapshot.get("parentId").toString()
                 val delegatedMembers = snapshot.get("teamMembers") as List<String>
@@ -949,7 +948,7 @@ class MyModel(val context: Context) {
                         dueDate = dueDate,
                         repeat = getRepeat(snapshot.getString("repeat")),
                         parentId = if (literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ).toLocalDate() },
                         tag = getTag(snapshot.getString("tag")),
                         teamMembers = snapshot.get("teamMembers") as List<String>,
                         state = state,
@@ -978,7 +977,8 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
+
+                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00"))).toLocalDate() }
                     val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
@@ -1007,7 +1007,7 @@ class MyModel(val context: Context) {
                         dueDate = dueDate,
                         repeat = getRepeat(taskDocument.getString("repeat")),
                         parentId = if (literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ).toLocalDate() },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
                         state = state,
@@ -1038,7 +1038,7 @@ class MyModel(val context: Context) {
             if (tasksSnapshot != null) {
                 val tasks = tasksSnapshot.documents.map { taskDocument ->
                     val dueDateTimestamp = taskDocument.get("dueDate")?.let { it as Timestamp }
-                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() }
+                    val dueDate = dueDateTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ).toLocalDate() }
                     val endDateRepeatTimestamp = taskDocument.get("endDateRepeat")?.let { it as Timestamp }
                     val literalParentId = taskDocument.get("parentId").toString()
                     val delegatedMembers = taskDocument.get("teamMembers") as List<String>
@@ -1067,7 +1067,7 @@ class MyModel(val context: Context) {
                         dueDate = dueDate,
                         repeat = getRepeat(taskDocument.getString("repeat")),
                         parentId = if (literalParentId == "null") { null } else literalParentId,
-                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).toLocalDate() },
+                        endDateRepeat = endDateRepeatTimestamp?.let { LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")) ).toLocalDate() },
                         tag = getTag(taskDocument.getString("tag")),
                         teamMembers = taskDocument.get("teamMembers") as List<String>,
                         state = state,
@@ -1106,29 +1106,47 @@ class MyModel(val context: Context) {
         ).await()
     }
 
-    suspend fun deleteTask(task: Task, delegateMembers: List<User>) {   //  TODO: manage case of recurrent task
+    suspend fun deleteTask(task: Task, delegateMembers: List<User>, option: Option) {   //  TODO: manage case of recurrent task
+        var count = 0
         val storageRef = storage.reference
-        val taskReference = db.collection("Tasks").document(task.id)
-        val commentsReference = taskReference.collection("comments")
-        val attachmentsReference = taskReference.collection("attachments")
-        val historyReference = taskReference.collection("history")
-
-        //  Delete Task comments
-        commentsReference.get().await().documents.forEach {
-            commentsReference.document(it.id).delete().await()
+        val currentTimestamp = localDateToTimestamp(task.dueDate, ZoneId.systemDefault())
+        val tasksReference = db.collection("Tasks")
+        val query = when(option) {
+            Option.NOT_SPECIFIED -> null
+            Option.CURRENT -> tasksReference.whereIn(FieldPath.documentId(), listOf(task.id))
+            Option.ALL -> tasksReference.whereEqualTo("parentId", task.parentId)
+            Option.AFTER -> currentTimestamp?.let {
+                tasksReference.whereEqualTo("parentId", task.parentId).whereGreaterThan("dueDate", it)
+            }
         }
 
-        //  Delete Task attachments
-        storageRef.child("attachments/${task.id}").listAll().await().items.forEach {
-            it.delete().await()
-        }
-        attachmentsReference.get().await().documents.forEach {
-            attachmentsReference.document(it.id).delete().await()
-        }
+        query?.get()?.await()?.documents?.forEach { documentSnapshot ->
+            val commentsReference = documentSnapshot.reference.collection("comments")
+            val attachmentsReference = documentSnapshot.reference.collection("attachments")
+            val historyReference = documentSnapshot.reference.collection("history")
 
-        //  Delete Task history
-        historyReference.get().await().documents.forEach {
-            historyReference.document(it.id).delete().await()
+            //  Delete Task comments
+            commentsReference.get().await().documents.forEach {
+                commentsReference.document(it.id).delete().await()
+            }
+
+            //  Delete Task attachments
+            storageRef.child("attachments/${task.id}").listAll().await().items.forEach {
+                it.delete().await()
+            }
+            attachmentsReference.get().await().documents.forEach {
+                attachmentsReference.document(it.id).delete().await()
+            }
+
+            //  Delete Task history
+            historyReference.get().await().documents.forEach {
+                historyReference.document(it.id).delete().await()
+            }
+
+            //  Delete Task
+            documentSnapshot.reference.delete().await()
+
+            count++
         }
 
         //  Update kpi for delegated members
@@ -1136,8 +1154,8 @@ class MyModel(val context: Context) {
             delegateMembers.forEach { member ->
                 member.kpiValues[task.teamId]?.let { kpi ->
                     val updatedKpi = kpi.copy(
-                        assignedTasks = kpi.assignedTasks - 1,
-                        score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
+                        assignedTasks = kpi.assignedTasks - count,
+                        score = calculateScore(kpi.assignedTasks - count, kpi.completedTasks)
                     )
 
                     updateUserKpi(member.id, member.joinedTeams, task.teamId to updatedKpi)
@@ -1145,8 +1163,48 @@ class MyModel(val context: Context) {
             }
         }
 
-        //  Delete Task
-        taskReference.delete().await()
+
+//        val taskReference = db.collection("Tasks").document(task.id)
+//
+//
+//        val commentsReference = taskReference.collection("comments")
+//        val attachmentsReference = taskReference.collection("attachments")
+//        val historyReference = taskReference.collection("history")
+//
+//        //  Delete Task comments
+//        commentsReference.get().await().documents.forEach {
+//            commentsReference.document(it.id).delete().await()
+//        }
+//
+//        //  Delete Task attachments
+//        storageRef.child("attachments/${task.id}").listAll().await().items.forEach {
+//            it.delete().await()
+//        }
+//        attachmentsReference.get().await().documents.forEach {
+//            attachmentsReference.document(it.id).delete().await()
+//        }
+//
+//        //  Delete Task history
+//        historyReference.get().await().documents.forEach {
+//            historyReference.document(it.id).delete().await()
+//        }
+//
+//        //  Update kpi for delegated members
+//        if (task.state != TaskState.COMPLETED) {
+//            delegateMembers.forEach { member ->
+//                member.kpiValues[task.teamId]?.let { kpi ->
+//                    val updatedKpi = kpi.copy(
+//                        assignedTasks = kpi.assignedTasks - 1,
+//                        score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
+//                    )
+//
+//                    updateUserKpi(member.id, member.joinedTeams, task.teamId to updatedKpi)
+//                }
+//            }
+//        }
+//
+//        //  Delete Task
+//        taskReference.delete().await()
     }
 
     suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) {
@@ -1166,7 +1224,7 @@ class MyModel(val context: Context) {
             hashMapOf(
                 "memberId" to action.memberId,
                 "taskState" to action.taskState,
-                "date" to Timestamp(Date(action.date.toInstant(ZoneOffset.UTC).toEpochMilli())),
+                "date" to localDateTimeToTimestamp(action.date, ZoneId.systemDefault()),
                 "description" to action.description
             )
         ).await()
@@ -1236,7 +1294,7 @@ class MyModel(val context: Context) {
             mapOf(
                 "authorId" to comment.authorId,
                 "content" to comment.content,
-                "date" to Timestamp(Date(comment.date.toInstant(ZoneOffset.UTC).toEpochMilli()))
+                "date" to localDateTimeToTimestamp(comment.date, ZoneId.systemDefault())
             )
         ).await()
     }

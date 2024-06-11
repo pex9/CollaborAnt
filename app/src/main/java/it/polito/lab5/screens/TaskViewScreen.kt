@@ -140,7 +140,11 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
 
                             scope.launch {
                                 if (users != null) {
-                                    deleteSuccess = vm.deleteTask(task = task, users.filter { task.teamMembers.contains(it.id) })
+                                    deleteSuccess = vm.deleteTask(
+                                        task = task,
+                                        delegatedMembers = users.filter { task.teamMembers.contains(it.id) },
+                                        option = Option.CURRENT
+                                    )
                                 }
                             }.invokeOnCompletion {
                                 if(deleteSuccess) {
@@ -161,9 +165,23 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                         optionSelected = vm.optionSelected,
                         setOptionSelectedValue = vm::setOptionSelectedValue,
                         onConfirm = {
-                            vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
-                            vm.setShowRepeatDeleteDialogValue(false)
-                            //  TODO: complete this
+                            var deleteSuccess = false
+
+                            scope.launch {
+                                if (users != null) {
+                                    deleteSuccess = vm.deleteTask(
+                                        task = task,
+                                        delegatedMembers = users.filter { task.teamMembers.contains(it.id) },
+                                        option = vm.optionSelected
+                                    )
+                                }
+                            }.invokeOnCompletion {
+                                if(deleteSuccess) {
+                                    vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
+                                    vm.setShowRepeatDeleteDialogValue(false)
+                                    navController.popBackStack()
+                                }
+                            }
                         },
                         onDismiss = {
                             vm.setOptionSelectedValue(Option.NOT_SPECIFIED)

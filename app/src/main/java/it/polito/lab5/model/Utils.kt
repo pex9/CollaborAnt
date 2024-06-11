@@ -202,6 +202,20 @@ fun localDateToTimestamp(localDate: LocalDate?, zoneId: ZoneId): Timestamp? {
     return null
 }
 
+fun localDateTimeToTimestamp(localDateTime: LocalDateTime?, zoneId: ZoneId): Timestamp? {
+    if(localDateTime != null) {
+        // Step 2: Specify a time zone to create a ZonedDateTime
+        val zonedDateTime = localDateTime.atZone(zoneId)
+
+        // Step 3: Convert ZonedDateTime to Instant
+        val instant = zonedDateTime.toInstant()
+
+        // Step 4: Convert Instant to Timestamp
+        return Timestamp(Date(instant.toEpochMilli()))
+    }
+    return null
+}
+
 fun getTaskState(state: String?): TaskState {
     return when(state) {
         "NOT_ASSIGNED" -> TaskState.NOT_ASSIGNED

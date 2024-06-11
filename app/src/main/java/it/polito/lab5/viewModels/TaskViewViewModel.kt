@@ -47,10 +47,10 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
 
     suspend fun deleteAttachmentFromTask(taskId: String, attachment: Attachment) = model.deleteAttachmentFromTask(taskId, attachment)
 
-    suspend fun deleteTask(task: Task, delegatedMembers: List<User>): Boolean {
+    suspend fun deleteTask(task: Task, delegatedMembers: List<User>, option: Option): Boolean {
         try {
             viewModelScope.async {
-                model.deleteTask(task, delegatedMembers)
+                model.deleteTask(task, delegatedMembers, option)
             }.await()
             return true
         } catch (e: Exception) {
