@@ -1,6 +1,5 @@
 package it.polito.lab5.gui.taskView
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,7 +33,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.journeyapps.barcodescanner.Util
 import it.polito.lab5.R
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.model.Attachment
@@ -51,6 +49,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskTopBar(
     taskId: String,
+    repeat: Repeat,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     state: TaskState,
@@ -59,6 +58,7 @@ fun TaskTopBar(
     setOptionsOpenedValue: (Boolean) -> Unit,
     stateSelOpened: Boolean,
     setStateSelOpenedValue: (Boolean) -> Unit,
+    setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController,
 ) {
@@ -110,8 +110,10 @@ fun TaskTopBar(
                 // Options component for additional actions
                 OptionsComp(
                     taskId = taskId,
+                    repeat = repeat,
                     optionsOpened = optionsOpened,
                     setOptionsOpenedValue = setOptionsOpenedValue,
+                    setShowRepeatDeleteDialogValue = setShowRepeatDeleteDialogValue,
                     setShowDeleteDialogValue = setShowDeleteDialogValue,
                     navController = navController
                 )

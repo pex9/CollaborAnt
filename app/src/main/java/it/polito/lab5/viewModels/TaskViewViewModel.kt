@@ -12,6 +12,7 @@ import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
+import it.polito.lab5.model.Option
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
@@ -88,6 +89,12 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
         showDeleteDialog = b
     }
 
+    var showRepeatDeleteDialog by mutableStateOf(false)
+        private set
+    fun setShowRepeatDeleteDialogValue(b: Boolean) {
+        showRepeatDeleteDialog = b
+    }
+
     var showLoading by mutableStateOf(false)
         private set
     fun setShowLoadingValue(b: Boolean) {
@@ -98,5 +105,11 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
         private set
     fun setShowDownloadLoadingValue(s: String) {
         showDownloadLoading = s
+    }
+
+    var optionSelected by mutableStateOf(Option.NOT_SPECIFIED)
+        private set
+    fun setOptionSelectedValue(o: Option) {
+        optionSelected = o
     }
 }

@@ -252,6 +252,7 @@ fun DatePickerComp(
 @OptIn(ExperimentalMaterial3Api::class)
 fun EndDatePickerComp(
     date: LocalDate?, // Currently selected date
+    repeat: Repeat,
     setDueDate: (LocalDate) -> Unit, // Callback to set the due date
     showDueDateDialog: Boolean, // Indicates whether the date picker dialog is shown or not
     setShowDueDateDialogValue: (Boolean) -> Unit // Callback to toggle the visibility of the date picker dialog
@@ -332,8 +333,9 @@ fun EndDatePickerComp(
                 dateValidator = {
                     // Date validator to allow only future dates
                     val selectedDate = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val maxEndDate = getMaxEndDate(repeat)
                     val currentDate = LocalDate.now()
-                    selectedDate >= currentDate
+                    selectedDate >= currentDate && selectedDate <= maxEndDate
                 }
             )
         }

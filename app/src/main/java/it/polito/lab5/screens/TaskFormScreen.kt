@@ -40,6 +40,7 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         ) {
             if (team != null && users != null && vm.loggedInUser != null) {
                 TaskFormPage(
+                    isEdit = vm.currentTask != null,
                     team = team,
                     users = users,
                     loggedInUserId = vm.loggedInUser!!.id,

@@ -146,6 +146,7 @@ fun TaskFormTopBar(
 
 @Composable
 fun TaskFormPage(
+    isEdit: Boolean,
     team: Team,
     users: List<User>,
     loggedInUserId: String,
@@ -278,45 +279,48 @@ fun TaskFormPage(
                     isEdit = true
                 )
 
-                Divider(
-                    thickness = 1.dp,
-                    color = CollaborantColors.BorderGray.copy(0.4f),
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-
-                RepeatMenuComp(
-                    repeat = repeat,
-                    setRepeat = setRepeatValue,
-                    showRepeatMenu = showRepeatMenu,
-                    setShowRepeatMenuValue = setShowRepeatMenuValue,
-
-                )
-
-                AnimatedVisibility(
-                    visible = showEndRepeatField,
-                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
-                ) {
-
+                if(!isEdit) {
                     Divider(
                         thickness = 1.dp,
                         color = CollaborantColors.BorderGray.copy(0.4f),
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    ) {
-                        // Due date component
-                        EndDatePickerComp(
-                            date = endRepeatDate,
-                            setDueDate = setEndRepeatDateValue,
-                            showDueDateDialog = showEndRepeatDateDialog,
-                            setShowDueDateDialogValue = setShowEndRepeatDateDialogValue
+                    RepeatMenuComp(
+                        repeat = repeat,
+                        setRepeat = setRepeatValue,
+                        showRepeatMenu = showRepeatMenu,
+                        setShowRepeatMenuValue = setShowRepeatMenuValue,
+
                         )
+
+                    AnimatedVisibility(
+                        visible = showEndRepeatField,
+                        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                    ) {
+
+                        Divider(
+                            thickness = 1.dp,
+                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        ) {
+                            // Due date component
+                            EndDatePickerComp(
+                                date = endRepeatDate,
+                                repeat = repeat,
+                                setDueDate = setEndRepeatDateValue,
+                                showDueDateDialog = showEndRepeatDateDialog,
+                                setShowDueDateDialogValue = setShowEndRepeatDateDialogValue
+                            )
+                        }
                     }
                 }
             }

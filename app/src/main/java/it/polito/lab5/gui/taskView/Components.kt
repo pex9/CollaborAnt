@@ -88,8 +88,10 @@ import kotlin.math.min
 @Composable
 fun OptionsComp(
     taskId: String,
+    repeat: Repeat,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
+    setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController
 ) {
@@ -188,7 +190,11 @@ fun OptionsComp(
                             color = Color.Red
                         )
                     },
-                    onClick = { setOptionsOpenedValue(false) ; setShowDeleteDialogValue(true) },
+                    onClick = {
+                        setOptionsOpenedValue(false)
+                        if(repeat == Repeat.NEVER) { setShowDeleteDialogValue(true) }
+                        else { setShowRepeatDeleteDialogValue(true) }
+                    },
                     modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }

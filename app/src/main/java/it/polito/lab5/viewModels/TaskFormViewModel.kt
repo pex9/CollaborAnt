@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import it.polito.lab5.gui.taskForm.generateDueDates
 import it.polito.lab5.model.Action
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.KPI
@@ -84,45 +85,64 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 )
                             )
 
+                            if(repeat == Repeat.NEVER) {
+                                users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                                    if(teamId != null) {
+                                        val kpi = member.kpiValues[teamId]
+                                        val updatedKpi = kpi?.copy(
+                                            assignedTasks = kpi.assignedTasks + 1,
+                                            score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                                        )
+
+                                        updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
+                                    }
+                                    categories[member.id] = "Recently Assigned"
+                                }
+                            }
+                        }
+
+                        val newTask = teamId?.let {Task(
+                            id = "",
+                            title = title,
+                            description = description,
+                            teamId = teamId,
+                            dueDate = dueDate,
+                            repeat = repeat,
+                            tag = tag,
+                            teamMembers = delegatedMembers,
+                            state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
+                            comments = emptyList(),
+                            categories = categories,
+                            attachments = emptyList(),
+                            history = history,
+                            parentId = null,
+                            endDateRepeat = endRepeatDate
+                        )}
+
+                        //  Create first instance of task
+                        newTask?.let { id = createTask(it) }
+
+                        if(repeat != Repeat.NEVER && newTask != null && dueDate != null && endRepeatDate != null) {
+                            val dates = generateDueDates(dueDate!!, endRepeatDate!!, repeat)
+
+                            //  Create all task's copy
+                            updateTask(newTask.copy(id = id, parentId = id))
+                            dates.forEach { date -> createTask(newTask.copy(parentId = id, dueDate = date)) }
+
+                            //  Update user kpi for all task's copy
                             users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
                                 if(teamId != null) {
                                     val kpi = member.kpiValues[teamId]
                                     val updatedKpi = kpi?.copy(
-                                        assignedTasks = kpi.assignedTasks + 1,
-                                        score = calculateScore(kpi.assignedTasks + 1, kpi.completedTasks)
+                                        assignedTasks = kpi.assignedTasks + dates.size + 1,
+                                        score = calculateScore(kpi.assignedTasks + dates.size + 1, kpi.completedTasks)
                                     )
 
                                     updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, teamId to it) }
                                 }
-                                categories[member.id] = "Recently Assigned"
                             }
                         }
-
-                        //  TODO: add case of repeat task
-
-                        teamId?.let {
-                            id = createTask(
-                                Task(
-                                    id = "",
-                                    title = title,
-                                    description = description,
-                                    teamId = teamId,
-                                    dueDate = dueDate,
-                                    repeat = repeat,
-                                    tag = tag,
-                                    teamMembers = delegatedMembers,
-                                    state = if(delegatedMembers.isEmpty()) TaskState.NOT_ASSIGNED else TaskState.PENDING,
-                                    comments = emptyList(),
-                                    categories = categories,
-                                    attachments = emptyList(),
-                                    history = history,
-                                    parentId = null,
-                                    endDateRepeat = endRepeatDate
-                                )
-                            )
-                        }
-
-                    } else {
+                    } else {    //  TODO: manage update of recurrent tasks
                         id = currentTask!!.id
                         var taskState = currentTask!!.state
                         val categories: MutableMap<String, String> = currentTask!!.categories.toMutableMap()
@@ -269,8 +289,10 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         endRepeatDate = d
     }
     private fun checkEndRepeatDate() {
-        if(repeat != Repeat.NEVER && endRepeatDate == null){
-            endRepeatDateError = "End repeat date must be set"
+        if (repeat != Repeat.NEVER) {
+            endRepeatDateError = if (endRepeatDate == null) "End repeat date must be set"
+                else if (dueDate != null && endRepeatDate!! < dueDate) "End repeat date must be after due date"
+                else ""
         }
     }
 

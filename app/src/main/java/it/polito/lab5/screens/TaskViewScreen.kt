@@ -2,32 +2,18 @@ package it.polito.lab5.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import it.polito.lab5.gui.DialogComp
+import it.polito.lab5.gui.RepeatDialogComp
 import it.polito.lab5.gui.taskView.CommentTextField
 import it.polito.lab5.gui.taskView.MembersBottomSheet
 import it.polito.lab5.gui.taskView.TaskPage
@@ -63,6 +49,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                 if (loggedInUserRole != null && isDelegatedMember != null) {
                     TaskTopBar(
                         taskId = task.id,
+                        repeat = task.repeat,
                         isDelegatedMember = isDelegatedMember,
                         loggedInUserRole = loggedInUserRole,
                         state = task.state,
@@ -82,6 +69,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                         setOptionsOpenedValue = vm::setOptionsOpenedValue,
                         stateSelOpened = vm.stateSelOpened,
                         setStateSelOpenedValue = vm::setStateSelOpenedValue,
+                        setShowRepeatDeleteDialogValue = vm::setShowRepeatDeleteDialogValue,
                         setShowDeleteDialogValue = vm::setShowDeleteDialogValue,
                         navController = navController
                     )
@@ -164,64 +152,26 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
                         onDismiss = { vm.setShowDeleteDialogValue(false) }
                     )
                 }
+
+                if(vm.showRepeatDeleteDialog) {
+                    RepeatDialogComp(
+                        title = "Confirm Delete",
+                        text = "Are you sure to delete this recurrent task?",
+                        onConfirmText = "Delete",
+                        optionSelected = vm.optionSelected,
+                        setOptionSelectedValue = vm::setOptionSelectedValue,
+                        onConfirm = {
+                            vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
+                            vm.setShowRepeatDeleteDialogValue(false)
+                            //  TODO: complete this
+                        },
+                        onDismiss = {
+                            vm.setOptionSelectedValue(Option.NOT_SPECIFIED)
+                            vm.setShowRepeatDeleteDialogValue(false)
+                        }
+                    )
+                }
             }
         }
     }
 }
-
-
-//@Preview
-//@Composable
-//fun Test() {
-//    var showDialog by remember { mutableStateOf(true) }
-//    var optionSelected by remember { mutableStateOf(Option.NOT_SPECIFIED) }
-//
-//    Column(modifier = Modifier.fillMaxSize()) {
-//        if (showDialog) {
-//            AlertDialog(
-//                onDismissRequest = { showDialog = false },
-//                title = { Text(text = "Confirm delete") },
-//                text = {
-//                    val options = Option.entries.drop(1)
-//
-//                    LazyColumn {
-//                        item { Text(text = "Are sure") }
-//
-//                        items(options) { option ->
-//                            val literalOption = when (option) {
-//                                Option.CURRENT -> "This task"
-//                                Option.ALL -> "All tasks"
-//                                Option.AFTER -> "This task and all next"
-//                                Option.NOT_SPECIFIED -> ""
-//                            }
-//
-//                            ListItem(
-//                                headlineContent = { Text(text = literalOption) },
-//                                leadingContent = {
-//                                    RadioButton(
-//                                        selected = optionSelected == option,
-//                                        onClick = null
-//                                    )
-//                                },
-//                                modifier = Modifier.selectable(
-//                                    selected = optionSelected == option,
-//                                    onClick = { optionSelected = option }
-//                                )
-//                            )
-//                        }
-//                    }
-//                },
-//                dismissButton = {
-//                    TextButton(onClick = { showDialog = false }) {
-//                        Text(text = "Cancel")
-//                    }
-//                },
-//                confirmButton = {
-//                    TextButton(onClick = { showDialog = false }) {
-//                        Text(text = "Save")
-//                    }
-//                }
-//            )
-//        }
-//    }
-//}
