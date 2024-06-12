@@ -84,7 +84,7 @@ fun TaskTopBar(
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
                     disabledContainerColor = Color.Transparent,
-                    disabledContentColor = CollaborantColors.DarkBlue,
+                    disabledContentColor = colors.onBackground,
                     containerColor = Color.Transparent, // Transparent background
                     contentColor = colors.onBackground // Dark blue icon color
                 ),
@@ -137,7 +137,7 @@ fun TaskTopBar(
                     onClick = { navController.navigate("history/${taskId}") },
                     colors = IconButtonDefaults.iconButtonColors(
                         disabledContainerColor = Color.Transparent,
-                        disabledContentColor = CollaborantColors.DarkBlue,
+                        disabledContentColor = colors.onBackground,
                     ),
 
                 ) {
@@ -253,7 +253,7 @@ fun TaskPage(
                 if(task.repeat != Repeat.NEVER) {
                     Divider(
                         thickness = 1.dp,
-                        color = CollaborantColors.BorderGray.copy(0.4f),
+                        color = colors.outline,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
 

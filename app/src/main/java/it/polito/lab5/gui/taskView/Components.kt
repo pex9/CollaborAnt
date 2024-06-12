@@ -51,6 +51,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -496,16 +497,17 @@ fun EndRepeatDateComp(
             Icon(
                 painter = painterResource(id = R.drawable.calendar), // Calendar icon
                 contentDescription = "Calendar Icon",
-                tint = colors.onBackground
+                tint = colors.secondaryContainer
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = "End date:",
+                text = "End date",
                 fontFamily = interFamily,
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 19.sp,
+                fontSize = 16.sp,
+                color = colors.onBackground
             )
         }
 

@@ -50,10 +50,10 @@ fun ChatItem(
         ),
         border = BorderStroke(width = 1.dp, color = colors.outline),
         elevation = CardDefaults.cardElevation(4.dp)
-    ){
+    ) {
         ListItem(
             leadingContent = {
-                Box(modifier = Modifier.size(50.dp)){
+                Box(modifier = Modifier.size(50.dp)) {
                     ImagePresentationComp(
                         first = first,
                         last = last,
@@ -79,56 +79,57 @@ fun ChatItem(
                         color = colors.onBackground
                     )
 
-                if (lastMessage != null) {
-                    Text(
-                        text = lastMessage,
-                        fontFamily = interFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 12.sp,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        modifier = Modifier.padding(top= 4.dp),
-                        color = colors.outline
-                    )
-                }
-            }
-        },
-        trailingContent = {
-            Column(
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Top,
-            ) {
-                val formattedDate = dateFormatter(team.chat.lastOrNull()?.date)
-
-                Text(
-                    text = formattedDate ?: "",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 10.sp,
-                    letterSpacing = 0.sp,
-                    maxLines = 1,
-                    color = colors.onBackground
-                )
-
-                Box(modifier = Modifier.padding(top = 14.dp)) {
-                    val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
-                    if(isReadFlag){
-                        UnreadMessageComp()
+                    if (lastMessage != null) {
+                        Text(
+                            text = lastMessage,
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = colors.outline
+                        )
                     }
                 }
-            }
-        },
-        colors = ListItemDefaults.colors(
-            containerColor = colors.surface
-        ),
-        modifier = Modifier
-            .height(80.dp)
-            .clickable {
-                scope.launch {
-                    resetUnreadMessage(team, loggedInUserId)
-                }.invokeOnCompletion { navController.navigate("viewChat/${team.id}/${null}") }
-            }
-    )
+            },
+            trailingContent = {
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Top,
+                ) {
+                    val formattedDate = dateFormatter(team.chat.lastOrNull()?.date)
+
+                    Text(
+                        text = formattedDate ?: "",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 10.sp,
+                        letterSpacing = 0.sp,
+                        maxLines = 1,
+                        color = colors.onBackground
+                    )
+
+                    Box(modifier = Modifier.padding(top = 14.dp)) {
+                        val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
+                        if (isReadFlag) {
+                            UnreadMessageComp()
+                        }
+                    }
+                }
+            },
+            colors = ListItemDefaults.colors(
+                containerColor = colors.surface
+            ),
+            modifier = Modifier
+                .height(80.dp)
+                .clickable {
+                    scope.launch {
+                        resetUnreadMessage(team, loggedInUserId)
+                    }.invokeOnCompletion { navController.navigate("viewChat/${team.id}/${null}") }
+                }
+        )
+    }
 }
 
 @Composable

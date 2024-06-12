@@ -441,6 +441,8 @@ fun RepeatDialogComp(
     optionSelected: Option,
     setOptionSelectedValue: (Option) -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
+
     AlertDialog(
         onDismissRequest = { onDismiss() },
         title = {
@@ -448,7 +450,8 @@ fun RepeatDialogComp(
                 text = title,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Medium,
-                fontSize = 20.sp
+                fontSize = 20.sp,
+                color = colors.onBackground
             )
         },
         text = {
@@ -458,7 +461,8 @@ fun RepeatDialogComp(
                         text = text,
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = colors.onBackground
                     )
                 }
 
@@ -470,19 +474,27 @@ fun RepeatDialogComp(
                     }
 
                     ListItem(
-                        headlineContent = { Text(text = literalOption) },
+                        headlineContent = {
+                            Text(
+                                text = literalOption,
+                                fontFamily = interFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 16.sp,
+                                color = colors.onBackground
+                            )
+                        },
                         leadingContent = {
                             RadioButton(
                                 selected = optionSelected == option,
                                 onClick = null,
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = CollaborantColors.DarkBlue,
-                                    unselectedColor = CollaborantColors.DarkBlue
+                                    selectedColor = colors.onBackground,
+                                    unselectedColor = colors.onBackground
                                 )
                             )
                         },
                         colors = ListItemDefaults.colors(
-                            containerColor = Color.White
+                            containerColor = colors.surfaceColorAtElevation(10.dp)
                         ),
                         modifier = Modifier.selectable(
                             selected = optionSelected == option,
@@ -495,32 +507,34 @@ fun RepeatDialogComp(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.onBackground)
             ) {
                 Text(
                     text = "Cancel",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
         },
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                colors = ButtonDefaults.textButtonColors(contentColor = CollaborantColors.PriorityRed)
+                colors = ButtonDefaults.textButtonColors(contentColor = colors.error)
             ) {
                 Text(
                     text = onConfirmText,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = colors.onBackground
                 )
             }
         },
-        containerColor = Color.White,
-        titleContentColor = CollaborantColors.DarkBlue,
-        textContentColor = CollaborantColors.BorderGray,
+        containerColor = colors.surfaceColorAtElevation(10.dp),
+        titleContentColor = colors.onBackground,
+        textContentColor = colors.onBackground,
     )
 }
 

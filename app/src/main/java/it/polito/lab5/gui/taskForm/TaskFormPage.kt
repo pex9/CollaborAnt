@@ -314,7 +314,7 @@ fun TaskFormPage(
 
                         Divider(
                             thickness = 1.dp,
-                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            color = colors.outline,
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
 

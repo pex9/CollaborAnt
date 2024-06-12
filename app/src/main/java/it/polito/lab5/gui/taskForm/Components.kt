@@ -276,6 +276,8 @@ fun EndDatePickerComp(
     showDueDateDialog: Boolean, // Indicates whether the date picker dialog is shown or not
     setShowDueDateDialogValue: (Boolean) -> Unit // Callback to toggle the visibility of the date picker dialog
 ) {
+    val colors = MaterialTheme.colorScheme
+    val customColorBehavior = if(LocalTheme.current.isDark) colors.secondary else colors.primary
     // Remember the state of the date picker
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
@@ -330,7 +332,7 @@ fun EndDatePickerComp(
                     )
                 }
             },
-            colors = DatePickerDefaults.colors(containerColor = Color.White),
+            colors = DatePickerDefaults.colors(containerColor = colors.surfaceColorAtElevation(10.dp)),
             modifier = Modifier.verticalScroll(rememberScrollState())
         ) {
             // Date picker component
@@ -346,8 +348,19 @@ fun EndDatePickerComp(
                     )
                 },
                 colors = DatePickerDefaults.colors(
-                    titleContentColor = CollaborantColors.DarkBlue,
-                    weekdayContentColor = CollaborantColors.DarkBlue
+                    titleContentColor = colors.secondaryContainer,
+                    weekdayContentColor = colors.secondaryContainer,
+
+                    todayDateBorderColor = customColorBehavior,
+                    todayContentColor = colors.onBackground,
+
+                    selectedDayContainerColor = customColorBehavior,
+                    selectedDayContentColor = colors.onSecondary,
+
+                    selectedYearContentColor = colors.onSecondary,
+                    selectedYearContainerColor = customColorBehavior,
+                    currentYearContentColor = customColorBehavior,
+                    yearContentColor = colors.onBackground,
                 ),
                 dateValidator = {
                     // Date validator to allow only future dates

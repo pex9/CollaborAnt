@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -91,7 +91,7 @@ fun MyChatsPage(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
-        itemsIndexed(userTeams.sortedBy { team -> team.chat.maxOf { it.date } }.reversed()){ idx, team ->
+        items(userTeams.sortedBy { team -> team.chat.maxOfOrNull { it.date } }.reversed()) {team ->
             ChatItem(
                 team = team,
                 loggedInUserId = loggedInUserId,
@@ -100,5 +100,6 @@ fun MyChatsPage(
                 navController = navController
             )
         }
+
     }
 }

@@ -63,7 +63,6 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.TagCircleComp
 import it.polito.lab5.gui.TaskStateComp
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.Team
