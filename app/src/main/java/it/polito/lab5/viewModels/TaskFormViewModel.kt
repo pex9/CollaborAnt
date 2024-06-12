@@ -143,6 +143,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                         }
                     } else {
                         id = currentTask!!.id
+                        var isOnCompletedReschedule = false
                         var taskState = currentTask!!.state
                         val categories: MutableMap<String, String> = currentTask!!.categories.toMutableMap()
 
@@ -172,18 +173,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 )
                             )
 
-                            if(taskState == TaskState.COMPLETED) {
-                                users?.filter { currentTask!!.teamMembers.contains(it.id) }?.forEach { member ->
-                                    //  Decrement completedTasks Kpi value for all previous delegated members since the task has been rescheduled
-                                    val kpi = member.kpiValues[currentTask!!.teamId]
-                                    val updatedKpi = kpi?.copy(
-                                        completedTasks = kpi.completedTasks - 1,
-                                        score = calculateScore(kpi.assignedTasks, kpi.completedTasks - 1)
-                                    )
-
-                                    updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
-                                }
-                            }
+                            if(taskState == TaskState.COMPLETED) { isOnCompletedReschedule = true }
 
                             taskState = TaskState.PENDING
                         }
@@ -210,12 +200,30 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 memberId -> categories.remove(memberId)
                         }
 
+                        if(isOnCompletedReschedule) {
+                            users?.filter { currentTask!!.teamMembers.contains(it.id) && delegatedMembers.contains(it.id)}?.forEach { member ->
+                                //  Decrement completedTasks Kpi value for previous delegated members since the task has been rescheduled
+                                val kpi = member.kpiValues[currentTask!!.teamId]
+                                val updatedKpi = kpi?.copy(
+                                    completedTasks = kpi.completedTasks - 1,
+                                    score = calculateScore(kpi.assignedTasks, kpi.completedTasks - 1)
+                                )
+
+                                updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                            }
+                        }
+
                         //  Decrease assignedTasks Kpi value for all members no longer delegated for the task
                         users?.filter { currentTask!!.teamMembers.contains(it.id) && !delegatedMembers.contains(it.id)}?.forEach { member ->
                             val kpi = member.kpiValues[currentTask!!.teamId]
+
+                            val newCompletedKpi = if(isOnCompletedReschedule) { (kpi?.completedTasks ?: 0) - 1 }
+                                else { kpi?.completedTasks ?: 0 }
+
                             val updatedKpi = kpi?.copy(
                                 assignedTasks = kpi.assignedTasks - 1,
-                                score = calculateScore(kpi.assignedTasks - 1, kpi.completedTasks)
+                                completedTasks = newCompletedKpi,
+                                score = calculateScore(kpi.assignedTasks - 1, newCompletedKpi)
                             )
 
                             updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
