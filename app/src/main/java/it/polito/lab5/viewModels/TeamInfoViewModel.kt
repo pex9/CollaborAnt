@@ -38,6 +38,8 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
 
     suspend fun removeUserFromTeam(user: User, team: Team, chosenMember: String?) = model.removeUserFromTeam(user, team, chosenMember)
 
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
+
     var optionsOpened by mutableStateOf(false)
     fun setOptionsOpenedValue(b: Boolean) {
         optionsOpened = b

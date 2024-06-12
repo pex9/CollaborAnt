@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,10 +40,17 @@ import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TeamChatTopAppBar(team: Team, navController: NavController) {
+fun TeamChatTopAppBar(
+    team: Team,
+    loggedInUserId: String,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
+    navController: NavController
+) {
+    val scope = rememberCoroutineScope()
     val (first, last) = getMonogramText(team.name)
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
@@ -89,7 +97,11 @@ fun TeamChatTopAppBar(team: Team, navController: NavController) {
         },
         navigationIcon = {
             IconButton(
-                onClick = { navController.popBackStack() },
+                onClick = {
+                    scope.launch {
+                        resetUnreadMessage(team, loggedInUserId)
+                    }.invokeOnCompletion { navController.popBackStack() }
+                },
                 colors = IconButtonDefaults.iconButtonColors(
                     containerColor = Color.Transparent,
                     contentColor = colors.onBackground

@@ -161,6 +161,7 @@ fun TeamInfoPage(
     errorMsg: String,
     setErrorMsgValue: (String) -> Unit,
     setShowDeleteLoadingValue: (Boolean) -> Unit,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
@@ -265,6 +266,7 @@ fun TeamInfoPage(
             navController = navController,
             loggedInUserId = loggedInUserId,
             setSelectedUserValue = setSelectedUserValue,
+            resetUnreadMessage = resetUnreadMessage
         )
     }
 

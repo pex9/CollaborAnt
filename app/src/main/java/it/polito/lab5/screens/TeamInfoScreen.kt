@@ -86,6 +86,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
                         errorMsg = vm.errorMsg,
                         setErrorMsgValue = vm::setErrorMsgValue,
                         setShowDeleteLoadingValue = vm::setShowDeleteLoadingValue,
+                        resetUnreadMessage = vm::resetUnreadMessage,
                         paddingValues = paddingValues,
                         navController = navController
                     )

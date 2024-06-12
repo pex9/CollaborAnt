@@ -36,7 +36,14 @@ fun TeamChatScreen (
     // Scaffold for layout structure
     Scaffold(
         topBar = {
-            if (team != null) { TeamChatTopAppBar(team = team, navController = navController) }
+            if (team != null && loggedInUserId != null) {
+                TeamChatTopAppBar(
+                    team = team,
+                    loggedInUserId = loggedInUserId,
+                    resetUnreadMessage = vm::resetUnreadMessage,
+                    navController = navController
+                )
+            }
         }, // Top app bar for task list
         bottomBar = {
             if (team != null && users != null && loggedInUserId != null) {

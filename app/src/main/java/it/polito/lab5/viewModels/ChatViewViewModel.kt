@@ -25,6 +25,8 @@ class ChatViewViewModel(val teamId: String, userId: String?, val model: MyModel,
 
     suspend fun addMessageToTeam(team: Team, message: Message) = model.addMessageToTeam(team, message)
 
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
+
     var newMessage by mutableStateOf("")
         private set
     fun setNewMessageValue(c: String) {

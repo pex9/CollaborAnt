@@ -433,7 +433,8 @@ fun MemberOptionsBottomSheet(
     removeUserFromTeam: suspend (User) -> Unit,
     navController: NavController,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,
-    setSelectedUserValue: (User?) -> Unit
+    setSelectedUserValue: (User?) -> Unit,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
 ) {
     // Remember the state of the modal bottom sheet
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -646,9 +647,13 @@ fun MemberOptionsBottomSheet(
                     },
                     modifier = Modifier.clickable {
                         coroutineScope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            setShowMemberOptBottomSheetValue(false)
-                            setSelectedUserValue(null)
-                            navController.navigate("viewChat/${team.id}/${member.id}")
+                            coroutineScope.launch {
+                                resetUnreadMessage(team, loggedInUserId)
+                            }.invokeOnCompletion {
+                                setShowMemberOptBottomSheetValue(false)
+                                setSelectedUserValue(null)
+                                navController.navigate("viewChat/${team.id}/${member.id}")
+                            }
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp))
