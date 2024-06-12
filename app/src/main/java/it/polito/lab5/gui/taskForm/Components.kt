@@ -189,7 +189,7 @@ fun DatePickerComp(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let {
-                            LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of("UTC"))
+                            LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault())
                         }?.toLocalDate()?.let { setDueDate(it) }
                         setShowDueDateDialogValue(false)
                     }
@@ -281,7 +281,7 @@ fun EndDatePickerComp(
                 TextButton(
                     onClick = {
                         datePickerState.selectedDateMillis?.let {
-                            LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.of("UTC"))
+                            LocalDateTime.ofInstant(Instant.ofEpochMilli(it), ZoneId.systemDefault())
                         }?.toLocalDate()?.let { setDueDate(it) }
                         setShowDueDateDialogValue(false)
                     }

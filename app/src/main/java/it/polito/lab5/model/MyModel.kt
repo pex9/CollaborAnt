@@ -113,8 +113,9 @@ class MyModel(val context: Context) {
 
     private suspend fun deleteAttachment(taskId: String, attachment: Attachment) {
         val storageRef = storage.reference
+        val (name, extension) = attachment.name.split(".")
 
-        val fileName = "attachments/${taskId}/${attachment.id}.${attachment.type.split("/").last()}"
+        val fileName = "attachments/${taskId}/${name}(${attachment.id}).${extension}"
         val attachmentRef = storageRef.child(fileName)
         attachmentRef.delete().await()
     }

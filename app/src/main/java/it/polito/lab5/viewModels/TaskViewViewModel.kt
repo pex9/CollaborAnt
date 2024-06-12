@@ -112,4 +112,10 @@ class TaskViewViewModel(val taskId: String, val model: MyModel,val auth: GoogleA
     fun setOptionSelectedValue(o: Option) {
         optionSelected = o
     }
+
+    var showDeleteLoading by mutableStateOf(false)
+        private set
+    fun setShowDeleteLoadingValue(b: Boolean) {
+        showDeleteLoading = b
+    }
 }

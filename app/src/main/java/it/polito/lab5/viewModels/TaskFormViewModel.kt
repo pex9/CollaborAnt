@@ -15,7 +15,6 @@ import it.polito.lab5.model.Action
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.KPI
 import it.polito.lab5.model.MyModel
-import it.polito.lab5.model.Option
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
@@ -142,7 +141,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 }
                             }
                         }
-                    } else {    //  TODO: manage update of recurrent tasks
+                    } else {
                         id = currentTask!!.id
                         var taskState = currentTask!!.state
                         val categories: MutableMap<String, String> = currentTask!!.categories.toMutableMap()
@@ -400,18 +399,6 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
     var showLoading by mutableStateOf(false)
         private set
-
-    var showRepeatUpdateDialog by mutableStateOf(false)
-        private set
-    fun setShowRepeatUpdateDialogValue(b: Boolean) {
-        showRepeatUpdateDialog = b
-    }
-
-    var optionSelected by mutableStateOf(Option.CURRENT)
-        private set
-    fun setOptionSelectedValue(o: Option) {
-        optionSelected = o
-    }
 
     init {
         val userid = auth.getSignedInUserId()

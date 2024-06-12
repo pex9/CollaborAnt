@@ -138,6 +138,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
 fun TaskStateComp(
     state: TaskState, // Task state
     fontSize: TextUnit, // Font size for the task state text
+    enabled: Boolean = false,
     onClick: (() -> Unit)? = null, // Click listener for the task state card
     trailingIcon: @Composable (() -> Unit?)? = null // Trailing icon for the task state card
 ) {
@@ -149,7 +150,7 @@ fun TaskStateComp(
         TaskState.COMPLETED -> "Completed" to CollaborantColors.PriorityGreen
         TaskState.OVERDUE -> "Overdue" to CollaborantColors.PriorityOrange2
     }
-    val modifier = if (onClick != null) Modifier.clickable { onClick() }
+    val modifier = if (onClick != null) Modifier.clickable(enabled = enabled) { onClick() }
     else Modifier
 
     // Draw the task state card

@@ -82,4 +82,10 @@ class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: Google
     fun setErrorMsgValue(e: String) {
         errorMsg = e
     }
+
+    var showDeleteLoading by mutableStateOf(false)
+        private set
+    fun setShowDeleteLoadingValue(b: Boolean) {
+        showDeleteLoading = b
+    }
 }

@@ -150,6 +150,7 @@ fun TeamInfoPage(
     setChosenMemberValue: (String?) -> Unit,
     errorMsg: String,
     setErrorMsgValue: (String) -> Unit,
+    setShowDeleteLoadingValue: (Boolean) -> Unit,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
@@ -276,9 +277,11 @@ fun TeamInfoPage(
                             leaveSuccess = false
                         }
                     } else {
+                        setShowDeleteLoadingValue(true)
                         leaveSuccess = deleteTeam(team, users)
                     }
                 }.invokeOnCompletion {
+                    setShowDeleteLoadingValue(false)
                     if(leaveSuccess) {
                         setShowLeaveDialogValue(false)
                         navController.popBackStack(
@@ -299,8 +302,10 @@ fun TeamInfoPage(
                 var deleteSuccess = false
 
                 scope.launch {
+                    setShowDeleteLoadingValue(true)
                     deleteSuccess = deleteTeam(team, users)
                 }.invokeOnCompletion {
+                    setShowDeleteLoadingValue(false)
                     if(deleteSuccess) {
                         setShowDeleteDialogValue(false)
                         navController.popBackStack(

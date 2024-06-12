@@ -89,6 +89,7 @@ import kotlin.math.min
 fun OptionsComp(
     taskId: String,
     repeat: Repeat,
+    showLoading: Boolean,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
     setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
@@ -98,7 +99,14 @@ fun OptionsComp(
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
         // IconButton to trigger the opening/closing of options
-        IconButton(onClick = { setOptionsOpenedValue(!optionsOpened) }) {
+        IconButton(
+            enabled = !showLoading,
+            onClick = { setOptionsOpenedValue(!optionsOpened) },
+            colors = IconButtonDefaults.iconButtonColors(
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = CollaborantColors.DarkBlue,
+            ),
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
@@ -206,6 +214,7 @@ fun OptionsComp(
 fun TaskStateSelComp(
     state: TaskState,
     updateState: (TaskState) -> Unit,
+    showLoading: Boolean,
     stateSelOpened: Boolean,
     setStateSelOpenedValue: (Boolean) -> Unit,
     isDelegatedMember: Boolean,
@@ -220,6 +229,7 @@ fun TaskStateSelComp(
         TaskStateComp(
             state = state,
             fontSize = 18.sp,
+            enabled = !showLoading,
             onClick = if(check) { { setStateSelOpenedValue(!stateSelOpened) } } else { null },
             trailingIcon = if(check) {
                     {

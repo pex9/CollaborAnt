@@ -20,6 +20,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +57,7 @@ fun TaskTopBar(
     updateState: (TaskState) -> Unit,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
+    showLoading: Boolean,
     stateSelOpened: Boolean,
     setStateSelOpenedValue: (Boolean) -> Unit,
     setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
@@ -72,8 +74,11 @@ fun TaskTopBar(
         navigationIcon = {
             // Navigation button to navigate back
             TextButton(
+                enabled = !showLoading,
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = CollaborantColors.DarkBlue,
                     containerColor = Color.Transparent, // Transparent background
                     contentColor = CollaborantColors.DarkBlue // Dark blue icon color
                 ),
@@ -100,6 +105,7 @@ fun TaskTopBar(
                 loggedInUserRole = loggedInUserRole,
                 state = state,
                 updateState = updateState,
+                showLoading = showLoading,
                 stateSelOpened = stateSelOpened,
                 setStateSelOpenedValue = setStateSelOpenedValue
             )
@@ -111,6 +117,7 @@ fun TaskTopBar(
                 OptionsComp(
                     taskId = taskId,
                     repeat = repeat,
+                    showLoading = showLoading,
                     optionsOpened = optionsOpened,
                     setOptionsOpenedValue = setOptionsOpenedValue,
                     setShowRepeatDeleteDialogValue = setShowRepeatDeleteDialogValue,
@@ -118,7 +125,15 @@ fun TaskTopBar(
                     navController = navController
                 )
             } else {
-                IconButton(onClick = { navController.navigate("history/${taskId}") }) {
+                IconButton(
+                    enabled = !showLoading,
+                    onClick = { navController.navigate("history/${taskId}") },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        disabledContainerColor = Color.Transparent,
+                        disabledContentColor = CollaborantColors.DarkBlue,
+                    ),
+
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.time_circle),
                         contentDescription = "History Icon",
