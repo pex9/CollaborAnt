@@ -167,7 +167,7 @@ fun DatePickerComp(
 ) {
     // Remember the state of the date picker
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli(),
+        initialSelectedDateMillis = date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli(),
     )
 
     // Due date component with an arrow icon to toggle the date picker dialog
@@ -181,7 +181,7 @@ fun DatePickerComp(
         DatePickerDialog(
             onDismissRequest = {
                 datePickerState.setSelection(
-                    date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli()
+                    date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
                 )
                 setShowDueDateDialogValue(false)
             },
@@ -206,7 +206,7 @@ fun DatePickerComp(
                 TextButton(
                     onClick = {
                         datePickerState.setSelection(
-                            date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli()
+                            date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
                         )
                         setShowDueDateDialogValue(false)
                     }
@@ -259,7 +259,7 @@ fun EndDatePickerComp(
 ) {
     // Remember the state of the date picker
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli(),
+        initialSelectedDateMillis = date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
     )
 
     // Due date component with an arrow icon to toggle the date picker dialog
@@ -273,7 +273,7 @@ fun EndDatePickerComp(
         DatePickerDialog(
             onDismissRequest = {
                 datePickerState.setSelection(
-                    date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli()
+                    date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
                 )
                 setShowDueDateDialogValue(false)
             },
@@ -298,7 +298,7 @@ fun EndDatePickerComp(
                 TextButton(
                     onClick = {
                         datePickerState.setSelection(
-                            date?.atStartOfDay(ZoneOffset.ofOffset("UTC", ZoneOffset.of("+02:00")))?.toInstant()?.toEpochMilli()
+                            date?.atStartOfDay()?.toInstant(ZoneOffset.UTC)?.toEpochMilli()
                         )
                         setShowDueDateDialogValue(false)
                     }
