@@ -8,7 +8,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -109,14 +111,17 @@ fun MyTeamsPage(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(top = 20.dp)
             .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
+        item { Spacer(modifier = Modifier.height(20.dp)) }
+
         items(teams) { team ->
             TeamItem(team,navController)
         }
+        
+        item { Spacer(modifier = Modifier.height(80.dp)) }
     }
 
     if(showDialog) {

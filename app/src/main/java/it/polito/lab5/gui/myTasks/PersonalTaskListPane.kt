@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
@@ -21,9 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,7 +34,6 @@ import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 
@@ -75,19 +71,10 @@ fun PersonalTaskListPane(
     errMsg: String,
     setErrMsgValue: (String) -> Unit,
     chosenCategory: String,
-    setChosenCategoryValue: (String) -> Unit,
-    setIsVisibleValue: (Boolean) -> Unit,
+    setChosenCategoryValue: (String) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val scrollState = rememberLazyListState()
-
-    LaunchedEffect(scrollState) {
-        snapshotFlow { scrollState.firstVisibleItemScrollOffset <= 0 }
-            .collect { checkVisible ->
-                setIsVisibleValue(checkVisible)
-            }
-    }
 
     if(isDialogOpen) {
         Dialog(
@@ -203,17 +190,15 @@ fun PersonalTaskListPane(
 
     // Composable LazyColumn for displaying list
     LazyColumn(
-        state = scrollState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(p)
-            .padding(top = 20.dp), // Apply padding
+            .padding(p),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top,
     ) {
-/*        item {
+        item {
             Spacer(modifier = Modifier.height(20.dp))
-        }*/
+        }
         // Display items for each category
         items(categories) { category ->
             // Display tasks for the current category
@@ -237,6 +222,8 @@ fun PersonalTaskListPane(
                 setChosenCategoryValue = setChosenCategoryValue
             )
         }
+
+        item { Spacer(modifier = Modifier.height(80.dp)) }
     }
 
     if(errMsg.isNotBlank()) {

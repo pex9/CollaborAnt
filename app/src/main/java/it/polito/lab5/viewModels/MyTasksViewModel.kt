@@ -142,10 +142,4 @@ class MyTasksViewModel(val model: MyModel, val auth: GoogleAuthentication): View
     fun setChosenCategoryValue(s: String) {
         chosenCategory = s
     }
-
-    var isVisible by mutableStateOf(true)
-        private set
-    fun setIsVisibleValue(b: Boolean) {
-        isVisible = b
-    }
 }
