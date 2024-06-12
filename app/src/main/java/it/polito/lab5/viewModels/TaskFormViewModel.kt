@@ -157,17 +157,18 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 )
                             )
 
-                            users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
-                                //  Decrease completedTasks Kpi value for all delegated members
-                                val kpi = member.kpiValues[currentTask!!.teamId]
-                                val updatedKpi = kpi?.copy(
-                                    completedTasks = kpi.completedTasks - 1,
-                                    score = calculateScore(kpi.assignedTasks, kpi.completedTasks - 1)
-                                )
+                            if(taskState == TaskState.COMPLETED) {
+                                users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                                    //  Decrease completedTasks Kpi value for all delegated members
+                                    val kpi = member.kpiValues[currentTask!!.teamId]
+                                    val updatedKpi = kpi?.copy(
+                                        completedTasks = kpi.completedTasks - 1,
+                                        score = calculateScore(kpi.assignedTasks, kpi.completedTasks - 1)
+                                    )
 
-                                updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                                    updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                                }
                             }
-
 
                             taskState = TaskState.PENDING
                         }
