@@ -15,6 +15,7 @@ import it.polito.lab5.model.Action
 import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.KPI
 import it.polito.lab5.model.MyModel
+import it.polito.lab5.model.Option
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
@@ -42,7 +43,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
     private suspend fun createTask(task: Task) = model.createTask(task)
 
-    private suspend fun updateTask(task: Task) = model.updateTask(task)
+    private suspend fun updateTask(task: Task, option: Option) = model.updateTask(task, option)
 
     private suspend fun addActionToHistory(taskId: String, action: Action) = model.addActionToTaskHistory(taskId, action)
 
@@ -125,7 +126,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                             val dates = generateDueDates(dueDate!!, endRepeatDate!!, repeat)
 
                             //  Create all task's copy
-                            updateTask(newTask.copy(id = id, parentId = id))
+                            updateTask(newTask.copy(id = id, parentId = id), Option.CURRENT)
                             dates.forEach { date -> createTask(newTask.copy(parentId = id, dueDate = date)) }
 
                             //  Update user kpi for all task's copy
@@ -141,6 +142,46 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 }
                             }
                         }
+                    } else if(repeat != Repeat.NEVER) {
+                        id = currentTask!!.id
+                        var taskState = currentTask!!.state
+
+                        if((taskState == TaskState.OVERDUE || taskState == TaskState.COMPLETED) && dueDate!! > LocalDate.now() && optionSelected == Option.CURRENT) {
+                            addActionToHistory(currentTask!!.id,
+                                Action(
+                                    id = "",
+                                    memberId = loggedInUser?.id ?: "",
+                                    taskState = TaskState.PENDING,
+                                    date = LocalDateTime.now(),
+                                    description = "Task rescheduled"
+                                )
+                            )
+
+                            users?.filter { delegatedMembers.contains(it.id) }?.forEach { member ->
+                                //  Decrease completedTasks Kpi value for all delegated members
+                                val kpi = member.kpiValues[currentTask!!.teamId]
+                                val updatedKpi = kpi?.copy(
+                                    completedTasks = kpi.completedTasks - 1,
+                                    score = calculateScore(kpi.assignedTasks, kpi.completedTasks - 1)
+                                )
+
+                                updatedKpi?.let { updateUserKpi(member.id, member.joinedTeams, currentTask!!.teamId to it) }
+                            }
+
+
+                            taskState = TaskState.PENDING
+                        }
+
+                        updateTask(
+                            currentTask!!.copy(
+                                title = title,
+                                tag = tag,
+                                description = description,
+                                dueDate = dueDate,
+                                state = taskState
+                            ),
+                            optionSelected
+                        )
                     } else {
                         id = currentTask!!.id
                         var isOnCompletedReschedule = false
@@ -240,7 +281,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
                                 state = taskState,
                                 categories = categories,
                                 endDateRepeat = endRepeatDate
-                            )
+                            ),
+                            Option.CURRENT
                         )
                     }
                 }.await()
@@ -299,6 +341,8 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
         dueDateError = if(dueDate == null && (repeat != Repeat.NEVER ||
             (currentTask != null && currentTask!!.state != TaskState.NOT_ASSIGNED) || delegatedMembers.isNotEmpty()))
                 "Due date must be set"
+            else if(currentTask != null && repeat != Repeat.NEVER && optionSelected != Option.CURRENT && dueDate != currentTask!!.dueDate)
+                "Due date can be changed just for the current task"
             else ""
     }
 
@@ -332,6 +376,7 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
     private fun checkDelegateMembers() {
         delegatedMembersError = if(currentTask != null && currentTask!!.state != TaskState.NOT_ASSIGNED && delegatedMembers.isEmpty())
             "At least one member must be delegated"
+            else if(delegatedMembers.isEmpty() && repeat != Repeat.NEVER) "Recurrent task must be delegated to someone"
             else ""
     }
 
@@ -407,6 +452,18 @@ class TaskFormViewModel(val teamId: String?, private val currentTaskId: String?,
 
     var showLoading by mutableStateOf(false)
         private set
+
+    var optionSelected by mutableStateOf(Option.CURRENT)
+        private set
+    fun setOptionSelectedValue(o: Option) {
+        optionSelected = o
+    }
+
+    var showRepeatEditDialog by mutableStateOf(false)
+        private set
+    fun setShowRepeatEditDialogValue(b: Boolean) {
+        showRepeatEditDialog = b
+    }
 
     init {
         val userid = auth.getSignedInUserId()

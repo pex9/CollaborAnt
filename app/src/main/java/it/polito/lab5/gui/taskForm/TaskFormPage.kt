@@ -48,10 +48,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
+import it.polito.lab5.gui.RepeatDialogComp
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.gui.taskView.DelegatedMemberComp
+import it.polito.lab5.model.Option
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
@@ -61,11 +63,14 @@ import java.time.LocalDate
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskFormTopBar(
+    isEdit: Boolean,
     taskId: String?,
+    repeat: Repeat,
     navController: NavController,
     validate: suspend () -> String,
     resetErrorMsg: (Boolean) -> Unit,
-    showLoading: Boolean
+    showLoading: Boolean,
+    setShowRepeatEditDialogValue: (Boolean) -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
@@ -121,15 +126,18 @@ fun TaskFormTopBar(
             } else {
                 TextButton(
                     onClick = {
-                        var id = ""
+                        if(isEdit && repeat != Repeat.NEVER) { setShowRepeatEditDialogValue(true) }
+                        else {
+                            var id = ""
 
-                        scope.launch {
-                            id = validate()
-                        }.invokeOnCompletion {
-                            if(id.isNotBlank()) {
-                                navController.popBackStack()
-                                if(taskId == null) {
-                                    navController.navigate("viewTask/${id}")
+                            scope.launch {
+                                id = validate()
+                            }.invokeOnCompletion {
+                                if(id.isNotBlank()) {
+                                    navController.popBackStack()
+                                    if(taskId == null) {
+                                        navController.navigate("viewTask/${id}")
+                                    }
                                 }
                             }
                         }
@@ -155,6 +163,7 @@ fun TaskFormTopBar(
 
 @Composable
 fun TaskFormPage(
+    validate: suspend () -> String,
     isEdit: Boolean,
     team: Team,
     users: List<User>,
@@ -193,8 +202,14 @@ fun TaskFormPage(
     resetErrorMsg: () -> Unit,
     triState: ToggleableState,
     setTriStateValue: (ToggleableState) -> Unit,
-    toggleTriState: () -> Unit
+    toggleTriState: () -> Unit,
+    optionSelected: Option,
+    setOptionSelectedValue: (Option) -> Unit,
+    showRepeatEditDialog: Boolean,
+    setShowRepeatEditDialogValue: (Boolean) -> Unit,
+    navController: NavController
 ) {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val defaultOpt = KeyboardOptions(
         imeAction = ImeAction.Next,
@@ -215,7 +230,7 @@ fun TaskFormPage(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
-            .padding(top= 10.dp)
+            .padding(top = 10.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -278,18 +293,20 @@ fun TaskFormPage(
                     )
                 }
 
-                Divider(
-                    thickness = 1.dp,
-                    color = colors.outline,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                if(!isEdit || repeat == Repeat.NEVER) {
+                    Divider(
+                        thickness = 1.dp,
+                        color = colors.outline,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
 
-                DelegatedMemberComp(
-                    members = delegatedMembers,
-                    users = users,
-                    setShowBottomSheetValue = setShowMemberBottomSheetValue,
-                    isEdit = true
-                )
+                    DelegatedMemberComp(
+                        members = delegatedMembers,
+                        users = users,
+                        setShowBottomSheetValue = setShowMemberBottomSheetValue,
+                        isEdit = true
+                    )
+                }
 
                 if(!isEdit) {
                     Divider(
@@ -364,6 +381,33 @@ fun TaskFormPage(
                 toggleTriState = toggleTriState
             )
         }
+    }
+
+    if (showRepeatEditDialog) {
+        RepeatDialogComp(
+            title = "Confirm Edit",
+            text = "Are you sure to edit this recurrent task?",
+            onConfirmText = "Save",
+            optionSelected = optionSelected,
+            setOptionSelectedValue = setOptionSelectedValue,
+            onConfirm = {
+                var id = ""
+                setShowRepeatEditDialogValue(false)
+
+                scope.launch {
+                    id = validate()
+                }.invokeOnCompletion {
+                    setOptionSelectedValue(Option.CURRENT)
+                    if(id.isNotBlank()) {
+                        navController.popBackStack()
+                    }
+                }
+            },
+            onDismiss = {
+                setOptionSelectedValue(Option.CURRENT)
+                setShowRepeatEditDialogValue(false)
+            }
+        )
     }
 
     if(dueDateError.isNotBlank() || delegatedMembersError.isNotBlank() || endRepeatDateError.isNotBlank()) {

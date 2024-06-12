@@ -28,11 +28,14 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         topBar = {
             if (team != null && users != null) {
                 TaskFormTopBar(
+                    isEdit = vm.currentTask != null,
                     taskId = vm.currentTask?.id,
+                    repeat = vm.repeat,
                     navController = navController,
                     validate = vm::validate,
                     resetErrorMsg = vm::resetErrorMsg,
-                    showLoading = vm.showLoading
+                    showLoading = vm.showLoading,
+                    setShowRepeatEditDialogValue = vm::setShowRepeatEditDialogValue
                 )
             }
         }
@@ -43,6 +46,7 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
         ) {
             if (team != null && users != null && vm.loggedInUser != null) {
                 TaskFormPage(
+                    validate = vm::validate,
                     isEdit = vm.currentTask != null,
                     team = team,
                     users = users,
@@ -81,7 +85,12 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
                     resetErrorMsg = vm::resetErrorMsg,
                     triState = vm.triState,
                     setTriStateValue = vm::setTriStateValue,
-                    toggleTriState = vm::toggleTriState
+                    toggleTriState = vm::toggleTriState,
+                    optionSelected = vm.optionSelected,
+                    setOptionSelectedValue = vm::setOptionSelectedValue,
+                    showRepeatEditDialog = vm.showRepeatEditDialog,
+                    setShowRepeatEditDialogValue = vm:: setShowRepeatEditDialogValue,
+                    navController = navController
                 )
             }
         }

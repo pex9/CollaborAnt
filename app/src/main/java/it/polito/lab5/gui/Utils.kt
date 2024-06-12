@@ -470,7 +470,7 @@ fun RepeatDialogComp(
                     val literalOption = when (option) {
                         Option.CURRENT -> "This task"
                         Option.ALL -> "All tasks"
-                        Option.AFTER -> "This task and all next"
+                        Option.AFTER -> "This task and all future tasks"
                     }
 
                     ListItem(

@@ -1089,22 +1089,42 @@ class MyModel(val context: Context) {
         awaitClose { tasksSnapshotListener.remove() }
     }
 
-    suspend fun updateTask(task: Task) {
-        db.collection("Tasks").document(task.id).update(
-            hashMapOf(
-                "title" to task.title,
-                "description" to task.description,
-                "parentId" to task.parentId,
-                "teamId" to task.teamId,
-                "dueDate" to localDateToTimestamp(task.dueDate, ZoneId.systemDefault()),
-                "repeat" to task.repeat,
-                "tag" to task.tag,
-                "teamMembers" to task.teamMembers,
-                "state" to task.state,
-                "categories" to task.categories.values.toList(),
-                "endDateRepeat" to localDateToTimestamp(task.endDateRepeat, ZoneId.systemDefault())
-            )
-        ).await()
+    suspend fun updateTask(task: Task, option: Option) {
+        val currentTimestamp = localDateToTimestamp(task.dueDate, ZoneId.systemDefault())
+        val tasksReference = db.collection("Tasks")
+        val query = when(option) {
+            Option.CURRENT -> tasksReference.whereIn(FieldPath.documentId(), listOf(task.id))
+            Option.ALL -> tasksReference.whereEqualTo("parentId", task.parentId)
+            Option.AFTER -> currentTimestamp?.let {
+                tasksReference.whereEqualTo("parentId", task.parentId).whereGreaterThanOrEqualTo("dueDate", it)
+            }
+        }
+
+        query?.get()?.await()?.documents?.forEach { documentSnapshot ->
+            if(option == Option.CURRENT) {
+                documentSnapshot.reference.update(
+                    hashMapOf(
+                        "title" to task.title,
+                        "description" to task.description,
+                        "parentId" to task.parentId,
+                        "teamId" to task.teamId,
+                        "dueDate" to localDateToTimestamp(task.dueDate, ZoneId.systemDefault()),
+                        "repeat" to task.repeat,
+                        "tag" to task.tag,
+                        "teamMembers" to task.teamMembers,
+                        "state" to task.state,
+                        "categories" to task.categories.values.toList(),
+                        "endDateRepeat" to localDateToTimestamp(task.endDateRepeat, ZoneId.systemDefault())
+                    )
+                ).await()
+            } else {
+                documentSnapshot.reference.update(
+                    "title", task.title,
+                    "description", task.description,
+                    "tag", task.tag
+                ).await()
+            }
+        }
     }
 
     suspend fun deleteTask(task: Task, delegateMembers: List<User>, option: Option) {
