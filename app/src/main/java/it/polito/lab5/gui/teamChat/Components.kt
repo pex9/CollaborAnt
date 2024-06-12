@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -55,11 +56,11 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.taskView.getTimeAgo
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Message
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -67,22 +68,22 @@ import java.util.Locale
 
 @Composable
 fun MessageTextField(
+    team: Team,
+    loggedInUserId: String,
     // Flag to determine if the layout should be horizontal or vertical
     isHorizontal: Boolean,
     // Current value of the text field
     value: String,
     // Callback to update the value of the text field
     updateValue: (String) -> Unit,
-    // Task ID associated with the comment
-    taskId: Int,
     // Callback to add a comment
-    addMessage: (Int, Message) -> Unit,
+    addMessageToTeam: suspend (Team, Message) -> Unit,
     // Modifier for styling and layout customization
-    newMessageReceiver: Int?,
-    setIsReadState: (Int, Boolean) -> Unit,
-    teamId: Int
+    newMessageReceiver: String?
 ) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -167,18 +168,17 @@ fun MessageTextField(
                     // Check if the text field is not blank
                     if (value.isNotBlank()) {
                         // Add the comment using the provided callback
-                        addMessage(
-                            taskId,
-                            Message(
-                                content = value,
-                                senderId = DataBase.LOGGED_IN_USER_ID,
-                                date = LocalDateTime.now(),
-                                receiverId = newMessageReceiver
+                        scope.launch {
+                            addMessageToTeam(team,
+                                Message(
+                                    id = "",
+                                    content = value,
+                                    senderId = loggedInUserId,
+                                    date = LocalDateTime.now(),
+                                    receiverId = newMessageReceiver
+                                )
                             )
-                        )
-                        // Clear the text field by updating its value
-                        updateValue("")
-                        setIsReadState(teamId, false)
+                        }.invokeOnCompletion { updateValue("") } // Clear the text field by updating its value
                     }
                 },
                 // Customizing the colors of the IconButton
@@ -392,15 +392,16 @@ fun MessageFrom(message: Message, users: List<User>){
 fun ReceiverSelector(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
-    targetReceiver: Int?,
-    setReceiverTargetValue: (Int?) -> Unit
+    targetReceiver: String?,
+    setReceiverTargetValue: (String?) -> Unit
 ) {
-    val members = team.members.map { it.first }.toSet()
-    val receiverList =
-        users.filter { members.contains(it.id) && it.id != DataBase.LOGGED_IN_USER_ID }
+    val members = team.members.map { it.key }.toSet()
+    val receiverList = users.filter { members.contains(it.id) && it.id != loggedInUserId }
     val colors = MaterialTheme.colorScheme
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -512,9 +513,9 @@ fun ReceiverSelector(
 @Composable
 fun SelectorItem(
     member: User,
-    targetReceiver: Int?,
+    targetReceiver: String?,
     setOptionsOpenedValue: (Boolean) -> Unit,
-    setReceiverTargetValue: (Int?) -> Unit
+    setReceiverTargetValue: (String?) -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     DropdownMenuItem(

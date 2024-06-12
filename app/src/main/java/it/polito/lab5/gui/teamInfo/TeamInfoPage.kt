@@ -1,5 +1,6 @@
 package it.polito.lab5.gui.teamInfo
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -44,11 +45,12 @@ import it.polito.lab5.gui.DialogComp
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.gui.teamForm.getMonogramText
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,11 +136,13 @@ fun TeamInfoTopBar(
 
 @Composable
 fun TeamInfoPage(
+    scope: CoroutineScope,
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     loggedInUserRole: Role,
-    roleSelectionOpened: List<Pair<Int, Boolean>>,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     showMemberOptBottomSheet: Boolean,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     selectedUser: User?,
@@ -147,15 +151,16 @@ fun TeamInfoPage(
     setShowLeaveDialogValue: (Boolean) -> Unit,
     showDeleteDialog: Boolean,
     setShowDeleteDialogValue: (Boolean) -> Unit,
-    deleteTeam: (Int) -> Unit,
-    updateRole: (Int, Int, Role) -> Unit,
-    removeMember: (Int, Int) -> Unit,
+    deleteTeam: suspend (Team, List<User>) -> Boolean,
+    updateUserRole: suspend (String, Role, Team) -> Unit,
+    removeUserFromTeam: suspend (User, Team, String?) -> Unit,
     showMemberSelBottomSheet: Boolean,
     setShowMemberSelBottomSheetValue: (Boolean) -> Unit,
-    chosenMember: Int?,
-    setChosenMemberValue: (Int?) -> Unit,
+    chosenMember: String?,
+    setChosenMemberValue: (String?) -> Unit,
     errorMsg: String,
     setErrorMsgValue: (String) -> Unit,
+    setShowDeleteLoadingValue: (Boolean) -> Unit,
     navController: NavController,
     paddingValues: PaddingValues
 ) {
@@ -239,8 +244,9 @@ fun TeamInfoPage(
             TeamMembersComp(
                 team = team,
                 users = users,
+                loggedInUserId = loggedInUserId,
                 loggedInUserRole = loggedInUserRole,
-                updateRole = updateRole,
+                updateUserRole = updateUserRole,
                 roleSelectionOpened = roleSelectionOpened,
                 setRoleSelectionOpenedValue = setRoleSelectionOpenedValue,
                 setSelectedUserValue = setSelectedUserValue,
@@ -255,21 +261,23 @@ fun TeamInfoPage(
             team = team,
             loggedInUserRole = loggedInUserRole,
             setShowMemberOptBottomSheetValue = setShowMemberOptBottomSheetValue,
-            removeMember = { removeMember(team.id, it) },
+            removeUserFromTeam = { removeUserFromTeam(it, team, null) },
             navController = navController,
+            loggedInUserId = loggedInUserId,
             setSelectedUserValue = setSelectedUserValue,
         )
     }
 
     if(showMemberSelBottomSheet) {
         MemberSelectionBottomSheet(
-            members = team.members,
+            members = team.members.toList(),
             users = users,
             chosenMember = chosenMember,
             setChosenMemberValue = setChosenMemberValue,
             setErrorMsgValue = setErrorMsgValue,
             setShowLeaveDialogValue = setShowLeaveDialogValue,
-            setShowBottomSheetValue = setShowMemberSelBottomSheetValue
+            setShowBottomSheetValue = setShowMemberSelBottomSheetValue,
+            loggedInUserId = loggedInUserId
         )
     }
 
@@ -279,17 +287,33 @@ fun TeamInfoPage(
             text = "Are you sure to leave this team?",
             onConfirmText = "Leave",
             onConfirm = {
-                setShowLeaveDialogValue(false)
+                var leaveSuccess = false
 
-                if (chosenMember != null) { updateRole(team.id, chosenMember, Role.TEAM_MANAGER) }
-
-                if(team.members.size > 1) { removeMember(team.id, DataBase.LOGGED_IN_USER_ID) }
-                else { deleteTeam(team.id) }
-
-                navController.popBackStack(
-                    route = "myTeams",
-                    inclusive = false
-                )
+                scope.launch {
+                    if(team.members.size > 1) {
+                        try {
+                            users.find { it.id == loggedInUserId }?.let { user ->
+                                removeUserFromTeam(user, team, chosenMember)
+                                leaveSuccess = true
+                            }
+                        } catch (e: Exception) {
+                            Log.e("DeleteTeam", "Failed to delete team", e)
+                            leaveSuccess = false
+                        }
+                    } else {
+                        setShowDeleteLoadingValue(true)
+                        leaveSuccess = deleteTeam(team, users)
+                    }
+                }.invokeOnCompletion {
+                    setShowDeleteLoadingValue(false)
+                    if(leaveSuccess) {
+                        setShowLeaveDialogValue(false)
+                        navController.popBackStack(
+                            route = "myTeams",
+                            inclusive = false
+                        )
+                    }
+                }
             },
             onDismiss = { setShowLeaveDialogValue(false) ; setChosenMemberValue(null) }
         )
@@ -299,12 +323,21 @@ fun TeamInfoPage(
             text = "Are you sure to delete this team?",
             onConfirmText = "Delete",
             onConfirm = {
-                setShowDeleteDialogValue(false)
-                deleteTeam(team.id)
-                navController.popBackStack(
-                    route = "myTeams",
-                    inclusive = false
-                )
+                var deleteSuccess = false
+
+                scope.launch {
+                    setShowDeleteLoadingValue(true)
+                    deleteSuccess = deleteTeam(team, users)
+                }.invokeOnCompletion {
+                    setShowDeleteLoadingValue(false)
+                    if(deleteSuccess) {
+                        setShowDeleteDialogValue(false)
+                        navController.popBackStack(
+                            route = "myTeams",
+                            inclusive = false
+                        )
+                    }
+                }
             },
             onDismiss = { setShowDeleteDialogValue(false) }
         )

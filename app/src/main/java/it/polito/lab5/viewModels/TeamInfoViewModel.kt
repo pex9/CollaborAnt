@@ -1,41 +1,51 @@
 package it.polito.lab5.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
+import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
+import kotlinx.coroutines.async
 
-class TeamInfoViewModel(val teamId: Int, val model: MyModel): ViewModel() {
-    val users = model.users
-    val teams = model.teams
+class TeamInfoViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
+    val loggedInUserId = auth.getSignedInUserId()
 
-    fun deleteTeam(teamId: Int) = model.deleteTeam(teamId)
+    fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    fun updateRole(teamId: Int, memberId: Int, role: Role) = model.updateRole(teamId, memberId, role)
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
 
-    fun removeMember(teamId: Int, memberId: Int) = model.removeMember(teamId, memberId)
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
+    suspend fun deleteTeam(team: Team, members: List<User>): Boolean {
+        try {
+            viewModelScope.async {
+                model.deleteTeam(team, members)
+            }.await()
+            return true
+        } catch (e: Exception) {
+            Log.e("Server Error", e.message.toString())
+            return false
+        }
+    }
+
+    suspend fun updateUserRole(userId: String, newRole: Role, team: Team) = model.updateUserRole(userId, newRole, team)
+
+    suspend fun removeUserFromTeam(user: User, team: Team, chosenMember: String?) = model.removeUserFromTeam(user, team, chosenMember)
 
     var optionsOpened by mutableStateOf(false)
     fun setOptionsOpenedValue(b: Boolean) {
         optionsOpened = b
     }
 
-    var roleSelectionOpened: MutableList<Pair<Int, Boolean>> = mutableStateListOf()
-    init {
-        teams.value.find { it.id == teamId }?.let { team ->
-            team.members.filter { it.second != Role.TEAM_MANAGER } }?.forEach {
-                roleSelectionOpened.add(it.first to false)
-        }
-    }
-
-    fun setRoleSelectionOpenedValue(memberId: Int, b: Boolean) {
-        val idx = roleSelectionOpened.indexOfFirst { it.first == memberId }
-
-        roleSelectionOpened[idx] = memberId to b
+    var roleSelectionOpened by mutableStateOf("")
+    fun setRoleSelectionOpenedValue(s: String) {
+        roleSelectionOpened = s
     }
 
     var showMemberOptBottomSheet by mutableStateOf(false)
@@ -63,13 +73,19 @@ class TeamInfoViewModel(val teamId: Int, val model: MyModel): ViewModel() {
         showMemberSelBottomSheet = b
     }
 
-    var chosenMember: Int? by mutableStateOf(null)
-    fun setChosenMemberValue(u: Int?) {
+    var chosenMember: String? by mutableStateOf(null)
+    fun setChosenMemberValue(u: String?) {
         chosenMember = u
     }
 
     var errorMsg by mutableStateOf("")
     fun setErrorMsgValue(e: String) {
         errorMsg = e
+    }
+
+    var showDeleteLoading by mutableStateOf(false)
+        private set
+    fun setShowDeleteLoadingValue(b: Boolean) {
+        showDeleteLoading = b
     }
 }

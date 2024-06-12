@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,10 +50,16 @@ import it.polito.lab5.gui.TextFieldComp
 import it.polito.lab5.gui.teamForm.OptionsBottomSheet
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
+fun MyProfileFormTopBar(
+    validate: suspend () -> Boolean,
+    showLoading: Boolean,
+    navController: NavController
+) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
 
@@ -64,8 +72,11 @@ fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
         },
         navigationIcon = {
             TextButton(
-                onClick = {navController.popBackStack() },
+                enabled = !showLoading,
+                onClick = { navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = colors.onBackground,
                     containerColor = Color.Transparent,
                     contentColor = colors.onBackground
                 ),
@@ -85,20 +96,30 @@ fun MyProfileFormTopBar(validate: () -> Boolean, navController: NavController) {
             }
         },
         actions = {
-            TextButton(
-                onClick = { if(validate()) { navController.popBackStack() } },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colors.onBackground
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text ="Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = colors.onBackground,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            }
+            else{
+                TextButton(
+                    onClick = {
+                        scope.launch { if(validate()) navController.popBackStack() }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = colors.onBackground
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text ="Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp
+                    )
+                }
             }
         }
     )

@@ -18,7 +18,6 @@ import androidx.navigation.NavController
 import it.polito.lab5.LocalTheme
 import it.polito.lab5.gui.myTeams.MyTeamsPage
 import it.polito.lab5.gui.myTeams.MyTeamsTopBar
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.viewModels.MyTeamsViewModel
 
@@ -28,18 +27,20 @@ fun MyTeamsScreen (
     vm: MyTeamsViewModel,
     showDialog: Boolean,
     setShowDialogValue: (Boolean) -> Unit,
-    navController: NavController,
-    isReadState: MutableList<Pair<Int, Boolean>>,
+    navController: NavController
 ) {
-    val teams = vm.teams.collectAsState().value.filter { team ->
-        team.members.map { it.first }.contains(DataBase.LOGGED_IN_USER_ID)
-    }
-
+    val loggedInUserId = vm.auth.getSignedInUserId()
+    val kpiValues = loggedInUserId?.let {vm.getUserKpi(it) }?.collectAsState(initial = emptyList())?.value
+    val loggedInUser = loggedInUserId?.let { vm.getUser(it) }?.collectAsState(initial = null)?.value?.copy(
+        kpiValues = kpiValues?.toMap() ?: emptyMap()
+    )
+    val invitationTeam = vm.teamId?.let { vm.getTeam(it).collectAsState(initial = null).value }
+    val teams = loggedInUserId?.let { vm.getUserTeams(it).collectAsState(initial = emptyList()).value }
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
+        bottomBar = {  BottomNavigationBarComp(navController) },
         topBar = { MyTeamsTopBar() },
-        bottomBar = {  BottomNavigationBarComp(navController, isReadState) },
         floatingActionButton = {
             val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
             // Floating action button for adding a new team
@@ -58,19 +59,24 @@ fun MyTeamsScreen (
             }
         }
     ) { paddingValues ->
-        MyTeamsPage(
-            teams = teams,
-            invitationTeam = vm.invitationTeam,
-            addMember = vm::addMember,
-            showBottomSheet = vm.showBottomSheet,
-            setShowBottomSheetValue = vm::setShowBottomSheetValue,
-            showDialog = showDialog,
-            setShowDialogValue = setShowDialogValue,
-            joinSuccess = vm.joinSuccess,
-            setJoinSuccessValue = vm::setJoinSuccessValue,
-            navController = navController,
-            paddingValues = paddingValues
-        )
+        if (teams != null && loggedInUser != null) {
+            MyTeamsPage(
+                teams = teams,
+                loggedInUser = loggedInUser,
+                invitationTeam = invitationTeam,
+                addMember = vm::addUserToTeam,
+                showBottomSheet = vm.showBottomSheet,
+                setShowBottomSheetValue = vm::setShowBottomSheetValue,
+                showDialog = showDialog,
+                setShowDialogValue = setShowDialogValue,
+                joinSuccess = vm.joinSuccess,
+                setJoinSuccessValue = vm::setJoinSuccessValue,
+                showLoading = vm.showLoading,
+                setShowLoadingValue = vm::setShowLoadingValue,
+                navController = navController,
+                paddingValues = paddingValues
+            )
+        }
     }
 }
 

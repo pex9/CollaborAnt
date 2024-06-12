@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -21,9 +24,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
@@ -58,6 +65,7 @@ import it.polito.lab5.ui.theme.interFamily
 import kotlin.math.min
 import coil.compose.AsyncImage
 import it.polito.lab5.LocalTheme
+import it.polito.lab5.model.Option
 
 @Composable
 fun MonogramPresentationComp(
@@ -116,6 +124,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
         is Uploaded ->
             AsyncImage(
                 model = imageProfile.image,
+                placeholder = painterResource(id = R.drawable.profile_placeholder),
                 contentScale = ContentScale.Crop,
                 contentDescription = "Image Profile",
                 modifier = Modifier
@@ -130,6 +139,7 @@ fun ImagePresentationComp(first: String, last: String, imageProfile: ImageProfil
 fun TaskStateComp(
     state: TaskState, // Task state
     fontSize: TextUnit, // Font size for the task state text
+    enabled: Boolean = false,
     onClick: (() -> Unit)? = null, // Click listener for the task state card
     trailingIcon: @Composable (() -> Unit?)? = null // Trailing icon for the task state card
 ) {
@@ -144,7 +154,7 @@ fun TaskStateComp(
         TaskState.COMPLETED -> "Completed" to colors.onBackground
         TaskState.OVERDUE -> "Overdue" to customStateColor
     }
-    val modifier = if (onClick != null) Modifier.clickable { onClick() }
+    val modifier = if (onClick != null) Modifier.clickable(enabled = enabled) { onClick() }
     else Modifier
 
     // Draw the task state card
@@ -421,7 +431,101 @@ fun DialogComp(
     )
 }
 
-fun bringPairToHead(list: List<Pair<Int, Any>>, targetId: Int): List<Pair<Int, Any>> {
+@Composable
+fun RepeatDialogComp(
+    title: String,
+    text: String,
+    onConfirmText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    optionSelected: Option,
+    setOptionSelectedValue: (Option) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = {
+            Text(
+                text = title,
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 20.sp
+            )
+        },
+        text = {
+            LazyColumn {
+                item {
+                    Text(
+                        text = text,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp
+                    )
+                }
+
+                items(Option.entries) { option ->
+                    val literalOption = when (option) {
+                        Option.CURRENT -> "This task"
+                        Option.ALL -> "All tasks"
+                        Option.AFTER -> "This task and all next"
+                    }
+
+                    ListItem(
+                        headlineContent = { Text(text = literalOption) },
+                        leadingContent = {
+                            RadioButton(
+                                selected = optionSelected == option,
+                                onClick = null,
+                                colors = RadioButtonDefaults.colors(
+                                    selectedColor = CollaborantColors.DarkBlue,
+                                    unselectedColor = CollaborantColors.DarkBlue
+                                )
+                            )
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.White
+                        ),
+                        modifier = Modifier.selectable(
+                            selected = optionSelected == option,
+                            onClick = { setOptionSelectedValue(option) }
+                        )
+                    )
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.Black)
+            ) {
+                Text(
+                    text = "Cancel",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = CollaborantColors.PriorityRed)
+            ) {
+                Text(
+                    text = onConfirmText,
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
+                )
+            }
+        },
+        containerColor = Color.White,
+        titleContentColor = CollaborantColors.DarkBlue,
+        textContentColor = CollaborantColors.BorderGray,
+    )
+}
+
+
+fun bringPairToHead(list: List<Pair<String, Any>>, targetId: String): List<Pair<String, Any>> {
     val indexOfTarget = list.indexOfFirst { it.first == targetId }
 
     return if (indexOfTarget != -1) {

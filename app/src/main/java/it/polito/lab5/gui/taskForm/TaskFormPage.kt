@@ -1,6 +1,11 @@
 package it.polito.lab5.gui.taskForm
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,18 +55,22 @@ import it.polito.lab5.gui.taskView.DelegatedMemberComp
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskFormTopBar(
-    taskId: Int?,
+    taskId: String?,
     navController: NavController,
-    validate: () -> Int,
-    resetErrorMsg: (Boolean) -> Unit
+    validate: suspend () -> String,
+    resetErrorMsg: (Boolean) -> Unit,
+    showLoading: Boolean
 ) {
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
+    val scope = rememberCoroutineScope()
+
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
@@ -76,8 +87,11 @@ fun TaskFormTopBar(
         },
         navigationIcon = {
             TextButton(
+                enabled = !showLoading,
                 onClick = { resetErrorMsg(true) ; navController.popBackStack() },
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = colors.onBackground,
                     containerColor = Color.Transparent,
                     contentColor = colors.onBackground
                 ),
@@ -99,26 +113,41 @@ fun TaskFormTopBar(
             }
         },
         actions = {
-            TextButton(
-                onClick = {
-                    val id = validate()
-                    if(id != -1) {
-                        navController.popBackStack()
-                        navController.navigate("viewTask/${id}")
-                    } },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colors.onBackground
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text = if (taskId == null) "Create" else "Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                    color = colors.onBackground
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = colors.onBackground,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            } else {
+                TextButton(
+                    onClick = {
+                        var id = ""
+
+                        scope.launch {
+                            id = validate()
+                        }.invokeOnCompletion {
+                            if(id.isNotBlank()) {
+                                navController.popBackStack()
+                                if(taskId == null) {
+                                    navController.navigate("viewTask/${id}")
+                                }
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = colors.onBackground
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text = if (taskId == null) "Create" else "Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = colors.onBackground
+                    )
+                }
             }
         }
     )
@@ -126,8 +155,10 @@ fun TaskFormTopBar(
 
 @Composable
 fun TaskFormPage(
+    isEdit: Boolean,
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     title: String,
     setTitleValue: (String) -> Unit,
     titleError: String,
@@ -139,9 +170,13 @@ fun TaskFormPage(
     dueDate: LocalDate?,
     setDueDateValue: (LocalDate) -> Unit,
     dueDateError: String,
-    delegatedMembers: List<Int>,
-    addMember: (Int) -> Unit,
-    removeMember: (Int) -> Unit,
+    endRepeatDate : (LocalDate?),
+    setEndRepeatDateValue: (LocalDate) -> Unit,
+    endRepeatDateError: String,
+    showEndRepeatField: Boolean,
+    delegatedMembers: List<String>,
+    addMember: (String) -> Unit,
+    removeMember: (String) -> Unit,
     delegatedMembersError: String,
     repeat: Repeat,
     setRepeatValue: (Repeat) -> Unit,
@@ -151,6 +186,8 @@ fun TaskFormPage(
     setShowRepeatMenuValue: (Boolean) -> Unit,
     showDueDateDialog: Boolean,
     setShowDueDateDialogValue: (Boolean) -> Unit,
+    showEndRepeatDateDialog: Boolean,
+    setShowEndRepeatDateDialogValue: (Boolean) -> Unit,
     showMemberBottomSheet: Boolean,
     setShowMemberBottomSheetValue: (Boolean) -> Unit,
     resetErrorMsg: () -> Unit,
@@ -254,18 +291,50 @@ fun TaskFormPage(
                     isEdit = true
                 )
 
-                Divider(
-                    thickness = 1.dp,
-                    color = colors.outline,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+                if(!isEdit) {
+                    Divider(
+                        thickness = 1.dp,
+                        color = colors.outline,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
 
-                RepeatMenuComp(
-                    repeat = repeat,
-                    setRepeat = setRepeatValue,
-                    showRepeatMenu = showRepeatMenu,
-                    setShowRepeatMenuValue = setShowRepeatMenuValue
-                )
+                    RepeatMenuComp(
+                        repeat = repeat,
+                        setRepeat = setRepeatValue,
+                        showRepeatMenu = showRepeatMenu,
+                        setShowRepeatMenuValue = setShowRepeatMenuValue,
+
+                        )
+
+                    AnimatedVisibility(
+                        visible = showEndRepeatField,
+                        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                    ) {
+
+                        Divider(
+                            thickness = 1.dp,
+                            color = CollaborantColors.BorderGray.copy(0.4f),
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        ) {
+                            // Due date component
+                            EndDatePickerComp(
+                                date = endRepeatDate,
+                                repeat = repeat,
+                                setDueDate = setEndRepeatDateValue,
+                                showDueDateDialog = showEndRepeatDateDialog,
+                                setShowDueDateDialogValue = setShowEndRepeatDateDialogValue
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -285,6 +354,7 @@ fun TaskFormPage(
             MembersPickerBottomSheet(
                 team = team,
                 users = users,
+                loggedInUserId = loggedInUserId,
                 members = delegatedMembers,
                 setShowBottomSheetValue = setShowMemberBottomSheetValue,
                 addMember = addMember,
@@ -296,8 +366,8 @@ fun TaskFormPage(
         }
     }
 
-    if(dueDateError.isNotBlank() || delegatedMembersError.isNotBlank()) {
-        val message = dueDateError.ifBlank { delegatedMembersError }
+    if(dueDateError.isNotBlank() || delegatedMembersError.isNotBlank() || endRepeatDateError.isNotBlank()) {
+        val message = dueDateError.ifBlank { delegatedMembersError }.ifBlank { endRepeatDateError }
 
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         resetErrorMsg()

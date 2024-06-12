@@ -6,9 +6,15 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import android.webkit.MimeTypeMap
+import androidx.compose.ui.text.toLowerCase
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
+import java.io.File
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 fun getTimeAgo(date: LocalDateTime): String {
     val minute = 60
@@ -37,18 +43,21 @@ fun getTimeAgo(date: LocalDateTime): String {
 
 }
 
-fun openDocument(context: Context, documentUri: Uri) {
+fun openDocument(context: Context, file: File) {
+    val documentUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    val type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+
     // Open the document using an appropriate application
     val intent = Intent(Intent.ACTION_VIEW).apply {
-        setDataAndType(documentUri, context.contentResolver.getType(documentUri))
+        setDataAndType(documentUri, type)//context.contentResolver.getType(documentUri))
         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
     }
     context.startActivity(intent)
 }
 
-fun getAttachmentInfo(context: Context, uri: Uri): Pair<String, Float>? {
+fun getAttachmentInfo(context: Context, uri: Uri): Pair<String, Double>? {
     var fileName = ""
-    var fileSize = 0f
+    var fileSize = 0.0
     val projection = arrayOf(
         MediaStore.Images.Media.DATA,
         OpenableColumns.DISPLAY_NAME,
@@ -65,7 +74,7 @@ fun getAttachmentInfo(context: Context, uri: Uri): Pair<String, Float>? {
 
                 val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
                 if (sizeIndex != -1) {
-                    fileSize = cursor.getLong(sizeIndex).toFloat()
+                    fileSize = cursor.getLong(sizeIndex).toDouble()
                 }
             }
         }
@@ -73,11 +82,11 @@ fun getAttachmentInfo(context: Context, uri: Uri): Pair<String, Float>? {
         Log.e("Attachment error", e.message.toString())
     }
 
-    return if(fileName.isNotBlank() && fileSize != 0f ) { Pair(fileName, fileSize) }
+    return if(fileName.isNotBlank() && fileSize != 0.0 ) { Pair(fileName, fileSize) }
         else { null }
 }
 
-fun getLiteralSize(size: Float): String {
+fun getLiteralSize(size: Double): String {
     var used = 0
     var s = size / 1024f
     val units = arrayOf("KB", "MB")

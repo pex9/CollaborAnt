@@ -1,22 +1,17 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import it.polito.lab5.model.MyModel
-import it.polito.lab5.model.User
 
-class TeamStatsViewModel(val teamId: Int, val model: MyModel): ViewModel() {
-    val teams = model.teams
-    val tasks = model.tasks
-    private val users = model.users
-    val rankedMembersList = computeRankedMembersList()
+@RequiresApi(Build.VERSION_CODES.O)
+class TeamStatsViewModel(val teamId: String, val model: MyModel): ViewModel() {
+    fun getTeam(teamId: String) = model.getTeam(teamId)
 
-    private fun computeRankedMembersList(): List<User> {
-        val teamMembersPairs = teams.value.find { it.id == teamId }?.members
-        val teamMembers = users.value.filter { it.id in teamMembersPairs!!.map { pair -> pair.first } }
-        val orderedTeamMembers = teamMembers.sortedBy { user ->
-            user.kpiValues.find { pair -> pair.first == teamId }?.second?.score ?: 0
-        }.reversed()
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
 
-        return orderedTeamMembers
-    }
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
+    fun getTasksTeam(teamId: String) = model.getTasksTeam(teamId)
 }

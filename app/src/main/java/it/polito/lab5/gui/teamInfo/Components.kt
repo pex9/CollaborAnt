@@ -53,7 +53,6 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.bringPairToHead
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
@@ -178,7 +177,7 @@ fun OptionsComp(
 }
 
 @Composable
-fun MembersHeaderComp(teamId: Int, loggedInUserRole: Role, navController: NavController) {
+fun MembersHeaderComp(teamId: String, loggedInUserRole: Role, navController: NavController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -209,20 +208,23 @@ fun MembersHeaderComp(teamId: Int, loggedInUserRole: Role, navController: NavCon
 fun TeamMembersComp(
     team: Team,
     users: List<User>,
+    loggedInUserId: String,
     loggedInUserRole: Role,
-    updateRole: (Int, Int, Role) -> Unit,
-    roleSelectionOpened: List<Pair<Int, Boolean>>,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    updateUserRole: suspend (String, Role, Team) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
-    bringPairToHead(team.members, DataBase.LOGGED_IN_USER_ID).forEach { (memberId, role) ->
+    bringPairToHead(team.members.toList(), loggedInUserId).forEach { (memberId, role) ->
+
         MemberRow(
             users = users,
             memberId = memberId,
             role = role as Role,
+            loggedInUserId = loggedInUserId,
             loggedInUserRole = loggedInUserRole,
-            updateRole = { id, r -> updateRole(team.id, id, r) },
+            updateUserRole = { id, r -> updateUserRole(id, r, team) },
             roleSelectionOpened = roleSelectionOpened,
             setRoleSelectionOpenedValue = setRoleSelectionOpenedValue,
             setSelectedUserValue = setSelectedUserValue,
@@ -234,17 +236,18 @@ fun TeamMembersComp(
 @Composable
 fun MemberRow(
     users: List<User>,
-    memberId: Int,
+    memberId: String,
     role: Role,
+    loggedInUserId: String,
     loggedInUserRole: Role,
-    updateRole: (Int, Role) -> Unit,
-    roleSelectionOpened: List<Pair<Int, Boolean>>,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    updateUserRole: suspend (String, Role) -> Unit,
+    roleSelectionOpened: String,
+    setRoleSelectionOpenedValue: (String) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit,
     setSelectedUserValue: (User?) -> Unit
 ) {
     val member = users.find { it.id == memberId }
-    val optionsOpened = roleSelectionOpened.find { it.first == memberId }?.second
+    val optionsOpened = roleSelectionOpened == memberId
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -272,7 +275,7 @@ fun MemberRow(
             Column {
                 if (member != null) {
                     Text(
-                        text = if(DataBase.LOGGED_IN_USER_ID == member.id) "You" else "${member.first} ${member.last}",
+                        text = if(loggedInUserId == member.id) "You" else "${member.first} ${member.last}",
                         fontWeight = FontWeight.Medium,
                         fontSize = 18.sp,
                         fontFamily = interFamily,
@@ -281,11 +284,11 @@ fun MemberRow(
                     )
                 }
 
-                if (optionsOpened != null && loggedInUserRole == Role.TEAM_MANAGER) {
+                if (loggedInUserRole == Role.TEAM_MANAGER && role != Role.TEAM_MANAGER) {
                     RoleOptionsComp(
                         memberId = memberId,
                         role = role,
-                        updateRole = updateRole,
+                        updateUserRole = updateUserRole,
                         roleSelectionOpened = optionsOpened,
                         setRoleSelectionOpenedValue = setRoleSelectionOpenedValue
                     )
@@ -315,12 +318,13 @@ fun MemberRow(
 
 @Composable
 fun RoleOptionsComp(
-    memberId: Int,
+    memberId: String,
     role: Role,
-    updateRole: (Int, Role) -> Unit,
+    updateUserRole: suspend (String, Role) -> Unit,
     roleSelectionOpened: Boolean,
-    setRoleSelectionOpenedValue: (Int, Boolean) -> Unit,
+    setRoleSelectionOpenedValue: (String) -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -332,7 +336,7 @@ fun RoleOptionsComp(
         modifier = Modifier
             .padding(top = 1.dp, start = 4.dp)
             .clickable(enabled = role != Role.TEAM_MANAGER) {
-                setRoleSelectionOpenedValue(memberId, true)
+                setRoleSelectionOpenedValue(memberId)
             }
     ) {
 
@@ -368,7 +372,7 @@ fun RoleOptionsComp(
         Box {
             DropdownMenu(
                 expanded = roleSelectionOpened,
-                onDismissRequest = { setRoleSelectionOpenedValue(memberId, false) },
+                onDismissRequest = { setRoleSelectionOpenedValue("") },
                 offset = DpOffset(x = 2.dp, y = 2.dp),
                 modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
@@ -398,7 +402,12 @@ fun RoleOptionsComp(
                                 fontSize = 16.sp
                             )
                         },
-                        onClick = { setRoleSelectionOpenedValue(memberId, false) ; updateRole(memberId, r) }
+                        onClick = {
+                            scope.launch { updateUserRole(memberId, r) }
+                                .invokeOnCompletion {
+                                    setRoleSelectionOpenedValue("")
+                                }
+                        }
                     )
 
                     if(idx < Role.entries.size - 2) {
@@ -419,8 +428,9 @@ fun RoleOptionsComp(
 fun MemberOptionsBottomSheet(
     member: User,
     team: Team,
+    loggedInUserId: String,
     loggedInUserRole: Role,
-    removeMember: (Int) -> Unit,
+    removeUserFromTeam: suspend (User) -> Unit,
     navController: NavController,
     setShowMemberOptBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,
     setSelectedUserValue: (User?) -> Unit
@@ -429,7 +439,7 @@ fun MemberOptionsBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Remember coroutine scope for launching coroutines
     val coroutineScope = rememberCoroutineScope()
-    val literalRole = when (team.members.find { it.first == member.id }?.second) {
+    val literalRole = when (team.members[member.id]) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
         Role.JUNIOR_MEMBER -> "Junior Member"
@@ -524,7 +534,7 @@ fun MemberOptionsBottomSheet(
     ) {
         Spacer(modifier = Modifier.height(20.dp))
 
-        if(member.id != DataBase.LOGGED_IN_USER_ID) {
+        if(member.id != loggedInUserId) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -608,7 +618,7 @@ fun MemberOptionsBottomSheet(
                 colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp)),
             )
 
-            if(member.id != DataBase.LOGGED_IN_USER_ID) {
+            if(member.id != loggedInUserId) {
                 Divider(
                     thickness = 1.dp,
                     color = colors.outline.copy(0.4f),
@@ -645,7 +655,7 @@ fun MemberOptionsBottomSheet(
                 )
             }
 
-            if(loggedInUserRole ==  Role.TEAM_MANAGER && member.id != DataBase.LOGGED_IN_USER_ID) {
+            if(loggedInUserRole ==  Role.TEAM_MANAGER && member.id != loggedInUserId) {
                 Divider(
                     thickness = 1.dp,
                     color = colors.outline.copy(0.4f),
@@ -673,9 +683,12 @@ fun MemberOptionsBottomSheet(
                     },
                     modifier = Modifier.clickable {
                         coroutineScope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-                            setShowMemberOptBottomSheetValue(false)
-                            setSelectedUserValue(null)
-                            removeMember(member.id)
+                            coroutineScope.launch {
+                                removeUserFromTeam(member)
+                            }.invokeOnCompletion {
+                                setShowMemberOptBottomSheetValue(false)
+                                setSelectedUserValue(null)
+                            }
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = colors.surfaceColorAtElevation(30.dp))
@@ -690,10 +703,11 @@ fun MemberOptionsBottomSheet(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MemberSelectionBottomSheet(
-    members: List<Pair<Int, Role>>,
+    members: List<Pair<String, Role>>,
     users: List<User>,
-    chosenMember: Int?,
-    setChosenMemberValue: (Int?) -> Unit,
+    loggedInUserId: String,
+    chosenMember: String?,
+    setChosenMemberValue: (String?) -> Unit,
     setErrorMsgValue: (String) -> Unit,
     setShowLeaveDialogValue: (Boolean) -> Unit,
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet,
@@ -785,6 +799,7 @@ fun MemberSelectionBottomSheet(
                                             setShowBottomSheetValue(false)
                                             setShowLeaveDialogValue(true)
                                             setErrorMsgValue("")
+                                            setChosenMemberValue(chosenMember)
                                         }
                                 }
                             },
@@ -838,7 +853,7 @@ fun MemberSelectionBottomSheet(
                             Column {
                                 if (member != null) {
                                     Text(
-                                        text = if (DataBase.LOGGED_IN_USER_ID == member.id) "You" else "${member.first} ${member.last}",
+                                        text = if (loggedInUserId == member.id) "You" else "${member.first} ${member.last}",
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 18.sp,
                                         fontFamily = interFamily,

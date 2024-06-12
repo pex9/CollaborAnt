@@ -16,6 +16,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,8 +42,8 @@ import androidx.navigation.NavController
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
 
@@ -160,10 +161,13 @@ fun VerifyDomainDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun InvitationTeamBottomSheet(
     team: Team,
-    addMember: (Int, Int) -> Boolean,
+    loggedInUser: User,
+    addMember: suspend (Team, User) -> Boolean,
     setShowBottomSheetValue: (Boolean) -> Unit, // Callback to toggle the visibility of the bottom sheet
     joinSuccess: Boolean,
     setJoinSuccessValue: (Boolean) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
     navController: NavController,
 ) {
     val (first, last) = getMonogramText(team.name)
@@ -235,23 +239,37 @@ fun InvitationTeamBottomSheet(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
-                onClick = {
-                    if(joinSuccess) { navController.navigate("myTeams/${team.id}") ; setShowBottomSheetValue(false) }
-                    else { setJoinSuccessValue(addMember(team.id, DataBase.LOGGED_IN_USER_ID)) }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = if(joinSuccess) colors.background else colors.onSecondary,
-                    containerColor = if(joinSuccess) colors.secondaryContainer else colors.primary
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = if(joinSuccess) "View Team" else "Join Team",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 18.sp
-                )
+            if(showLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(32.dp))
+            } else {
+                Button(
+                    onClick = {
+                        if (joinSuccess) {
+                            navController.navigate("myTeams/${team.id}"); setShowBottomSheetValue(
+                                false
+                            )
+                        } else {
+                            coroutineScope.launch {
+                                val isOk = addMember(team, loggedInUser)
+
+                                setJoinSuccessValue(isOk)
+                                setShowLoadingValue(!isOk)
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = if(joinSuccess) colors.background else colors.onSecondary,
+                        containerColor = if(joinSuccess) colors.secondaryContainer else colors.primary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (joinSuccess) "View Team" else "Join Team",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 18.sp
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(40.dp))

@@ -1,6 +1,7 @@
 package it.polito.lab5.gui.myProfile
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,16 +18,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.KPI
@@ -89,8 +99,8 @@ fun OverlappingComponents(
     first: String,
     last: String,
     imageProfile: ImageProfile,
-    joinedTeams: Int,
-    kpi: List<Pair<Int, KPI>>
+    joinedTeams: Long,
+    kpi: Map<String, KPI>
 ) {
     Box(modifier = Modifier
         .fillMaxWidth()
@@ -125,12 +135,12 @@ fun OverlappingComponents(
 }
 
 @Composable
-fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
+fun KPIPresentationComp(kpi: Map<String, KPI>, joinedTeams: Long) {
     val colors = MaterialTheme.colorScheme
     val c = colors.outline.copy(0.4f)
     val overallUserKPI = mapOf(
-        "assigned" to kpi.sumOf{ it.second.assignedTasks },
-        "completed" to kpi.sumOf{ it.second.completedTasks }
+        "assigned" to kpi.values.sumOf{ it.assignedTasks },
+        "completed" to kpi.values.sumOf{ it.completedTasks }
     )
 
     Card(
@@ -219,6 +229,83 @@ fun KPIPresentationComp(kpi: List<Pair<Int, KPI>>, joinedTeams: Int) {
                     fontSize = 14.sp,
                     color = colors.outline,
                     textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+@Composable
+fun OptionsComp(
+    onSignOut: ()-> Unit,
+    optionsOpened: Boolean,
+    navController: NavController,
+    setOptionsOpenedValue: (Boolean) -> Unit,
+) {
+    val colors = MaterialTheme.colorScheme
+    // Box to align content at the bottom end of the layout
+    Box(contentAlignment = Alignment.BottomEnd) {
+        // IconButton to trigger the opening/closing of options
+        IconButton(onClick = { setOptionsOpenedValue(!optionsOpened) }) {
+            Icon(
+                painter = painterResource(id = R.drawable.more_circle),
+                contentDescription = "Options Icon",
+                tint = colors.onBackground,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        // DropdownMenu to display options
+        Box {
+            DropdownMenu(
+                expanded = optionsOpened,
+                onDismissRequest = { setOptionsOpenedValue(false) },
+                offset = DpOffset(x = 8.dp, y = 0.dp),
+                modifier = Modifier.background(Color.White)
+            ) {
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.edit_square),
+                            contentDescription = "Edit Icon",
+                            tint = colors.onBackground
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Edit Profile",
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
+                    },
+                    onClick = { setOptionsOpenedValue(false) ; navController.navigate("myProfile/edit") },
+                    modifier = Modifier.offset(y = (-4).dp) // Offset for better alignment
+                )
+
+                Divider(
+                    color = colors.outline.copy(0.4f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                )
+
+                DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.logout),
+                            contentDescription = "Logout Icon",
+                            tint = colors.error
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "Log out",
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp,
+                            color = colors.error
+                        )
+                    },
+                    onClick = { setOptionsOpenedValue(false) ; onSignOut() },
+                    modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }
         }

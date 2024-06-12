@@ -130,34 +130,36 @@ fun HistoryItem(action: Action, users: List<User>) {
                     .fillMaxWidth()
                     .weight(2f)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp)
-                ) {
-                    Text(
-                        text = text,
-                        fontFamily = interFamily,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 12.sp,
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    // Action author
-                    Box(
+                if(action.memberId.isNotBlank()) {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .size(28.dp)
+                            .fillMaxWidth()
+                            .padding(start = 8.dp)
                     ) {
-                        users.find { it.id == action.memberId }?.let { user ->
-                            ImagePresentationComp(
-                                first = user.first,
-                                last = user.last,
-                                imageProfile = user.imageProfile,
-                                fontSize = 12.sp
-                            )
+                        Text(
+                            text = text,
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Light,
+                            fontSize = 12.sp,
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        // Action author
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                        ) {
+                            users.find { it.id == action.memberId }?.let { user ->
+                                ImagePresentationComp(
+                                    first = user.first,
+                                    last = user.last,
+                                    imageProfile = user.imageProfile,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
                     }
                 }

@@ -130,30 +130,31 @@ fun CategoryItem(
     teams: List<Team>,
     tasks: List<Task>,
     category: String,
+    loggedInUserId: String,
     navController: NavController,
     setIsDialogOpen: (Boolean) -> Unit,
     setCurrentCategory: (String) -> Unit,
-    setCategorySelectionOpenedValue: (String, Boolean) -> Unit,
-    categorySelectionOpened: MutableList<Pair<String, Boolean>>,
+    setCategorySelectionOpenedValue: (String) -> Unit,
+    categorySelectionOpened: String,
     setCategory: (String) -> Unit,
     setMyTasksHideSheet: (Boolean) -> Unit,
-    setTargetTaskIdValue: (Int) -> Unit,
-    expandCategory: MutableList<Pair<String, Boolean>>,
-    setExpandCategory: (String, Boolean) -> Unit,
+    setTargetTaskIdValue: (String) -> Unit,
+    expandCategory: String,
+    setExpandCategory: (String) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
     setNumberOfTasksForCategory: (Int?) -> Unit,
     setChosenCategoryValue: (String) -> Unit,
 ) {
     // Filter tasks for the current category
-    val userTasks = tasks.filter { it.categories[DataBase.LOGGED_IN_USER_ID] == category }
-    val flag = expandCategory.find { it.first == category }?.second ?: false
+    val userTasks = tasks.filter { it.categories[loggedInUserId] == category }
+    val flag = expandCategory == category
     val colors = MaterialTheme.colorScheme
 
     // Row containing category name and task count
     Card(
         modifier = Modifier
             .padding(horizontal = 15.dp, vertical = 10.dp)
-            .clickable { setExpandCategory(category, !flag) }, // Toggle expansion on click,
+            .clickable { setExpandCategory(if(flag) "" else category) }, // Toggle expansion on click,
         colors = CardDefaults.cardColors(
             containerColor = colors.surface,
         ),
@@ -215,7 +216,7 @@ fun CategoryItem(
                     modifier = Modifier.padding(end = 10.dp),
                     color = colors.onSurface
                 )
-                if (category != DataBase.default_categories[0]) {
+                if(category != "Recently Assigned") {
                     CategoryOptionsComp(
                         setCategorySelectionOpenedValue = setCategorySelectionOpenedValue,
                         setIsDialogOpen = setIsDialogOpen,
@@ -278,7 +279,7 @@ fun TaskItem(
     task: Task,
     navController: NavController,
     setMyTasksHideSheet: (Boolean) -> Unit,
-    setTargetTaskIdValue: (Int) -> Unit,
+    setTargetTaskIdValue: (String) -> Unit,
     setChosenCategory: () -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
@@ -329,6 +330,7 @@ fun TaskItem(
             ) {
                 // Display task title
                 val title = task.title.replaceFirstChar { it.uppercase() }
+
                 Text(
                     title,
                     maxLines = 2,
@@ -447,11 +449,11 @@ fun TaskItem(
 // Alert dialog for confirming deletion
 @Composable
 fun CategoryOptionsComp(
-    categorySelectionOpened: MutableList<Pair<String, Boolean>>,
+    categorySelectionOpened: String,
     setIsDialogOpen: (Boolean) -> Unit,
     setCurrentCategory: (String) -> Unit,
     category: String,
-    setCategorySelectionOpenedValue: (String, Boolean) -> Unit,
+    setCategorySelectionOpenedValue: (String) -> Unit,
     setCategory: (String) -> Unit,
     setIsDialogDeleteOpen: (Boolean) -> Unit,
     setNumberOfTasksForCategory: (Int?) -> Unit,
@@ -460,9 +462,9 @@ fun CategoryOptionsComp(
     val colors = MaterialTheme.colorScheme
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
-        val flag = categorySelectionOpened.find { it.first == category }?.second ?: false
+        val flag = categorySelectionOpened == category
         // IconButton to trigger the opening/closing of options
-        IconButton(onClick = { setCategorySelectionOpenedValue(category, !flag) ; }) {
+        IconButton(onClick = { setCategorySelectionOpenedValue(category) ; }) {
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
@@ -474,7 +476,7 @@ fun CategoryOptionsComp(
         Box {
             DropdownMenu(
                 expanded = flag,
-                onDismissRequest = { setCategorySelectionOpenedValue(category, false) },
+                onDismissRequest = { setCategorySelectionOpenedValue("") },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
                 modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
@@ -495,7 +497,12 @@ fun CategoryOptionsComp(
                             color = colors.onBackground
                         )
                     },
-                    onClick = { setCategorySelectionOpenedValue(category, false); setCurrentCategory(category); setCategory(category); setIsDialogOpen(true) },
+                    onClick = {
+                        setCategorySelectionOpenedValue("")
+                        setCurrentCategory(category)
+                        setCategory(category)
+                        setIsDialogOpen(true)
+                    },
                     modifier = Modifier.offset(y = (-4).dp) // Offset for better alignment
                 )
 
@@ -525,7 +532,7 @@ fun CategoryOptionsComp(
                         )
                     },
                     onClick = {
-                        setCategorySelectionOpenedValue(category, false)
+                        setCategorySelectionOpenedValue("")
                         setIsDialogDeleteOpen(true);setCurrentCategory(category)
                         setNumberOfTasksForCategory(numberOfTasks)
                     },
@@ -541,8 +548,9 @@ fun CategoryOptionsComp(
 fun MyTasksModalBottomSheet(
     setMyTasksHideSheet: (Boolean) -> Unit,
     categories: List<String>,
-    updateCategoryFromTask: ( Int, Int, String) -> Unit,
-    taskId: Int?,
+    loggedInUserId: String,
+    updateUserCategoryToTask: suspend (Task, String, String) -> Unit,
+    targetTask: Task?,
     chosenCategory: String,
     setChosenCategoryValue: (String) -> Unit,
 ){
@@ -630,12 +638,14 @@ fun MyTasksModalBottomSheet(
                         selected = chosenCategory == category,
                         onClick = {
                             coroutineScope.launch { modalBottomSheetState.hide() }.invokeOnCompletion {
-                                if(taskId != null) {
-                                    updateCategoryFromTask(taskId, DataBase.LOGGED_IN_USER_ID, category)
+                                coroutineScope.launch {
+                                    if(targetTask != null) {
+                                        updateUserCategoryToTask(targetTask, loggedInUserId, category)
+                                    }
+                                }.invokeOnCompletion {
+                                    setChosenCategoryValue("")
+                                    setMyTasksHideSheet(false)
                                 }
-
-                                setChosenCategoryValue("")
-                                setMyTasksHideSheet(false)
                             }
                         }
                     )

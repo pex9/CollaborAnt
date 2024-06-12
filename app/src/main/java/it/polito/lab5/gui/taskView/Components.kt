@@ -1,6 +1,8 @@
 package it.polito.lab5.gui.taskView
 
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -27,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -64,7 +68,6 @@ import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.model.Attachment
 import it.polito.lab5.model.Comment
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Tag
 import it.polito.lab5.model.TaskState
@@ -77,6 +80,7 @@ import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.interFamily
 import kotlinx.coroutines.launch
+import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -85,9 +89,12 @@ import kotlin.math.min
 
 @Composable
 fun OptionsComp(
-    taskId: Int,
+    taskId: String,
+    repeat: Repeat,
+    showLoading: Boolean,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
+    setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController
 ) {
@@ -95,7 +102,14 @@ fun OptionsComp(
     // Box to align content at the bottom end of the layout
     Box(contentAlignment = Alignment.BottomEnd) {
         // IconButton to trigger the opening/closing of options
-        IconButton(onClick = { setOptionsOpenedValue(!optionsOpened) }) {
+        IconButton(
+            enabled = !showLoading,
+            onClick = { setOptionsOpenedValue(!optionsOpened) },
+            colors = IconButtonDefaults.iconButtonColors(
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = colors.onBackground,
+            ),
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.more_circle),
                 contentDescription = "Options Icon",
@@ -189,7 +203,11 @@ fun OptionsComp(
                             color = colors.error
                         )
                     },
-                    onClick = { setOptionsOpenedValue(false) ; setShowDeleteDialogValue(true) },
+                    onClick = {
+                        setOptionsOpenedValue(false)
+                        if(repeat == Repeat.NEVER) { setShowDeleteDialogValue(true) }
+                        else { setShowRepeatDeleteDialogValue(true) }
+                    },
                     modifier = Modifier.offset(y = 4.dp) // Offset for better alignment
                 )
             }
@@ -201,6 +219,7 @@ fun OptionsComp(
 fun TaskStateSelComp(
     state: TaskState,
     updateState: (TaskState) -> Unit,
+    showLoading: Boolean,
     stateSelOpened: Boolean,
     setStateSelOpenedValue: (Boolean) -> Unit,
     isDelegatedMember: Boolean,
@@ -216,6 +235,7 @@ fun TaskStateSelComp(
         TaskStateComp(
             state = state,
             fontSize = 18.sp,
+            enabled = !showLoading,
             onClick = if(check) { { setStateSelOpenedValue(!stateSelOpened) } } else { null },
             trailingIcon = if(check) {
                     {
@@ -443,6 +463,72 @@ fun DueDateComp(
                 text = text,
                 fontFamily = interFamily,
                 fontWeight = FontWeight.Normal,
+                fontSize = 16.sp
+            )
+        }
+    }
+}
+@Composable
+fun EndRepeatDateComp(
+    date: LocalDate?, // The due date
+    isEdit: Boolean = false, // Flag indicating if the component is in edit mode
+    updateVisible: (() -> Unit)? = null // Function to update visibility (optional)
+) {
+    val colors = MaterialTheme.colorScheme
+
+    // Row containing the due date component
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(enabled = isEdit, onClick = { updateVisible?.let { updateVisible() } }) // Enable click handling if in edit mode
+    ) {
+        // Column for the calendar icon
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(start = 8.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.calendar), // Calendar icon
+                contentDescription = "Calendar Icon",
+                tint = colors.onBackground
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Text(
+                text = "End date:",
+                fontFamily = interFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 19.sp,
+            )
+        }
+
+        // Column for displaying the date text
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(end = 12.dp)
+        ) {
+            // Format the date text
+            val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH)
+            val text = if (date != null) { date.format(formatter) }
+            else if (isEdit) { "Add end date" } // Display "Add due date" if in edit mode and no date is set
+            else { "No date" } // Display "No date" if no date is set
+
+            // Display the formatted date text
+            Text(
+                text = text,
+                fontFamily = interFamily,
+                fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
                 color = colors.onBackground
             )
@@ -452,7 +538,7 @@ fun DueDateComp(
 
 @Composable
 fun DelegatedMemberComp(
-    members: List<Int>, // List of member IDs
+    members: List<String>, // List of member IDs
     users: List<User>,
     setShowBottomSheetValue: (Boolean) -> Unit, // Function to set the visibility of the bottom sheet
     isEdit: Boolean = false // Flag indicating if the component is in edit mode
@@ -630,11 +716,17 @@ fun AttachmentItem(
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     context: Context, // Android context
-    taskId: Int, // ID of the task to which the attachment belongs
+    taskId: String, // ID of the task to which the attachment belongs
     attachment: Attachment, // Attachment data
-    removeAttachment: (Int, Int) -> Unit // Function to remove the attachment
+    removeAttachment: suspend (String, Attachment) -> Unit, // Function to remove the attachment
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+
     // Row containing the attachment item
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -643,7 +735,30 @@ fun AttachmentItem(
             .background(color = colors.surfaceColorAtElevation(10.dp))
             .defaultMinSize(0.dp, 55.dp)
             .fillMaxSize()
-            .clickable { openDocument(context, attachment.uri) } // Click listener to open the attached document
+            .clickable(enabled = showDownloadLoading.isBlank() && !showLoading) {
+                scope.launch {
+                    setShowDownloadLoadingValue(attachment.id)
+                    downloadFileFromFirebase(
+                        taskId,
+                        attachment,
+                        {
+                            setShowDownloadLoadingValue("")
+                            openDocument(context, it)
+                        },
+                        {
+                            Log.e("Server Error", it.message.toString())
+                            setShowDownloadLoadingValue("")
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Unable to download attachment!",
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
+                        }
+                    )
+                }
+            } // Click listener to open the attached document
     ) {
         // Row containing the attachment icon and name
         Row(
@@ -700,7 +815,14 @@ fun AttachmentItem(
         ) {
             if(isDelegatedMember || loggedInUserRole == Role.TEAM_MANAGER || loggedInUserRole == Role.SENIOR_MEMBER) {
                 // IconButton to remove the attachment
-                IconButton(onClick = { removeAttachment(taskId, attachment.id) }) {
+                IconButton(
+                    enabled = showDownloadLoading.isBlank() && !showLoading,
+                    onClick = {
+                        scope.launch {
+                            removeAttachment(taskId, attachment)
+                        }
+                    }
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.cross),
                         contentDescription = "Remove Icon",
@@ -710,18 +832,32 @@ fun AttachmentItem(
             }
         }
     }
+
+    if(showDownloadLoading == attachment.id) {
+        LinearProgressIndicator(
+            color = colors.onBackground,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
 fun AttachmentComponent(
-    taskId: Int,
+    taskId: String,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     attachments: List<Attachment>,
-    addAttachment: (Int, Attachment) -> Unit,
-    removeAttachment: (Int, Int) -> Unit
+    addAttachment: suspend (String, Attachment) -> Unit,
+    removeAttachment: suspend (String, Attachment) -> Unit,
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+
     // Accessing the current context
     val context = LocalContext.current
     // Creating a launcher for activity result to open documents
@@ -734,15 +870,18 @@ fun AttachmentComponent(
                 // Getting information about the attachment
                 getAttachmentInfo(context, uri)?.let { (name, size) ->
                     // Adding the attachment to the list
-                    addAttachment(
-                        taskId, Attachment(
-                            id = -1,
-                            name = name,
-                            type = mimeType,
-                            size = size,
-                            uri = uri,
+                    scope.launch {
+                        setShowLoadingValue(true)
+                        addAttachment(
+                            taskId, Attachment(
+                                id = "",
+                                name = name,
+                                type = mimeType,
+                                size = size,
+                                uri = uri,
+                            )
                         )
-                    )
+                    }.invokeOnCompletion { setShowLoadingValue(false) }
                 }
             }
         }
@@ -792,13 +931,25 @@ fun AttachmentComponent(
                     .weight(1f)
             ) {
                 if(isDelegatedMember || loggedInUserRole == Role.TEAM_MANAGER || loggedInUserRole == Role.SENIOR_MEMBER) {
-                    // IconButton for launching the document picker
-                    IconButton(onClick = { launcher.launch(arrayOf("application/*", "image/*")) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.paper_plus),
-                            contentDescription = "Attachment Plus Icon",
-                            tint = colors.onBackground
+                    if(showLoading) {
+                        CircularProgressIndicator(
+                            color = colors.onBackground,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .offset(y = 12.dp, x = (-12).dp)
                         )
+                    } else {
+                        // IconButton for launching the document picker
+                        IconButton(
+                            enabled = showDownloadLoading.isBlank(),
+                            onClick = { launcher.launch(arrayOf("application/*", "image/*")) }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.paper_plus),
+                                contentDescription = "Attachment Plus Icon",
+                                tint = colors.onBackground
+                            )
+                        }
                     }
                 }
             }
@@ -835,7 +986,11 @@ fun AttachmentComponent(
                             context = context,
                             taskId = taskId,
                             attachment = attachment,
-                            removeAttachment = removeAttachment
+                            removeAttachment = removeAttachment,
+                            downloadFileFromFirebase = downloadFileFromFirebase,
+                            showLoading = showLoading,
+                            showDownloadLoading = showDownloadLoading,
+                            setShowDownloadLoadingValue = setShowDownloadLoadingValue
                         )
 
                         // Adding a divider between attachment items
@@ -854,8 +1009,9 @@ fun AttachmentComponent(
 }
 
 @Composable
-fun CommentItem(comment: Comment, users: List<User>) {
+fun CommentItem(loggedInUserId: String, comment: Comment, users: List<User>) {
     val colors = MaterialTheme.colorScheme
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -895,7 +1051,8 @@ fun CommentItem(comment: Comment, users: List<User>) {
                 ) {
                     // Text for displaying the user's name
                     Text(
-                        text = user.first.plus(" ").plus(user.last),
+                        text = if(user.id == loggedInUserId) { "You" }
+                            else { user.first.plus(" ").plus(user.last) },
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 14.sp,
@@ -929,7 +1086,7 @@ fun CommentItem(comment: Comment, users: List<User>) {
 }
 
 @Composable
-fun CommentsComp(comments: List<Comment>, users: List<User>) {
+fun CommentsComp(loggedInUserId: String, comments: List<Comment>, users: List<User>) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start,
@@ -964,7 +1121,7 @@ fun CommentsComp(comments: List<Comment>, users: List<User>) {
             // Looping through comments and displaying each comment item
             comments.sortedBy { it.date }.forEachIndexed { idx, comment ->
                 // Displaying the comment item
-                CommentItem(comment = comment, users = users)
+                CommentItem(loggedInUserId = loggedInUserId, comment = comment, users = users)
 
                 // Adding a divider between comment items
                 if (idx < comments.size - 1) {
@@ -1001,13 +1158,16 @@ fun CommentTextField(
     // Callback to update the value of the text field
     updateValue: (String) -> Unit,
     // Task ID associated with the comment
-    taskId: Int,
+    taskId: String,
     // Callback to add a comment
-    addComment: (Int, Comment) -> Unit,
+    addComment: suspend (String, Comment) -> Unit,
+    loggedInUserId: String,
     // Modifier for styling and layout customization
     modifier: Modifier
 ) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
@@ -1090,14 +1250,18 @@ fun CommentTextField(
                 onClick = {
                     // Check if the text field is not blank
                     if (value.isNotBlank()) {
-                        // Add the comment using the provided callback
-                        addComment(taskId, Comment(
-                            content = value,
-                            authorId = DataBase.LOGGED_IN_USER_ID,
-                            date = LocalDateTime.now()
-                        ))
-                        // Clear the text field by updating its value
-                        updateValue("")
+                        scope.launch {
+                            // Add the comment using the provided callback
+                            addComment(taskId, Comment(
+                                id = "",
+                                content = value,
+                                authorId = loggedInUserId,
+                                date = LocalDateTime.now()
+                            ))
+                        }.invokeOnCompletion {
+                            // Clear the text field by updating its value
+                            updateValue("")
+                        }
                     }
                 },
                 // Customizing the colors of the IconButton
@@ -1119,7 +1283,13 @@ fun CommentTextField(
 }
 
 @Composable
-fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingContent: @Composable (() -> Unit)? = null) {
+fun MemberItem(
+    user: User,
+    role: Role,
+    loggedInUserId: String,
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable (() -> Unit)? = null
+) {
     val literalRole = when (role) {
         Role.TEAM_MANAGER -> "Team Manager"
         Role.SENIOR_MEMBER -> "Senior Member"
@@ -1146,7 +1316,7 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
         headlineContent = {
             Column {
                 Text(
-                    text = if (DataBase.LOGGED_IN_USER_ID == user.id) "You" else "${user.first} ${user.last}",
+                    text = if (loggedInUserId == user.id) "You" else "${user.first} ${user.last}",
                     fontWeight = FontWeight.Medium,
                     fontSize = 18.sp,
                     fontFamily = interFamily,
@@ -1174,7 +1344,8 @@ fun MemberItem(user: User, role: Role, modifier: Modifier = Modifier, trailingCo
 fun MembersBottomSheet(
     team: Team,
     users: List<User>,
-    members: List<Int>,
+    members: List<String>,
+    loggedInUserId: String,
     setShowBottomSheetValue: (Boolean) -> Unit,
     navController: NavController
 ) {
@@ -1238,7 +1409,7 @@ fun MembersBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
-            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.first) }, DataBase.LOGGED_IN_USER_ID)
+            val sortedMembers = bringPairToHead(team.members.filter { members.contains(it.key) }.toList(), loggedInUserId)
 
             items(sortedMembers) {(memberId, role) ->
                 // Display member items
@@ -1246,6 +1417,7 @@ fun MembersBottomSheet(
                     MemberItem(
                         user = user,
                         role = role as Role,
+                        loggedInUserId = loggedInUserId,
                         trailingContent = {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1265,7 +1437,7 @@ fun MembersBottomSheet(
                                     )
                                 }
 
-                                if(memberId != DataBase.LOGGED_IN_USER_ID) {
+                                if(memberId != loggedInUserId) {
                                     IconButton(onClick = {
                                         coroutineScope.launch { bottomSheetState.hide() }
                                             .invokeOnCompletion {

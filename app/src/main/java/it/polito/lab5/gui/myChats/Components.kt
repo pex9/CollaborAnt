@@ -16,6 +16,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,15 +28,17 @@ import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Team
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatItem(
     team: Team,
-    isReadState: MutableList<Pair<Int, Boolean>>,
-    setIsReadStateValue: (Int, Boolean) -> Unit,
+    loggedInUserId: String,
+    isReadState: List<Pair<String, Boolean>>,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
     navController: NavController
 ) {
-    val teamChat = team.chat.sortedBy { it.date }
+    val scope = rememberCoroutineScope()
     val (first, last) = getMonogramText(team.name)
     val colors = MaterialTheme.colorScheme
     Card(
@@ -64,6 +67,8 @@ fun ChatItem(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start,
                 ) {
+                    val lastMessage = team.chat.lastOrNull()?.content
+
                     Text(
                         text = team.name,
                         fontFamily = interFamily,
@@ -74,8 +79,9 @@ fun ChatItem(
                         color = colors.onBackground
                     )
 
+                if (lastMessage != null) {
                     Text(
-                        text = teamChat.last().content,
+                        text = lastMessage,
                         fontFamily = interFamily,
                         fontWeight = FontWeight.Medium,
                         fontSize = 12.sp,
@@ -85,43 +91,44 @@ fun ChatItem(
                         color = colors.outline
                     )
                 }
-            },
-            trailingContent = {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.Top,
-                ) {
-                    val formattedDate = dateFormatter(teamChat.last().date)
+            }
+        },
+        trailingContent = {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Top,
+            ) {
+                val formattedDate = dateFormatter(team.chat.lastOrNull()?.date)
 
-                    Text(
-                        text = formattedDate,
-                        fontFamily = interFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 10.sp,
-                        letterSpacing = 0.sp,
-                        maxLines = 1,
-                        color = colors.onBackground
-                    )
+                Text(
+                    text = formattedDate ?: "",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 10.sp,
+                    letterSpacing = 0.sp,
+                    maxLines = 1,
+                    color = colors.onBackground
+                )
 
-                    Box(modifier = Modifier.padding(top = 14.dp)) {
-                        val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
-                        if(!isReadFlag){
-                            UnreadMessageComp()
-                        }
+                Box(modifier = Modifier.padding(top = 14.dp)) {
+                    val isReadFlag = isReadState.find { it.first == team.id }?.second ?: false
+                    if(isReadFlag){
+                        UnreadMessageComp()
                     }
                 }
-            },
-            colors = ListItemDefaults.colors(
-                containerColor = colors.surface
-            ),
-            modifier = Modifier
-                .height(80.dp)
-                .clickable {
-                    setIsReadStateValue(team.id, true)
-                    navController.navigate("viewChat/${team.id}/-1")
-                }
-        )
-    }
+            }
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = colors.surface
+        ),
+        modifier = Modifier
+            .height(80.dp)
+            .clickable {
+                scope.launch {
+                    resetUnreadMessage(team, loggedInUserId)
+                }.invokeOnCompletion { navController.navigate("viewChat/${team.id}/${null}") }
+            }
+    )
 }
 
 @Composable

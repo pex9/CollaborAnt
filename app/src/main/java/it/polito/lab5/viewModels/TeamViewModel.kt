@@ -1,17 +1,30 @@
 package it.polito.lab5.viewModels
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Tag
+import it.polito.lab5.model.Team
 
-class TeamViewModel(val teamId: Int, val model: MyModel): ViewModel() {
-    val teams = model.teams
-    val tasks = model.tasks
-    val users = model.users
+@RequiresApi(Build.VERSION_CODES.O)
+class TeamViewModel(val teamId: String, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
+    fun getTeam(teamId: String) = model.getTeam(teamId)
+
+    fun getUsersTeam(members: List<String>) = model.getUsersTeam(members)
+
+    fun getUserKpi(userId: String) = model.getUserKpi(userId)
+
+    fun getTasksTeam(teamId: String) = model.getTasksTeam(teamId)
+
+    fun getTaskComments(taskId: String) = model.getTaskComments(taskId)
+
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 
     var myTasksFilter = mutableStateOf(false)
     var priorityFilter: MutableState<Tag?> = mutableStateOf(null)

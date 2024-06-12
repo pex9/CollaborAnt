@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +31,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,13 +47,19 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.ImagePresentationComp
 import it.polito.lab5.gui.TextFieldComp
-import it.polito.lab5.model.Team
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.ui.theme.interFamily
+import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team?) {
+fun TeamFormTopBar(
+    team: String?,
+    showLoading: Boolean,
+    validate: suspend () -> String,
+    navController: NavController
+) {
+    val scope = rememberCoroutineScope()
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
 
@@ -70,8 +78,11 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
         navigationIcon = {
             // Navigation button to navigate back
             TextButton(
+                enabled = !showLoading,
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = colors.onBackground,
                     containerColor = Color.Transparent, // Transparent background
                     contentColor = colors.onBackground // Dark blue icon color
                 ),
@@ -94,29 +105,38 @@ fun TeamFormTopBar(validate: () -> Int, navController: NavController, team: Team
             }
         },
         actions = {
-            TextButton(
-                onClick = {
-                    val teamId = validate()
-                    if(teamId != -1) {
-                        navController.popBackStack()
-                        if(team == null) {
-                            navController.navigate("infoTeam/${teamId}")
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colors.onBackground
-                ),
-                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
-            ) {
-                Text(
-                    text = if (team == null) "Create" else "Save",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp,
-                    color = colors.onBackground
+            if(showLoading) {
+                CircularProgressIndicator(
+                    color = colors.onBackground,
+                    modifier = Modifier.padding(end = 8.dp)
                 )
+            } else {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            val teamId = validate()
+                            if(teamId.isNotBlank()) {
+                                navController.popBackStack()
+                                if(team == null) {
+                                    navController.navigate("infoTeam/${teamId}")
+                                }
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = colors.onBackground
+                    ),
+                    contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                ) {
+                    Text(
+                        text = if (team == null) "Create" else "Save",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp,
+                        color = colors.onBackground
+                    )
+                }
             }
         }
     )

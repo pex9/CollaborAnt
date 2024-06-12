@@ -1,23 +1,17 @@
 package it.polito.lab5.viewModels
 
-import androidx.compose.runtime.mutableStateListOf
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import it.polito.lab5.model.DataBase
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.MyModel
+import it.polito.lab5.model.Team
 
-class MyChatsViewModel(val model: MyModel): ViewModel() {
-    val teams = model.teams
-    private val userTeams = teams.value.filter { team -> team.members.any {it.first == DataBase.LOGGED_IN_USER_ID}}
+@RequiresApi(Build.VERSION_CODES.O)
+class MyChatsViewModel(val model: MyModel,  val auth: GoogleAuthentication): ViewModel() {
+    fun getUserTeams(userId: String) = model.getUserTeams(userId)
 
-    var chatsReadState: MutableList<Pair<Int, Boolean>> = mutableStateListOf()
-    fun setChatsReadStateValue(teamId: Int, b: Boolean) {
-        val idx = chatsReadState.indexOfFirst { it.first == teamId }
-        chatsReadState[idx] = teamId to b
-    }
+    fun getTeamChat(teamId: String) = model.getTeamChat(teamId)
 
-    init {
-        userTeams.forEach {
-            chatsReadState.add(it.id to false)
-        }
-    }
+    suspend fun resetUnreadMessage(team: Team, userId: String) = model.updateUnreadMessage(team, listOf(userId), false)
 }

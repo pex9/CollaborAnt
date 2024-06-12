@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,22 +38,25 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.myTasks.MyTasksTopBar
 import it.polito.lab5.gui.myTasks.PersonalTaskListPane
-import it.polito.lab5.model.DataBase
-import it.polito.lab5.model.TaskState
 import it.polito.lab5.navigation.BottomNavigationBarComp
 import it.polito.lab5.ui.theme.interFamily
 import it.polito.lab5.viewModels.MyTasksViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadState: MutableList<Pair<Int, Boolean>>,) {
+fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController) {
+    val user = vm.auth.getSignedInUserId()?.let { vm.getUser(it).collectAsState(initial = null).value }
+    val teams = user?.let { vm.getUserTeams(it.id).collectAsState(initial = emptyList()).value }
+    val tasks = user?.let { vm.getUserTasks(it.id).collectAsState(initial = emptyList()).value }
     val colors = MaterialTheme.colorScheme
+
     Scaffold(
         topBar = {
             Column {
                 MyTasksTopBar()
             }
          },
-        bottomBar = { BottomNavigationBarComp(navController, isReadState) },
+        bottomBar = { BottomNavigationBarComp(navController) },
         floatingActionButton = {
             if(vm.isVisible) {
                 val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
@@ -70,43 +75,46 @@ fun MyTasksScreen (vm: MyTasksViewModel, navController: NavController, isReadSta
             }
         }
     ) { paddingValues ->
-        val user = vm.users.collectAsState().value.first { it.id == DataBase.LOGGED_IN_USER_ID }
+        val targetTask = tasks?.find { it.id == vm.targetTaskId }
 
-        PersonalTaskListPane(
-            teams = vm.teams.collectAsState().value,
-            categories = user.categories,
-            tasks = vm.tasks.collectAsState().value.filter { it.teamMembers.contains(DataBase.LOGGED_IN_USER_ID) && it.state!= TaskState.COMPLETED },
-            navController = navController,
-            p = paddingValues,
-            category = vm.category,
-            categoryError = vm.categoryError,
-            resetCategoryError = vm::resetCategoryError,
-            setCategoryValue = vm::setCategoryValue,
-            isDialogOpen = vm.isDialogOpen,
-            setIsDialogOpen = vm::setDialogOpenValue,
-            categorySelectionOpened = vm.categorySelectionOpened,
-            currentCategory = vm.currentCategory,
-            setCurrentCategory = vm::setCurrentCategoryValue,
-            validate = vm::validate,
-            setCategorySelectionOpenedValue = vm::setCategorySelectionOpenedValue,
-            myTasksHideSheet = vm.myTasksHideSheet,
-            setMyTasksHideSheet = vm::setMyTasksHideSheetValue,
-            updateCategoryFromTask = vm::updateCategoryFromTask,
-            taskId = vm.targetTaskId,
-            setTargetTaskIdValue = vm::setTargetTaskIdValue,
-            expandCategory = vm.categoryTaskListOpened,
-            setExpandCategory = vm::setCategoryTaskListOpenedValue,
-            isDialogDeleteOpen = vm.isDialogDeleteOpen,
-            setIsDialogDeleteOpen = vm::setIsDialogDeleteOpen,
-            deleteCategoryFromUser = vm::deleteCategoryFromUser,
-            numberOfTasksForCategory = vm.numberOfTasksForCategory,
-            setNumberOfTasksForCategory = vm::setnumberOfTasksForCategory,
-            errMsg = vm.errMsg,
-            setErrMsgValue = vm::setErrMsgValue,
-            chosenCategory = vm.chosenCategory,
-            setChosenCategoryValue = vm::setChosenCategoryValue,
-            setIsVisibleValue = vm::setIsVisibleValue,
-        )
+        if (user != null && teams != null && tasks != null) {
+            PersonalTaskListPane(
+                teams = teams,
+                categories = user.categories,
+                tasks = tasks,
+                loggedInUser = user,
+                navController = navController,
+                p = paddingValues,
+                category = vm.category,
+                categoryError = vm.categoryError,
+                resetCategoryError = vm::resetCategoryError,
+                setCategoryValue = vm::setCategoryValue,
+                isDialogOpen = vm.isDialogOpen,
+                setIsDialogOpen = vm::setDialogOpenValue,
+                categorySelectionOpened = vm.categorySelectionOpened,
+                currentCategory = vm.currentCategory,
+                setCurrentCategory = vm::setCurrentCategoryValue,
+                validate = vm::validate,
+                setCategorySelectionOpenedValue = vm::setCategorySelectionOpenedValue,
+                myTasksHideSheet = vm.myTasksHideSheet,
+                setMyTasksHideSheet = vm::setMyTasksHideSheetValue,
+                updateUserCategoryToTask = vm::updateUserCategoryToTask,
+                targetTask = targetTask,
+                setTargetTaskIdValue = vm::setTargetTaskIdValue,
+                expandCategory = vm.categoryTaskListOpened,
+                setExpandCategory = vm::setCategoryTaskListOpenedValue,
+                isDialogDeleteOpen = vm.isDialogDeleteOpen,
+                setIsDialogDeleteOpen = vm::setIsDialogDeleteOpen,
+                deleteCategoryFromUser = vm::removeCategoryFromUser,
+                numberOfTasksForCategory = vm.numberOfTasksForCategory,
+                setNumberOfTasksForCategory = vm::setNumberOfTasksForCategoryValue,
+                errMsg = vm.errMsg,
+                setErrMsgValue = vm::setErrMsgValue,
+                chosenCategory = vm.chosenCategory,
+                setChosenCategoryValue = vm::setChosenCategoryValue,
+                setIsVisibleValue = vm::setIsVisibleValue,
+            )
+        }
     }
 }
 

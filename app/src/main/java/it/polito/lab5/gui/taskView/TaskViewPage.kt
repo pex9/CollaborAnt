@@ -22,6 +22,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,24 +41,29 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.TextComp
 import it.polito.lab5.model.Attachment
+import it.polito.lab5.model.Repeat
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+import java.io.File
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun TaskTopBar(
-    taskId: Int,
+    taskId: String,
+    repeat: Repeat,
     isDelegatedMember: Boolean,
     loggedInUserRole: Role,
     state: TaskState,
     updateState: (TaskState) -> Unit,
     optionsOpened: Boolean,
     setOptionsOpenedValue: (Boolean) -> Unit,
+    showLoading: Boolean,
     stateSelOpened: Boolean,
     setStateSelOpenedValue: (Boolean) -> Unit,
+    setShowRepeatDeleteDialogValue: (Boolean) -> Unit,
     setShowDeleteDialogValue: (Boolean) -> Unit,
     navController: NavController,
 ) {
@@ -74,8 +80,11 @@ fun TaskTopBar(
         navigationIcon = {
             // Navigation button to navigate back
             TextButton(
+                enabled = !showLoading,
                 onClick = { navController.popBackStack() }, // Navigate back when clicked
                 colors = ButtonDefaults.buttonColors(
+                    disabledContainerColor = Color.Transparent,
+                    disabledContentColor = CollaborantColors.DarkBlue,
                     containerColor = Color.Transparent, // Transparent background
                     contentColor = colors.onBackground // Dark blue icon color
                 ),
@@ -103,6 +112,7 @@ fun TaskTopBar(
                 loggedInUserRole = loggedInUserRole,
                 state = state,
                 updateState = updateState,
+                showLoading = showLoading,
                 stateSelOpened = stateSelOpened,
                 setStateSelOpenedValue = setStateSelOpenedValue
             )
@@ -113,13 +123,24 @@ fun TaskTopBar(
                 // Options component for additional actions
                 OptionsComp(
                     taskId = taskId,
+                    repeat = repeat,
+                    showLoading = showLoading,
                     optionsOpened = optionsOpened,
                     setOptionsOpenedValue = setOptionsOpenedValue,
+                    setShowRepeatDeleteDialogValue = setShowRepeatDeleteDialogValue,
                     setShowDeleteDialogValue = setShowDeleteDialogValue,
                     navController = navController
                 )
             } else {
-                IconButton(onClick = { navController.navigate("history/${taskId}") }) {
+                IconButton(
+                    enabled = !showLoading,
+                    onClick = { navController.navigate("history/${taskId}") },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        disabledContainerColor = Color.Transparent,
+                        disabledContentColor = CollaborantColors.DarkBlue,
+                    ),
+
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.time_circle),
                         contentDescription = "History Icon",
@@ -138,10 +159,16 @@ fun TaskPage(
     task: Task,
     users: List<User>,
     isDelegatedMember: Boolean,
+    loggedInUserId: String,
     loggedInUserRole: Role,
-    addAttachment: (Int, Attachment) -> Unit,
-    removeAttachment: (Int, Int) -> Unit,
-    setShowBottomSheetValue: (Boolean) -> Unit
+    addAttachment: suspend (String, Attachment) -> Unit,
+    removeAttachment: suspend (String, Attachment) -> Unit,
+    setShowBottomSheetValue: (Boolean) -> Unit,
+    downloadFileFromFirebase: suspend (String, Attachment, (File) -> Unit, (Exception) -> Unit) -> Unit,
+    showLoading: Boolean,
+    setShowLoadingValue: (Boolean) -> Unit,
+    showDownloadLoading: String,
+    setShowDownloadLoadingValue: (String) -> Unit
 ) {
     val colors = MaterialTheme.colorScheme
     Column(
@@ -222,6 +249,24 @@ fun TaskPage(
 
                 // Repeat component
                 RepeatComponent(repeat = task.repeat)
+
+                if(task.repeat != Repeat.NEVER) {
+                    Divider(
+                        thickness = 1.dp,
+                        color = CollaborantColors.BorderGray.copy(0.4f),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    ) {
+                        // end date component
+                        EndRepeatDateComp(date = task.endDateRepeat)
+                    }
+                }
             }
         }
 
@@ -240,11 +285,16 @@ fun TaskPage(
             loggedInUserRole = loggedInUserRole,
             attachments = task.attachments,
             addAttachment = addAttachment,
-            removeAttachment = removeAttachment
+            removeAttachment = removeAttachment,
+            downloadFileFromFirebase = downloadFileFromFirebase,
+            showLoading = showLoading,
+            setShowLoadingValue = setShowLoadingValue,
+            showDownloadLoading = showDownloadLoading,
+            setShowDownloadLoadingValue = setShowDownloadLoadingValue
         )
 
         // Comments component
-        CommentsComp(comments = task.comments, users = users)
+        CommentsComp(loggedInUserId = loggedInUserId, comments = task.comments, users = users)
 
         Spacer(modifier = Modifier.height(88.dp)) // Spacer for layout spacing
     }

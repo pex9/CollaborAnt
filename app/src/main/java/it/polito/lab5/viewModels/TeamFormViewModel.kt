@@ -1,50 +1,90 @@
 package it.polito.lab5.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.polito.lab5.model.DataBase
+import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.Empty
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.ImageProfile
+import it.polito.lab5.model.KPI
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.Role
 import it.polito.lab5.model.Team
+import it.polito.lab5.model.User
+import it.polito.lab5.model.calculateScore
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): ViewModel() {
-    val currentTeam = model.teams.value.find { it.id == currentTeamId }
-    private fun addTeam(team: Team): Int = model.addTeam(team)
-    private fun updateTeam(teamId: Int, team: Team) = model.updateTeam(teamId, team)
+class TeamFormViewModel(val currentTeamId: String?, val model: MyModel, val auth: GoogleAuthentication): ViewModel() {
+    private var currentTeam: Team? = null
+    private var loggedInUser : User? = null
 
-    fun validate(): Int {
-        var id = -1
+    private fun getTeam(teamId: String) = model.getTeam(teamId)
+    private suspend fun createTeam(team: Team) = model.createTeam(team)
+    private suspend fun updateTeam(teamId: String, team: Team, deletePrevious: Boolean) = model.updateTeam(teamId, team, deletePrevious)
+    private suspend fun updateUserKpi(userId: String, joinedTeams: Long, kpiValues: Pair<String, KPI>) = model.updateUserKpi(userId, joinedTeams, kpiValues)
+
+    suspend fun validate(): String {
+        var id = ""
 
         checkName()
         checkDescription()
 
         if(nameError.isBlank() && descriptionError.isBlank()) {
-            if(currentTeam == null) {
-                id = addTeam(team = Team(
-                    id = -1,
-                    image = image,
-                    name = name,
-                    description = description,
-                    members = listOf(DataBase.LOGGED_IN_USER_ID to Role.TEAM_MANAGER),
-                    chat = emptyList()
-                ))
-            } else {
-                currentTeamId?.let { id = it }
-                updateTeam(currentTeam.id, currentTeam.copy(
-                    name = name,
-                    description = description,
-                    image = image
-                ))
+            try {
+                viewModelScope.async {
+                    showLoading = true
+
+                    if(currentTeam == null) {
+                        loggedInUser?.let { user ->
+                            id = createTeam(
+                                team = Team(
+                                    id = "",
+                                    image = image,
+                                    name = name,
+                                    description = description,
+                                    members = mapOf(user.id to Role.TEAM_MANAGER),
+                                    chat = emptyList(),
+                                    unreadMessage = mapOf(user.id to false)
+                                )
+                            )
+
+                            updateUserKpi(user.id, user.joinedTeams + 1, id to KPI(
+                                assignedTasks = 0,
+                                completedTasks = 0,
+                                score = calculateScore(0, 0)
+                            ))
+                        }
+                    } else {
+                        currentTeamId?.let {
+                            id = it
+
+                            updateTeam(
+                                teamId = currentTeamId,
+                                team = currentTeam!!.copy(
+                                    name = name,
+                                    description = description,
+                                    image = image
+                                ),
+                                deletePrevious = currentTeam!!.image !is Empty && image is Empty
+                            )
+                        }
+                    }
+                }.await()
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+                showLoading = false
+                return ""
             }
         }
         return id
     }
 
-    var name by mutableStateOf(currentTeam?.name ?: "")
+    var name by mutableStateOf("")
         private set
     var nameError by mutableStateOf("")
         private set
@@ -60,7 +100,7 @@ class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): Vi
             ""
     }
 
-    var description by mutableStateOf(currentTeam?.description ?: "")
+    var description by mutableStateOf("")
         private set
     var descriptionError by mutableStateOf("")
         private set
@@ -74,7 +114,7 @@ class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): Vi
             ""
     }
 
-    var image by mutableStateOf(currentTeam?.image ?: Empty(pickRandomColor()))
+    var image: ImageProfile by mutableStateOf(Empty(pickRandomColor()))
         private set
     fun setImageValue(i: ImageProfile) {
         image = i
@@ -84,5 +124,22 @@ class TeamFormViewModel(private val currentTeamId: Int?, val model: MyModel): Vi
         private set
     fun setShowBottomSheetValue(b: Boolean) {
         showBottomSheet = b
+    }
+
+    var showLoading by mutableStateOf(false)
+        private set
+
+    init {
+        val userid = auth.getSignedInUserId()
+
+        if (userid != null) {
+            viewModelScope.launch {
+                loggedInUser = model.getUser(userid).first()
+                currentTeam = currentTeamId?.let { getTeam(it).first() }
+                name = currentTeam?.name ?: ""
+                description = currentTeam?.description ?: ""
+                image = currentTeam?.image ?: Empty(pickRandomColor())
+            }
+        }
     }
 }

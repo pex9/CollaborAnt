@@ -35,8 +35,8 @@ import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
 
 @Composable
-fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>, teamId: Int) {
-    val teamTasks = tasks.filter { it.teamId == teamId }
+fun HorizontalTeamStatsPane(team: Team, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>) {
+    val teamTasks = tasks.filter { it.teamId == team.id }
     val literalTotTasks = teamTasks.count()
     val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
     val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()*100f)
@@ -101,26 +101,24 @@ fun HorizontalTeamStatsPane(teams: List<Team>, tasks: List<Task>, navController:
                 .fillMaxWidth()
                 .padding(35.dp)
         ) {
-            TeamMembersRanking(membersList, teams, navController, teamId)
+            TeamMembersRanking(membersList, team, navController)
         }
     }
 }
 
 @Composable
 fun VerticalTeamStatsPane(
-    teams: List<Team>,
+    team: Team,
     tasks: List<Task>,
     navController: NavController, // NavController for navigation
     p: PaddingValues, // Padding values for layout
     membersList: List<User>,
-    teamId: Int,
-)
-{
-    val teamTasks = tasks.filter { it.teamId == teamId }
-    val literalTotTasks = teamTasks.count()
-    val literalTotCompletedTasks = teamTasks.count { it.state == TaskState.COMPLETED }
-    val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()*100f)
+) {
+    val literalTotTasks = tasks.size
+    val literalTotCompletedTasks = tasks.filter{ it.state == TaskState.COMPLETED }.size
+    val literalCompletionPercentage = Math.round(literalTotCompletedTasks.toFloat() / literalTotTasks.toFloat() * 100f)
     val colors = MaterialTheme.colorScheme
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -180,10 +178,13 @@ fun VerticalTeamStatsPane(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    val completed = if(literalTotTasks == 0 && literalTotCompletedTasks == 0) { 0f }
+                        else { literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat() }
+
                     Chart(
                         data = mapOf(
                             1f to "Total",
-                            (literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()) to "Completed"
+                            completed to "Completed"
                         ),
                         maxValue = literalTotTasks
                     )
@@ -197,7 +198,7 @@ fun VerticalTeamStatsPane(
                 .fillMaxWidth()
                 .padding(vertical = 10.dp, horizontal = 30.dp)
         ) {
-            TeamMembersRanking(membersList, teams, navController, teamId)
+            TeamMembersRanking(membersList, team, navController)
         }
     }
 }

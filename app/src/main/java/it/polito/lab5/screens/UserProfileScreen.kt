@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavController
 import it.polito.lab5.gui.myProfile.MyProfilePage
 import it.polito.lab5.gui.userProfile.UserProfileTopBar
@@ -13,13 +14,16 @@ import it.polito.lab5.viewModels.UserProfileViewModel
 @RequiresApi(Build.VERSION_CODES.S)
 fun UserProfileScreen (
     vm: UserProfileViewModel,
-    navController: NavController
+    navController: NavController,
 ) {
+    val kpiValues = vm.getUserKpi(vm.userId).collectAsState(initial = emptyList()).value
+    val user = vm.getUser(vm.userId).collectAsState(initial = null).value?.copy(kpiValues = kpiValues.toMap())
+
     Scaffold(
         topBar = { UserProfileTopBar(navController) },
 
         ) { paddingValues ->
-        vm.user?.let { user ->
+        user?.let { user ->
             MyProfilePage(
                 first = user.first,
                 last = user.last,

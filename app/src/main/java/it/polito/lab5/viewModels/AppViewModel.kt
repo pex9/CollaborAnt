@@ -7,11 +7,7 @@ import androidx.lifecycle.ViewModel
 
 
 class AppViewModel(): ViewModel() {
-
     var themeUserSetting by mutableStateOf(false)
-/*    fun toggleThemeUserSettingValue() {
-        themeUserSetting = !themeUserSetting
-    }*/
 
     var showDialog by mutableStateOf(false)
     fun setShowDialogValue(b: Boolean) {

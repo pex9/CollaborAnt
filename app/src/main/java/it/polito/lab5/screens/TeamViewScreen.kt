@@ -1,5 +1,7 @@
 package it.polito.lab5.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +27,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,19 +42,27 @@ import it.polito.lab5.LocalTheme
 import it.polito.lab5.R
 import it.polito.lab5.gui.teamView.TeamViewPage
 import it.polito.lab5.gui.teamView.TeamViewTopBar
-import it.polito.lab5.model.DataBase
 import it.polito.lab5.model.Role
 import it.polito.lab5.ui.theme.interFamily
 import it.polito.lab5.viewModels.TeamViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TeamViewScreen(
     vm: TeamViewModel, // ViewModel for team data
     navController: NavController, // NavController for navigation
 ) {
-    val team = vm.teams.collectAsState().value.find { it.id == vm.teamId }
-    val loggedInUserRole =  team?.members?.find { it.first == DataBase.LOGGED_IN_USER_ID }?.second
+    val scope = rememberCoroutineScope()
+    val loggedInUserId = vm.auth.getSignedInUserId()
+    val team = vm.getTeam(vm.teamId).collectAsState(initial = null).value
+    val users = team?.let { vm.getUsersTeam(it.members.keys.toList()).collectAsState(initial = emptyList()).value }
+    val loggedInUserRole =  team?.members?.get(loggedInUserId)
+    val tasks = vm.getTasksTeam(vm.teamId).collectAsState(initial = emptyList()).value.map {
+        val comments = vm.getTaskComments(it.id).collectAsState(initial = emptyList()).value
+        it.copy(comments = comments)
+    }
     val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(key1 = vm.showInfoText) {
@@ -162,11 +173,16 @@ fun TeamViewScreen(
                             },
                             contentPadding = PaddingValues(start = 20.dp),
                             onClick = {
-                                vm.setOptionsOpenedValue(false)
-                                navController.navigate("viewChat/${vm.teamId}/-1")
+                                scope.launch {
+                                    if (team != null && loggedInUserId != null) {
+                                        vm.resetUnreadMessage(team, loggedInUserId)
+                                    }
+                                }.invokeOnCompletion {
+                                    vm.setOptionsOpenedValue(false)
+                                    navController.navigate("viewChat/${vm.teamId}/${null}")
+                                }
                             },
                             colors = MenuDefaults.itemColors(textColor = colors.outline),
-                            //modifier = Modifier.padding(vertical = 5.dp)
                         )
 
                         if(loggedInUserRole == Role.TEAM_MANAGER) {
@@ -206,17 +222,21 @@ fun TeamViewScreen(
         }
     ) { paddingValues ->
         BoxWithConstraints {
-            val isHorizontal by remember { mutableStateOf(maxWidth > maxHeight) }
             // Content area
-            TeamViewPage(
-                vm = vm,
-                navController = navController,
-                p = paddingValues,
-                c = colors,
-                filterState = vm.filterState,
-                hideFilter = { vm.setFilterStateValue(false) }, // Function to hide filter
-                isHorizontal = isHorizontal
-            )
+            if (users != null && loggedInUserId != null) {
+                TeamViewPage(
+                    vm = vm,
+                    loggedInUserId = loggedInUserId,
+                    tasks = tasks,
+                    users = users,
+                    navController = navController,
+                    p = paddingValues,
+                    c = colors,
+                    filterState = vm.filterState,
+                    hideFilter = { vm.setFilterStateValue(false) } // Function to hide filter
+                    isHorizontal = maxWidth > maxHeight
+                )
+            }
         }
     }
 }

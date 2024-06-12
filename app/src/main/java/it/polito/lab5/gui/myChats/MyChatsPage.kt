@@ -76,9 +76,10 @@ fun MyChatsTopBar() {
 
 @Composable
 fun MyChatsPage(
+    loggedInUserId: String,
     userTeams: List<Team>,
-    isReadState: MutableList<Pair<Int, Boolean>>,
-    setIsReadStateValue: (Int, Boolean) -> Unit,
+    isReadState: List<Pair<String, Boolean>>,
+    resetUnreadMessage: suspend (Team, String) -> Unit,
     navController: NavController, // NavController for navigation
     paddingValues: PaddingValues // Padding values for layout
 ) {
@@ -93,8 +94,9 @@ fun MyChatsPage(
         itemsIndexed(userTeams.sortedBy { team -> team.chat.maxOf { it.date } }.reversed()){ idx, team ->
             ChatItem(
                 team = team,
+                loggedInUserId = loggedInUserId,
                 isReadState = isReadState,
-                setIsReadStateValue = setIsReadStateValue,
+                resetUnreadMessage = resetUnreadMessage,
                 navController = navController
             )
         }

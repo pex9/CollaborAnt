@@ -13,8 +13,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +35,12 @@ import it.polito.lab5.ui.theme.interFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyProfileTopBar(navController: NavController) {
+fun MyProfileTopBar(
+    onSignOut : () -> Unit,
+    optionsOpened: Boolean,
+    setOptionsOpenedValue: (Boolean) -> Unit,
+    navController: NavController
+) {
     val colors = MaterialTheme.colorScheme
     val containerColor = if(LocalTheme.current.isDark) colors.surfaceColorAtElevation(10.dp) else colors.primary
     val gradientColors =
@@ -66,19 +68,12 @@ fun MyProfileTopBar(navController: NavController) {
             )
         },
         actions = {
-            IconButton(
-                onClick = { navController.navigate("myProfile/edit") },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = colors.onBackground,
-                )
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.edit_square),
-                    contentDescription = "Back Icon",
-                    modifier = Modifier.size(26.dp)
-                )
-            }
+            OptionsComp(
+                onSignOut = onSignOut,
+                optionsOpened = optionsOpened,
+                setOptionsOpenedValue = setOptionsOpenedValue,
+                navController = navController
+            )
         },
         navigationIcon = {
             Text(
@@ -108,8 +103,8 @@ fun MyProfilePage(
     location: String,
     description: String,
     imageProfile: ImageProfile,
-    joinedTeams: Int,
-    kpi: List<Pair<Int, KPI>>,
+    joinedTeams: Long,
+    kpi: Map<String, KPI>,
     paddingValues: PaddingValues
 ) {
     Column(

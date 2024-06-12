@@ -1,6 +1,8 @@
 package it.polito.lab5.screens
 
 import androidx.compose.foundation.background
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -13,29 +15,38 @@ import it.polito.lab5.gui.taskForm.TaskFormPage
 import it.polito.lab5.gui.taskForm.TaskFormTopBar
 import it.polito.lab5.viewModels.TaskFormViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
+    val team = (vm.currentTask?.teamId ?: vm.teamId)?.let { vm.getTeam(it).collectAsState(initial = null).value }
+    val users = team?.let { vm.getUsersTeam(team.members.keys.toList()).collectAsState(initial = emptyList()).value }?.map { user ->
+        val kpi = vm.getUserKpi(user.id).collectAsState(initial = emptyList()).value
+        user.copy(kpiValues = kpi.toMap())
+    }
+
     Scaffold(
         topBar = {
-            TaskFormTopBar(
-                taskId = vm.currentTask?.id,
-                navController = navController,
-                validate = vm::validate,
-                resetErrorMsg = vm::resetErrorMsg
-            )
+            if (team != null && users != null) {
+                TaskFormTopBar(
+                    taskId = vm.currentTask?.id,
+                    navController = navController,
+                    validate = vm::validate,
+                    resetErrorMsg = vm::resetErrorMsg,
+                    showLoading = vm.showLoading
+                )
+            }
         }
     ) { paddingValues ->
         val colors = MaterialTheme.colorScheme
         Box(
             modifier = Modifier.padding(paddingValues).background(colors.background)
         ) {
-            val team = vm.teams.collectAsState().value.find { it.id == (vm.teamId ?: vm.currentTask?.teamId) }
-            val users = vm.users.collectAsState().value
-
-            if (team != null) {
+            if (team != null && users != null && vm.loggedInUser != null) {
                 TaskFormPage(
+                    isEdit = vm.currentTask != null,
                     team = team,
                     users = users,
+                    loggedInUserId = vm.loggedInUser!!.id,
                     title = vm.title,
                     setTitleValue = vm::setTitleValue,
                     titleError = vm.titleError,
@@ -52,13 +63,19 @@ fun TaskFormScreen(vm: TaskFormViewModel, navController: NavController) {
                     removeMember = vm::removeMember,
                     delegatedMembersError = vm.delegatedMembersError,
                     repeat = vm.repeat,
+                    setEndRepeatDateValue = vm::setEndRepeatDateValue,
+                    endRepeatDateError = vm.endRepeatDateError,
+                    endRepeatDate = vm.endRepeatDate,
                     setRepeatValue = vm::setRepeatValue,
                     showTagMenu = vm.showTagMenu,
                     setShowTagMenuValue = vm::setShowTagMenuValue,
                     showRepeatMenu = vm.showRepeatMenu,
                     setShowRepeatMenuValue = vm::setShowRepeatMenuValue,
                     showDueDateDialog = vm.showDueDateDialog,
+                    setShowEndRepeatDateDialogValue = vm::setShowEndRepeatDateDialogValue,
+                    showEndRepeatDateDialog = vm.showEndRepeatDateDialog,
                     setShowDueDateDialogValue = vm::setShowDueDateDialogValue,
+                    showEndRepeatField = vm.showEndRepeatField,
                     showMemberBottomSheet = vm.showMemberBottomSheet,
                     setShowMemberBottomSheetValue = vm::setShowMemberBottomSheetValue,
                     resetErrorMsg = vm::resetErrorMsg,

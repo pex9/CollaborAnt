@@ -1,23 +1,27 @@
 package it.polito.lab5.viewModels
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
-import it.polito.lab5.model.DataBase
+import androidx.lifecycle.viewModelScope
 import it.polito.lab5.model.Empty
+import it.polito.lab5.model.GoogleAuthentication
 import it.polito.lab5.model.ImageProfile
 import it.polito.lab5.model.MyModel
 import it.polito.lab5.model.User
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
+class MyProfileFormViewModel(val model: MyModel, auth: GoogleAuthentication) : ViewModel() {
+    private var user: User? = null
 
-    val user = model.users.value.find{it.id == DataBase.LOGGED_IN_USER_ID}
+    private suspend fun updateUser(userid: String, user: User, deletePrevious: Boolean) = model.updateUser(userid, user, deletePrevious)
 
-    private fun updateUser(userid:Int, user: User) = model.updateUser(userid, user)
-
-    fun  validate() : Boolean {
+    suspend fun  validate() : Boolean {
         checkFirstName()
         checkLastName()
         checkNickname()
@@ -25,30 +29,42 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
         checkLocation()
         checkDescription()
         checkTelephone()
+
         if(firstNameError.isBlank() && lastNameError.isBlank() && nicknameError.isBlank()
             && emailError.isBlank() && locationError.isBlank() && descriptionError.isBlank()
             && telephoneError.isBlank())
         {
-            user?.let { user ->
-                updateUser(
-                    user.id, user.copy(
-                        first = firstNameValue,
-                        last = lastNameValue,
-                        nickname = nicknameValue,
-                        email = emailValue,
-                        location = locationValue,
-                        description = descriptionValue,
-                        telephone = telephoneValue,
-                        imageProfile = imageProfile
-                    )
-                )
-                return true
+            try {
+                user?.let { user ->
+                    viewModelScope.async {
+                        showLoading = true
+                        updateUser(
+                            userid = user.id,
+                            user = user.copy(
+                                first = firstNameValue,
+                                last = lastNameValue,
+                                nickname = nicknameValue,
+                                email = emailValue,
+                                location = locationValue,
+                                description = descriptionValue,
+                                telephone = telephoneValue,
+                                imageProfile = imageProfile
+                            ),
+                            deletePrevious = user.imageProfile !is Empty && imageProfile is Empty
+                        )
+                    }.await()
+
+                    return true
+                }
+            } catch (e: Exception) {
+                Log.e("Server Error", e.message.toString())
+                showLoading = false
             }
         }
         return false
     }
 
-    var firstNameValue by mutableStateOf(user?.first?: "")
+    var firstNameValue by mutableStateOf("")
         private set
     var firstNameError by mutableStateOf("")
         private set
@@ -64,7 +80,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var lastNameValue by mutableStateOf(user?.last?: "")
+    var lastNameValue by mutableStateOf("")
         private set
     var lastNameError by mutableStateOf("")
         private set
@@ -79,7 +95,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
         else ""
     }
 
-    var nicknameValue by mutableStateOf(user?.nickname?: "")
+    var nicknameValue by mutableStateOf("")
         private set
     var nicknameError by mutableStateOf("")
         private set
@@ -95,7 +111,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var emailValue by mutableStateOf(user?.email?: "")
+    var emailValue by mutableStateOf("")
         private set
     var emailError by mutableStateOf("")
         private set
@@ -113,7 +129,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var telephoneValue by mutableStateOf(user?.telephone?: "")
+    var telephoneValue by mutableStateOf("")
         private set
     var telephoneError by mutableStateOf("")
         private set
@@ -129,7 +145,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var locationValue by mutableStateOf(user?.location?: "")
+    var locationValue by mutableStateOf("")
         private set
     var locationError by mutableStateOf("")
         private set
@@ -145,7 +161,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var descriptionValue by mutableStateOf(user?.description?: "")
+    var descriptionValue by mutableStateOf("")
         private set
     var descriptionError by mutableStateOf("")
         private set
@@ -161,7 +177,7 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
             ""
     }
 
-    var imageProfile: ImageProfile by mutableStateOf(user?.imageProfile?: Empty(pickRandomColor()))
+    var imageProfile: ImageProfile by mutableStateOf(Empty(pickRandomColor()))
         private set
     fun setImageProfileValue(i: ImageProfile) {
         imageProfile = i
@@ -171,6 +187,26 @@ class MyProfileFormViewModel(val model: MyModel) : ViewModel() {
         private set
     fun setShowBottomSheetValue(b: Boolean) {
         showBottomSheet = b
+    }
+
+    var showLoading by mutableStateOf(false)
+        private set
+
+    init {
+        val userid = auth.getSignedInUserId()
+        if (userid != null) {
+            viewModelScope.launch {
+                user = model.getUser(userid).first()
+                firstNameValue = user?.first ?: ""
+                lastNameValue = user?.last ?: ""
+                nicknameValue = user?.nickname ?: ""
+                emailValue = user?.email ?: ""
+                telephoneValue = user?.telephone ?: ""
+                locationValue = user?.location ?: ""
+                descriptionValue = user?.description ?: ""
+                imageProfile = user?.imageProfile ?: Empty(pickRandomColor())
+            }
+        }
     }
 
 }
