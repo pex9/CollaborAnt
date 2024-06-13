@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,16 +50,19 @@ fun LoginScreen(vm : LogInViewModel, navController: NavController) {
         }
     }
 
-    LoginPage(
-        showLoading = vm.showLoading,
-        onSignInClick = {
-            vm.setShowLoadingValue(true)
-            scope.launch {
-                val signInIntentSender = auth.signIn()
-                launcher.launch(
-                    IntentSenderRequest.Builder(signInIntentSender ?: return@launch).build()
-                )
-            }
-        }
-    )
+    BoxWithConstraints {
+        LoginPage(
+            showLoading = vm.showLoading,
+            onSignInClick = {
+                vm.setShowLoadingValue(true)
+                scope.launch {
+                    val signInIntentSender = auth.signIn()
+                    launcher.launch(
+                        IntentSenderRequest.Builder(signInIntentSender ?: return@launch).build()
+                    )
+                }
+            },
+            isHorizontal = maxWidth > maxHeight
+        )
+    }
 }
