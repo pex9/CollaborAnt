@@ -73,7 +73,7 @@ fun LoginPage(showLoading: Boolean, onSignInClick: () -> Unit, isHorizontal: Boo
         ) {
             Image(
                 painter = painterResource(id = R.mipmap.logo_foreground), // Replace with your image name
-                contentDescription = "Description of your image",
+                contentDescription = "CollaborAnt logo image",
                 modifier = imgModifier
             )
         }

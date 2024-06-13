@@ -47,8 +47,8 @@ fun MyTeamsScreen (
     val colors = MaterialTheme.colorScheme
 
     Scaffold(
-        bottomBar = {  BottomNavigationBarComp(navController) },
         topBar = { MyTeamsTopBar() },
+        bottomBar = {  BottomNavigationBarComp(navController) },
         floatingActionButton = {
             val containerColor = if(LocalTheme.current.isDark) colors.secondary else colors.primary
             //var animationState by remember { mutableStateOf(true) }

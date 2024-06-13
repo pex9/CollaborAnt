@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import it.polito.lab5.model.MyApplication
-import it.polito.lab5.LocalTheme
 import it.polito.lab5.ui.theme.interFamily
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -54,7 +52,6 @@ fun BottomNavigationBarComp(navController: NavController) {
 
     val colors = MaterialTheme.colorScheme
     val containerColor = colors.surfaceColorAtElevation(10.dp)
-    val badgeColor = if(LocalTheme.current.isDark) colors.primary else colors.secondaryContainer
 
     // Bottom navigation bar
     NavigationBar(
@@ -85,7 +82,7 @@ fun BottomNavigationBarComp(navController: NavController) {
                                 // Use bold icon if the current destination matches the navigation item route
                                 if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                             ),
-                            contentDescription = "icon",
+                            contentDescription = "bottom bar item icon",
                             tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.outline, // Set icon tint based on selection
                             modifier = Modifier.size(28.dp) // Set icon size
                         )
@@ -107,7 +104,7 @@ fun BottomNavigationBarComp(navController: NavController) {
                                     // Use bold icon if the current destination matches the navigation item route
                                     if (currentRoute == navItem.route) navItem.iconBold else navItem.icon
                                 ),
-                                contentDescription = "icon",
+                                contentDescription = "bottom bar item icon",
                                 tint = if (currentRoute == navItem.route) colors.secondaryContainer else colors.outline, // Set icon tint based on selection
                                 modifier = Modifier.size(28.dp) // Set icon size
                             )

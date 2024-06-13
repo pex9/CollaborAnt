@@ -71,7 +71,7 @@ fun MyTeamsTopBar() {
                 fontSize = 18.sp,
             )
         },
-        actions = { /*No action*/ },
+        actions = { /*NO actions*/ },
         navigationIcon = {
             Text(
                 text = "CollaborAnt", // App title
