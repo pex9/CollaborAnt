@@ -80,7 +80,7 @@ fun MonogramPresentationComp(
 
     // Construct monogram text if both first and last names are not blank
     if (first.isNotEmpty() && last.isNotEmpty())
-        monogramText = "${first.first().uppercase()}${last.first().uppercase()}"
+        monogramText = "${first.first().uppercase()}${last.first().uppercase()}".trim()
 
     // Draw the monogram on a Canvas
     Canvas(modifier = Modifier.fillMaxSize()) {
