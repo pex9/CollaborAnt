@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -194,26 +195,19 @@ fun TeamInfoPage(
                     fontSize = 60.sp
                 )
             }
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surfaceColorAtElevation(10.dp),
-                    contentColor = colors.onBackground
-                ),
-                border = BorderStroke(1.dp, colors.outline),
-            ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ){
                 Text(
                     text = team.name,
                     fontFamily = interFamily, // Custom font family
                     fontWeight = FontWeight.SemiBold, // Semi-bold font weight
-                    fontSize = 22.sp, // Font size
+                    fontSize = 24.sp, // Font size
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
                     color = colors.onBackground,
-                    modifier = Modifier.padding(10.dp).align(Alignment.CenterHorizontally),
+                    modifier = Modifier.padding(10.dp),
                     textAlign = TextAlign.Center
                 )
             }
