@@ -59,6 +59,7 @@ fun OptionsBottomSheet(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val colors = MaterialTheme.colorScheme
+    val userMonogramColor = pickRandomColor()
 
     ModalBottomSheet(
         sheetState = bottomSheetState,
@@ -207,7 +208,7 @@ fun OptionsBottomSheet(
                     modifier = Modifier.clickable {
                         coroutineScope.launch { bottomSheetState.hide() }.invokeOnCompletion {
                             setShowBottomSheetValue(false)
-                            setImageValue(Empty(pickRandomColor()))
+                            setImageValue(Empty(userMonogramColor))
                         }
                     },
                     colors = ListItemDefaults.colors(containerColor = colors.surface)

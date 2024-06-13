@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import it.polito.lab5.gui.teamInfo.TeamInfoPage
 import it.polito.lab5.gui.teamInfo.TeamInfoTopBar
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.viewModels.TeamInfoViewModel
 
 @Composable
@@ -47,6 +47,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
             }
         }
     ) { paddingValues ->
+        val colors = MaterialTheme.colorScheme
         if (vm.showDeleteLoading) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -55,7 +56,7 @@ fun TeamInfoViewScreen(vm: TeamInfoViewModel, navController: NavController) {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                CircularProgressIndicator(color = CollaborantColors.DarkBlue)
+                CircularProgressIndicator(color = colors.onBackground)
             }
         } else {
             team?.let {

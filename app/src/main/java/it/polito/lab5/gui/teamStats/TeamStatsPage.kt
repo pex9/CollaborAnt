@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,8 @@ import it.polito.lab5.model.TaskState
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
+
+private val infoText = "No Chart available.\nNo tasks found for this team.\nCreate some tasks and try again."
 
 @Composable
 fun HorizontalTeamStatsPane(team: Team, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>) {
@@ -66,32 +69,66 @@ fun HorizontalTeamStatsPane(team: Team, tasks: List<Task>, navController: NavCon
                 TeamStatsCard(literalTotTasks, literalTotCompletedTasks, literalCompletionPercentage, true)
             }
 
-            Card(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(start = 15.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surfaceColorAtElevation(10.dp),
-                    contentColor = colors.onBackground
-                ),
-                border = BorderStroke(width = 1.dp, color = colors.outline),
-            ) {
-                Column(
+            if(literalTotTasks != 0) {
+                Card(
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(start = 15.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(width = 1.dp, color = colors.outline),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(start = 30.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Chart(
+                            data = mapOf(
+                                1f to "Total",
+                                (literalTotCompletedTasks.toFloat() / literalTotTasks.toFloat()) to "Completed"
+                            ),
+                            maxValue = literalTotTasks
+                        )
+                    }
+                }
+            }
+            else {
+                Card(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(start = 30.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .weight(1f)
+                        .padding(start = 15.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(width = 1.dp, color = colors.outline),
                 ) {
-                    Chart(
-                        data = mapOf(
-                            1f to "Total",
-                            (literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat()) to "Completed"
-                        ),
-                        maxValue = literalTotTasks
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = infoText,
+                            color = colors.outline,
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            letterSpacing = 0.sp,
+                            lineHeight = 30.sp,
+                            modifier = Modifier.padding(25.dp),
+                        )
+                    }
                 }
             }
         }
@@ -147,6 +184,7 @@ fun VerticalTeamStatsPane(
             TeamStatsCard(literalTotTasks, literalTotCompletedTasks, literalCompletionPercentage, false)
         }
 
+        if (literalTotCompletedTasks != 0) {
         // CHARTS
         Column(
             modifier = Modifier
@@ -164,29 +202,71 @@ fun VerticalTeamStatsPane(
                 letterSpacing = 0.sp
             )
             Spacer(modifier = Modifier.height(5.dp))
-            Card(
-                modifier = Modifier.fillMaxSize(),
-                colors = CardDefaults.cardColors(
-                    containerColor = colors.surfaceColorAtElevation(10.dp),
-                    contentColor = colors.onBackground
-                ),
-                border = BorderStroke(width = 1.dp, color = Color.Gray),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(width = 1.dp, color = Color.Gray),
                 ) {
-                    val completed = if(literalTotTasks == 0 && literalTotCompletedTasks == 0) { 0f }
-                        else { literalTotCompletedTasks.toFloat()/literalTotTasks.toFloat() }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        val completed = if (literalTotTasks == 0 && literalTotCompletedTasks == 0) {
+                            0f
+                        } else {
+                            literalTotCompletedTasks.toFloat() / literalTotTasks.toFloat()
+                        }
 
-                    Chart(
-                        data = mapOf(
-                            1f to "Total",
-                            completed to "Completed"
-                        ),
-                        maxValue = literalTotTasks
+                        Chart(
+                            data = mapOf(
+                                1f to "Total",
+                                completed to "Completed"
+                            ),
+                            maxValue = literalTotTasks
+                        )
+                    }
+                }
+            }
+        }
+        else {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 30.dp, vertical = 10.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Charts",
+                    overflow = TextOverflow.Ellipsis,
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    letterSpacing = 0.sp
+                )
+                Spacer(modifier = Modifier.height(5.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors.surfaceColorAtElevation(10.dp),
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(width = 1.dp, color = Color.Gray),
+                ) {
+                    Text(
+                        text = infoText,
+                        color = colors.outline,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(25.dp),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.sp,
+                        lineHeight = 30.sp
                     )
                 }
             }

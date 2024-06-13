@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +22,6 @@ import it.polito.lab5.gui.taskView.TaskPage
 import it.polito.lab5.gui.taskView.TaskTopBar
 import it.polito.lab5.model.Option
 import it.polito.lab5.model.Role
-import it.polito.lab5.ui.theme.CollaborantColors
 import it.polito.lab5.viewModels.TaskViewViewModel
 import kotlinx.coroutines.launch
 
@@ -82,6 +82,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
             }
         }
     ) { paddingValues ->
+        val colors = MaterialTheme.colorScheme
         // BoxWithConstraints for responsive layout
         BoxWithConstraints(
             modifier = Modifier
@@ -90,7 +91,7 @@ fun TaskViewScreen(vm: TaskViewViewModel, navController: NavController) {
         ) {
             if(vm.showDeleteLoading) {
                 CircularProgressIndicator(
-                    color = CollaborantColors.DarkBlue,
+                    color = colors.onBackground,
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
