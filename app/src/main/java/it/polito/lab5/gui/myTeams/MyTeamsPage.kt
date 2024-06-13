@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -105,6 +109,9 @@ fun MyTeamsPage(
     paddingValues: PaddingValues // Padding values for layout
 ){
     val context = LocalContext.current
+    val initialText = "Hey ${loggedInUser.first}!\nYou don't have any teams yet. " +
+            "You can create one by clicking the '+' button below, or join an existing team using an invitation link."
+    val colors = MaterialTheme.colorScheme
 
     // Composable LazyColumn for displaying list
     LazyColumn(
@@ -117,8 +124,35 @@ fun MyTeamsPage(
     ) {
         item { Spacer(modifier = Modifier.height(20.dp)) }
 
-        items(teams) { team ->
-            TeamItem(team,navController)
+        if(teams.isEmpty()){
+            item {
+                Card(
+                    modifier = Modifier.padding(horizontal = 30.dp).padding(top = 20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = colors.surface,
+                        contentColor = colors.onBackground
+                    ),
+                    border = BorderStroke(width = 1.dp, color = colors.primary),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Text(
+                        text = initialText,
+                        color = colors.outline,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(25.dp),
+                        textAlign =  TextAlign.Center,
+                        letterSpacing = 0.sp,
+                        lineHeight = 30.sp
+                    )
+                }
+            }
+        }
+        else {
+            items(teams) { team ->
+                TeamItem(team, navController)
+            }
         }
         
         item { Spacer(modifier = Modifier.height(80.dp)) }

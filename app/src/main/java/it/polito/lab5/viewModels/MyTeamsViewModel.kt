@@ -58,6 +58,13 @@ class MyTeamsViewModel(val teamId: String?, val model: MyModel, val auth: Google
         showLoading = b
     }
 
+    var animationState by mutableStateOf(true)
+        private set
+
+    fun setAnimationStateValue(b: Boolean) {
+        animationState = b
+    }
+
     init {
         val loggedInUserId = auth.getSignedInUserId()
 
