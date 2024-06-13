@@ -107,6 +107,9 @@ fun MyProfilePage(
     kpi: Map<String, KPI>,
     paddingValues: PaddingValues
 ) {
+    val spacerModifier = Modifier.height(18.dp)
+    val colors = MaterialTheme.colorScheme
+    val iconColor = if(LocalTheme.current.isDark) colors.outline else colors.onBackground.copy(alpha = 0.75f)
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -116,8 +119,7 @@ fun MyProfilePage(
             .padding(horizontal = 28.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        val spacerModifier = Modifier.height(18.dp)
-        val colors = MaterialTheme.colorScheme
+
         Spacer(modifier = Modifier.height(10.dp))
         OverlappingComponents(
             first = first,
@@ -135,33 +137,35 @@ fun MyProfilePage(
         )
         
         Spacer(modifier = Modifier.height(4.dp))
+        if(description.isNotBlank()){
+            TextPresentationComp(
+                text = description,
+                fontWeight = FontWeight.Medium,
+                fontSize = 16.sp,
+                color = colors.outline
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+        if(nickname.isNotBlank()){
+            TextPresentationComp(
+                text = nickname,
+                label = "Nickname",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground,
 
-        TextPresentationComp(
-            text = description,
-            fontWeight = FontWeight.Medium,
-            fontSize = 16.sp,
-            color = colors.outline
-        )
+                icon = {
+                    Icon(
+                        painterResource(id = R.drawable.profile_bold),
+                        contentDescription = "Nickname Icon",
+                        tint = iconColor,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
-        TextPresentationComp(
-            text = nickname,
-            label = "Nickname",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = colors.onBackground,
-
-            icon = {
-                Icon(
-                    painterResource(id = R.drawable.profile_bold),
-                    contentDescription = "Nickname Icon",
-                    tint = colors.onBackground,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        )
-
-        Spacer(modifier = spacerModifier)
+            Spacer(modifier = spacerModifier)
+        }
 
         TextPresentationComp(
             text = email,
@@ -169,12 +173,11 @@ fun MyProfilePage(
             fontWeight = FontWeight.SemiBold,
             fontSize = 18.sp,
             color = colors.onBackground,
-
             icon = {
                 Icon(
                     painterResource(id = R.drawable.mail),
                     contentDescription = "Email Icon",
-                    tint = colors.onBackground,
+                    tint = iconColor,
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -182,41 +185,45 @@ fun MyProfilePage(
 
         Spacer(modifier = spacerModifier)
 
-        TextPresentationComp(
-            text = telephone,
-            label = "Telephone",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = colors.onBackground,
+        if(telephone.isNotBlank()) {
+            TextPresentationComp(
+                text = telephone,
+                label = "Telephone",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground,
 
-            icon = {
-                Icon(
-                    painterResource(id = R.drawable.telephone),
-                    contentDescription = "Telephone Icon",
-                    tint = colors.onBackground,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        )
+                icon = {
+                    Icon(
+                        painterResource(id = R.drawable.telephone),
+                        contentDescription = "Telephone Icon",
+                        tint = iconColor,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            )
 
-        Spacer(modifier = spacerModifier)
+            Spacer(modifier = spacerModifier)
+        }
 
-        TextPresentationComp(
-            text = location,
-            label = "Location",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            color = colors.onBackground,
+        if(location.isNotBlank()) {
+            TextPresentationComp(
+                text = location,
+                label = "Location",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp,
+                color = colors.onBackground,
 
-            icon = {
-                Icon(
-                    painterResource(id = R.drawable.location),
-                    contentDescription = "Email Icon",
-                    tint = colors.onBackground,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        )
-        Spacer(modifier = spacerModifier)
+                icon = {
+                    Icon(
+                        painterResource(id = R.drawable.location),
+                        contentDescription = "Email Icon",
+                        tint = iconColor,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            )
+            Spacer(modifier = spacerModifier)
+        }
     }
 }

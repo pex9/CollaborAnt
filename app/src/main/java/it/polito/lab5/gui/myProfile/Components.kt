@@ -23,6 +23,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -259,7 +260,7 @@ fun OptionsComp(
                 expanded = optionsOpened,
                 onDismissRequest = { setOptionsOpenedValue(false) },
                 offset = DpOffset(x = 8.dp, y = 0.dp),
-                modifier = Modifier.background(Color.White)
+                modifier = Modifier.background(colors.surfaceColorAtElevation(10.dp))
             ) {
                 DropdownMenuItem(
                     leadingIcon = {
@@ -274,7 +275,8 @@ fun OptionsComp(
                             text = "Edit Profile",
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = colors.onBackground
                         )
                     },
                     onClick = { setOptionsOpenedValue(false) ; navController.navigate("myProfile/edit") },

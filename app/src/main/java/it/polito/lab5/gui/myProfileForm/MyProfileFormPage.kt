@@ -240,7 +240,7 @@ fun MyProfileFormPage(
         TextFieldComp(description, setDescription, descriptionError, "Description", 5, descriptionOpt, 250) {
             Icon(painter = painterResource(id = R.drawable.info_bold), contentDescription = "Description Icon")
         }
-        Spacer(spacerModifier)
+        Spacer(modifier = Modifier.height(80.dp))
 
         if (showBottomSheet) {
             OptionsBottomSheet(
