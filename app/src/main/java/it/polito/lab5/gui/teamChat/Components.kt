@@ -435,7 +435,9 @@ fun ReceiverSelector(
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp,
                         color = colors.onSecondary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(modifier = Modifier.width(7.dp))
                     Icon(
