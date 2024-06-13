@@ -43,6 +43,7 @@ import it.polito.lab5.model.Tag
 import it.polito.lab5.model.Task
 import it.polito.lab5.gui.MonogramPresentationComp
 import it.polito.lab5.gui.TagCircleComp
+import it.polito.lab5.model.Repeat
 import it.polito.lab5.ui.theme.interFamily
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -156,6 +157,16 @@ fun TaskItem(
                             .size(15.dp)
                             .padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
                     )
+                    if(task.repeat != Repeat.NEVER){
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.repeat),
+                            contentDescription = "task with repetition",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(start = 4.dp, top = 2.dp, bottom = 2.dp),
+                            tint = colors.secondaryContainer
+                        )
+                    }
                 }
             }
             Column(
