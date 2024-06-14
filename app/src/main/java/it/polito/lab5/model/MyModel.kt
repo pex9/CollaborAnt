@@ -537,41 +537,33 @@ class MyModel(val context: Context) {
 
         val snapshotListener = query.addSnapshotListener { snapshot, e ->
             if (snapshot != null) {
-                try {
-                    val teams = snapshot.documents.map { document ->
-                        val image = document?.get("image") as Map<String, String?>
-                        val members = (document.get("members") as List<String>)
-                            .zip((document.get("roles") as List<String>).map {
-                                when (it) {
-                                    "TEAM_MANAGER" -> Role.TEAM_MANAGER
-                                    "SENIOR_MEMBER" -> Role.SENIOR_MEMBER
-                                    else -> Role.JUNIOR_MEMBER
-                                }
-                            }).toMap()
+                val teams = snapshot.documents.map { document ->
+                    val image = document.get("image") as Map<String, String?>
+                    val members = (document.get("members") as List<String>)
+                        .zip((document.get("roles") as List<String>).map {
+                            when (it) {
+                                "TEAM_MANAGER" -> Role.TEAM_MANAGER
+                                "SENIOR_MEMBER" -> Role.SENIOR_MEMBER
+                                else -> Role.JUNIOR_MEMBER
+                            }
+                        }).toMap()
 
-                        val unreadMessage = (document.get("members") as List<String>)
-                            .zip((document.get("unreadMessage") as List<Boolean>)).toMap()
+                    val unreadMessage = (document.get("members") as List<String>)
+                        .zip((document.get("unreadMessage") as List<Boolean>)).toMap()
 
-                        Team(
-                            id = document.id,
-                            name = document.get("name").toString(),
-                            description = document.get("description").toString(),
-                            image = if (image["color"] != null) Empty(
-                                Color(
-                                    image["color"]?.toULong() ?: 0UL
-                                )
-                            )
-                            else Uploaded(image["url"]?.toUri() ?: "".toUri()),
-                            members = members,
-                            chat = emptyList(),
-                            unreadMessage = unreadMessage
-                        )
-                    }
-                    trySend(teams)
-                } catch (e: Exception){
-                    Log.e("Error retrieving teams", e.message.toString())
+                    Team(
+                        id = document.id,
+                        name = document.get("name").toString(),
+                        description = document.get("description").toString(),
+                        image = if (image["color"] != null) Empty(
+                            Color(image["color"]?.toULong() ?: 0UL))
+                        else Uploaded(image["url"]?.toUri() ?: "".toUri()),
+                        members = members,
+                        chat = emptyList(),
+                        unreadMessage = unreadMessage
+                    )
                 }
-
+                trySend(teams)
             } else {
                 if (e != null) {
                     Log.e("Server Error", e.message.toString())
