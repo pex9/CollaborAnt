@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,7 +51,6 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.polito.lab5.LocalTheme
@@ -450,6 +448,13 @@ fun ReceiverSelector(
                 }
             }
 
+            val dropDownSizeModifier = when(receiverList.size){
+                0 -> Modifier.size(180.dp, 50.dp)
+                1 -> Modifier.size(180.dp, 100.dp)
+                2 -> Modifier.size(180.dp, 150.dp)
+                else -> Modifier.size(180.dp, 200.dp)
+            }
+
             Box {
                 DropdownMenu(
                     expanded = optionsOpened,
@@ -458,7 +463,7 @@ fun ReceiverSelector(
                     modifier = Modifier
                         .background(colors.surfaceColorAtElevation(10.dp))
                 ) {
-                    Box(modifier = Modifier.size(180.dp, 200.dp)) {
+                    Box(modifier = dropDownSizeModifier) {
                         LazyColumn {
                             item {
                                 DropdownMenuItem(
@@ -486,12 +491,14 @@ fun ReceiverSelector(
                                     } else { null },
                                     onClick = { setOptionsOpenedValue(false); setReceiverTargetValue(null) },
                                 )
+                                if(receiverList.isNotEmpty()){
+                                    Divider(
+                                        thickness = 1.dp,
+                                        color = colors.outline.copy(0.4f),
+                                        modifier = Modifier.padding(horizontal = 15.dp)
+                                    )
+                                }
 
-                                Divider(
-                                    thickness = 1.dp,
-                                    color = colors.outline.copy(0.4f),
-                                    modifier = Modifier.padding(horizontal = 15.dp)
-                                )
                             }
 
                             itemsIndexed(receiverList) { idx, member ->
