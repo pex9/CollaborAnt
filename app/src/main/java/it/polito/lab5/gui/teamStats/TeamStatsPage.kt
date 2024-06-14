@@ -184,24 +184,24 @@ fun VerticalTeamStatsPane(
             TeamStatsCard(literalTotTasks, literalTotCompletedTasks, literalCompletionPercentage, false)
         }
 
-        if (literalTotCompletedTasks != 0) {
-        // CHARTS
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 30.dp, vertical = 10.dp)
-                .fillMaxWidth()
-                .aspectRatio(1f),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Charts",
-                overflow = TextOverflow.Ellipsis,
-                fontFamily = interFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp,
-                letterSpacing = 0.sp
-            )
-            Spacer(modifier = Modifier.height(5.dp))
+        if (literalTotTasks != 0) {
+            // CHARTS
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 30.dp, vertical = 10.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Charts",
+                    overflow = TextOverflow.Ellipsis,
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp,
+                    letterSpacing = 0.sp
+                )
+                Spacer(modifier = Modifier.height(5.dp))
                 Card(
                     modifier = Modifier.fillMaxSize(),
                     colors = CardDefaults.cardColors(
