@@ -24,10 +24,59 @@
 
 ## What's New in This Release (lab5)
 ### Firebase Google Authentication
-...
+We have implemented user authentication following Firebase guidelines. Each time a user authenticates, a unique UUID is created. This UUID is crucial for maintaining a secure and efficient authentication system.
 
 ### Firebase DB Interaction
-We've integrated Firebase Database to enhance real-time data synchronization across all users. This ensures that all changes and updates are immediately reflected across devices, providing a more cohesive and synchronized experience.
+## 1. User Information Management
+
+We created a `users` collection to store comprehensive information about each user. Each document within this collection includes properties such as:
+- Name
+- Profile photo URL or color of the monogram
+- Address
+- UUID (provided by Google)
+- JoinedTeams
+- Nickname
+- Telephone
+- Location
+- Email
+
+This structure ensures a one-to-one relationship between user authentication and user information.
+Due to the 1 MB size limit for documents in Firestore, we utilize Firebase Storage for saving user profile images. Each user's image is stored with a filename that matches the user's unique UUID, ensuring easy retrieval and management.
+Each user has a subcollection named `kpivalues` within their document to store the current KPI data for each team they are working with. This allows us to efficiently track and manage individual performance metrics.
+
+## 2. Team Management
+
+We created a `teams` collection where each document represents a team and contains:
+- Description
+- Image or color of the monogram
+- list of memebers
+- list of roles
+- Name of the team
+- Unread message flag
+
+Each team document also has a subcollection named `chat`, which stores the current messages exchanged within the team. 
+We use the Firestore-generated ID for the team to generate links or QR codes for team invitations.
+Every time a user uses a link to join a team, their information is added to the list of members, and their initial role is set to "Junior Member" by default.
+
+## 3. Task Management
+
+A separate `tasks` collection was established to manage tasks. Each task document includes details such as:
+- Title
+- Categories
+- Due date
+- End Date
+- Repeat
+- Tag
+- Team id
+- Parent id (if is a recurrent task)
+-  Delegated Members to the task
+- Other relevant task information
+
+Within each task document, there are several subcollections:
+- `history`: Contains a list of actions related to the task.
+- `comments`: Stores all related messages for the task.
+
+To work with attachments, we use Firebase Storage to handle files related to the task properly.
 
 ### New UI Palette
 We've introduced a fresh new color palette to improve the visual appeal and usability of the app. Here’s a preview of the new palette:
