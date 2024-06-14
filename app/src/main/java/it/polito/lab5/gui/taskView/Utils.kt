@@ -7,14 +7,11 @@ import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.compose.ui.text.toLowerCase
 import androidx.core.content.FileProvider
-import androidx.core.net.toUri
 import java.io.File
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 fun getTimeAgo(date: LocalDateTime): String {
     val minute = 60
