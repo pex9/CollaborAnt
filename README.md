@@ -7,9 +7,8 @@
 4. [Installation](#installation)
 5. [Usage](#usage)
 6. [Screenshots](#screenshots)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Contact](#contact)
+7. [License](#license)
+8. [Contact](#contact)
 
 ## Introduction
 **CollaborAnt** is a mobile application designed to enhance teamwork by improving collaboration and interaction among team members. Inspired by the collaborative nature of ants, CollaborAnt provides a platform where users can work together seamlessly, share ideas, and manage projects effectively.
@@ -68,7 +67,7 @@ Full color palette for both Light and Dark Themes:
 
 ## Usage
 
-- **Config Google Account**: The device must already have been associated with a google account through browser or settings.
+- **Ensure Google Account Configuration:** Make sure the device is already associated with a Google account through the device's settings or a web browser.
 - **Login:** Open the application, click on Login and select the previously configured google account.
 - **Create a Team:** Set up a new team and invite members.
 - **Start Collaborating:** Begin creating tasks, sharing files, and communicating with your team.

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.polito.lab5.LocalTheme
@@ -295,7 +298,7 @@ fun MessageFrom(message: Message, users: List<User>){
     val messageColor = colors.surface
     val senderName = sender?.first + " " + sender?.last
     val receiveName = when(receiver?.id) {
-        null -> "Everybody"
+        null -> "Everyone"
         else -> "You"
     }
 
@@ -436,7 +439,8 @@ fun ReceiverSelector(
                         color = colors.onSecondary,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = 100.dp)
                     )
                     Spacer(modifier = Modifier.width(7.dp))
                     Icon(
@@ -464,7 +468,10 @@ fun ReceiverSelector(
                                             fontFamily = interFamily,
                                             fontWeight = FontWeight.Medium,
                                             fontSize = 16.sp,
-                                            color = colors.onBackground
+                                            color = colors.onBackground,
+                                            overflow = TextOverflow.Ellipsis,
+                                            maxLines = 1,
+                                            modifier = Modifier.widthIn(max = 200.dp)
                                         )
                                     },
                                     trailingIcon = if (targetReceiver == null) {
