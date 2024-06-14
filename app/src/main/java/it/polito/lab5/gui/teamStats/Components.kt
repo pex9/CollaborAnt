@@ -337,7 +337,7 @@ fun TeamMembersRanking(membersList: List<User>, team: Team, navController: NavCo
         Column(
             modifier = Modifier.padding(bottom = 10.dp),
         ) {
-            membersList.forEachIndexed(){ index, member ->
+            membersList.forEachIndexed { index, member ->
                 if(index == 0){
                     Spacer(modifier = Modifier.height(5.dp))
                 }

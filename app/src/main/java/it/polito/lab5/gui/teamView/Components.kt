@@ -1,5 +1,7 @@
 package it.polito.lab5.gui.teamView
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -185,12 +187,13 @@ fun TaskItem(
                 ) {
                     task.teamMembers.take(if (task.teamMembers.size > 4) { 3 } else { task.teamMembers.size })
                         .forEach { memberId ->
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .padding(3.dp)
-                        ) {
-                            users.find { it.id == memberId }?.let { member ->
+
+                        users.find { it.id == memberId }?.let { member ->
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .padding(3.dp)
+                            ) {
                                 ImagePresentationComp(
                                     first = member.first,
                                     last = member.last,
@@ -221,6 +224,7 @@ fun TaskItem(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterSheet(vm: TeamViewModel, hideFilter: () -> Unit) {

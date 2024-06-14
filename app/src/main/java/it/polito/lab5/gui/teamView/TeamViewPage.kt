@@ -55,7 +55,6 @@ import it.polito.lab5.gui.teamForm.getMonogramText
 import it.polito.lab5.model.Task
 import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
-import it.polito.lab5.ui.theme.CollaborantColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

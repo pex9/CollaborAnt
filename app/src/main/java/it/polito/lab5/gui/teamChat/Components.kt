@@ -224,7 +224,6 @@ fun MessageTo(message: Message, users: List<User>) {
                 contentColor = colors.onBackground
             ),
             shape = CardDefaults.outlinedShape,
-            //elevation = CardDefaults.cardElevation(4.dp),
             border = BorderStroke(width = 1.dp, color = colors.outline.copy(0.4f)),
         ) {
             Row(

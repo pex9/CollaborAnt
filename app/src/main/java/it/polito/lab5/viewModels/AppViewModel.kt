@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
 
-class AppViewModel(): ViewModel() {
+class AppViewModel: ViewModel() {
     var themeUserSetting by mutableStateOf(false)
 
     var showDialog by mutableStateOf(false)

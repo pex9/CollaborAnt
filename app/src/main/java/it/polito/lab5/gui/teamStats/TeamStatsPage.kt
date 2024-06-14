@@ -35,7 +35,7 @@ import it.polito.lab5.model.Team
 import it.polito.lab5.model.User
 import it.polito.lab5.ui.theme.interFamily
 
-private val infoText = "No Chart available.\nNo tasks found for this team.\nCreate some tasks and try again."
+private const val infoText = "No Chart available.\nNo tasks found for this team.\nCreate some tasks and try again."
 
 @Composable
 fun HorizontalTeamStatsPane(team: Team, tasks: List<Task>, navController: NavController, p: PaddingValues, membersList: List<User>) {
